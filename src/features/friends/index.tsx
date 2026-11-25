@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useApp } from '../../app/store';
-import { accountAvailable, hasAccount } from '../../infra/account';
+import type { Friend } from '../../domain/room';
+import { accountAvailable, callRpc, hasAccount } from '../../infra/account';
 import { cheerInRoom } from '../../infra/rooms';
 import { useFriends, useRoomView } from '../room/useRoomView';
 import '../today/fields.css';
@@ -14,11 +15,25 @@ import { RoomSetup } from './RoomSetup';
 
 type View = { name: 'list' } | { name: 'setup' } | { name: 'live' } | { name: 'member'; id: string } | { name: 'record'; id: string };
 
+// 친구 기록 화면. 끊기는 서버 함수 friend_remove가 내 참여 기록을 지운다(양쪽 목록에서 함께 사라진다)
+function RecordRoute({ friend, toList, onGone }: { friend: Friend; toList: () => void; onGone: (id: string) => void }) {
+  const cut = async () => {
+    const ok = (await callRpc<boolean>('friend_remove', { p_other: friend.userId })) === true;
+    if (ok) {
+      onGone(friend.userId);
+      toList();
+    }
+    return ok;
+  };
+  return <FriendRecord friend={friend} onBack={toList} onCut={cut} />;
+}
+
 // 친구 탭: 목록 → 친구 추가(방 만들기·들어가기, 목업 1번) → 내 화면(2번) → 친구 상태(3·4·5번)
 export function FriendsScreen() {
   const { room, now } = useApp();
   const { view: roomView, refresh } = useRoomView(room?.roomId ?? null);
-  const friends = useFriends(hasAccount());
+  const [gone, setGone] = useState<string[]>([]); // 방금 끊은 친구는 바로 목록에서 뺀다
+  const friends = useFriends(hasAccount()).filter((f) => !gone.includes(f.userId));
   const [view, setView] = useState<View>(() => (location.hash.startsWith('#r=') ? { name: 'setup' } : { name: 'list' }));
   const toList = () => setView({ name: 'list' });
 
@@ -49,7 +64,7 @@ export function FriendsScreen() {
   }
   if (view.name === 'record') {
     const f = friends.find((x) => x.userId === view.id);
-    if (f) return <FriendRecord friend={f} onBack={toList} />;
+    if (f) return <RecordRoute friend={f} toList={toList} onGone={(id) => setGone((g) => [...g, id])} />;
   }
   return (
     <FriendList
