@@ -100,3 +100,13 @@ public/        아이콘, 서비스 워커에 덧붙이는 코드 (공유 받기
 - [원본 명세](docs/reference/jette-spec.md), [프로토타입](docs/reference/jaettae-prototype.html)
 
 날씨 데이터: [Open-Meteo.com](https://open-meteo.com) (CC BY 4.0). 비상업 무료 한도 안에서 씁니다.
+
+## 안드로이드 설치 앱 (APK)
+
+웹앱은 닫혀 있으면 알람 소리를 낼 수 없어서, 안드로이드용 설치 앱을 따로 만들었다. 배포된 웹앱을 그대로 띄우고, 알람만 휴대폰에 직접 예약한다.
+
+- 파일: [`apk/jette.apk`](apk/jette.apk) (시험용 debug 빌드, 스토어 등록 아님)
+- 설치: 안드로이드 휴대폰에서 파일을 내려받아 열고, "출처를 알 수 없는 앱 설치"를 허용한다. 처음 열 때 알림 권한을 허용한다.
+- 달라지는 것: 알람을 켜면 기상·출발 시각이 휴대폰에 예약되어, 앱을 닫아도 그 시각에 알람 소리와 알림이 나온다. 인터넷이 없어도 울린다.
+- 한계: 소리는 휴대폰의 "알림" 음량을 따른다(무음·방해금지면 나지 않는다). 아이폰용은 없다(맥과 애플 개발자 계정이 필요). 아이폰은 웹앱을 쓴다.
+- 다시 만들기: Android Studio가 깔린 PC에서 `npm run build` → `npx cap sync android` → `android` 폴더에서 `gradlew assembleDebug`.
