@@ -6,6 +6,7 @@ import { buildChecklist } from '../domain/weather';
 import { loadRaw, saveRaw } from '../infra/storage';
 import { makeActions, type Actions, type Clock } from './actions';
 import { useShareSync } from './shareSync';
+import { useTransitRecheck } from './transitRecheck';
 import { calcOf, restoreState, type AppState } from './state';
 
 export interface AppValue extends AppState {
@@ -59,6 +60,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => saveRaw(state), [state]);
   useShareSync(state, now, actions);
+  useTransitRecheck(state, now, actions);
 
   const calc = useMemo(() => calcOf(state), [state]);
   const checklist = useMemo(

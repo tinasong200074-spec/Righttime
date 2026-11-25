@@ -71,3 +71,11 @@
   font-weight: 700;
   cursor: pointer;
 }
+
+.app-note {
+  margin: 0;
+  padding: 8px var(--pad);
+  background: var(--accent-soft);
+  font-size: 0.875rem;
+  font-weight: 700;
+}

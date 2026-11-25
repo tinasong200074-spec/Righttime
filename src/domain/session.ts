@@ -14,6 +14,8 @@ export function createSession(c: PlanCalc, title: string, now: number, demo: boo
     leaveAt: c.leaveAt,
     prepStartPlanAt: c.prepStartAt,
     travelMin: c.travelTotal,
+    waitMin: c.waitMin,
+    transitChecked: 0,
     buffer: c.buffer,
     wakeMin: c.wake.val,
     placeId: c.place?.id,
@@ -82,6 +84,32 @@ export function setGeo(s: Session, geo: GeoResult): Session {
 export function isGlowOn(s: Session | null, now: number, preLeave: number): boolean {
   if (!s || (s.state !== 'prep' && s.state !== 'check')) return false;
   return (s.leaveAt - now) / MIN <= preLeave;
+}
+
+const RECHECK_BEFORE_MIN = [30, 10]; // 출발 30분 전, 10분 전에 다시 확인한다
+
+// 지금까지 했어야 할 이동 시간 재확인 횟수. 알람이 울린 뒤 한 번, 그리고 출발 30분·10분 전
+export function transitChecksDue(s: Session, now: number): number {
+  if (s.demo || s.state === 'armed' || s.state === 'travel' || s.state === 'summary') return s.transitChecked ?? 0;
+  return 1 + RECHECK_BEFORE_MIN.filter((m) => now >= s.leaveAt - m * MIN).length;
+}
+
+// 다시 조회한 이동 시간을 반영한다. 달라졌으면 출발 시각을 옮기고 한 줄 안내를 남긴다.
+// 알람은 이미 울렸으므로 당길 수 없다. rideMin이 null이면(조회 실패) 횟수만 올린다
+export function applyTransitCheck(s: Session, rideMin: number | null, checked: number): Session {
+  const base = { ...s, transitChecked: Math.max(s.transitChecked ?? 0, checked) };
+  if (rideMin === null) return base;
+  const travelMin = rideMin + (s.waitMin ?? 0);
+  const diff = travelMin - s.travelMin;
+  if (diff === 0) return base;
+  const leaveAt = s.arriveAt - (travelMin + s.buffer) * MIN;
+  const d = new Date(leaveAt);
+  const clock = `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+  const transitNote =
+    diff > 0
+      ? `지금 기준으로 이동 시간이 ${diff}분 늘었어요. 출발을 ${clock}로 당겼어요.`
+      : `지금 기준으로 이동 시간이 ${-diff}분 줄었어요. 출발은 ${clock}예요.`;
+  return { ...base, travelMin, leaveAt, transitNote };
 }
 
 export function toRecord(s: Session, id: string, excluded: boolean): RecordRow {

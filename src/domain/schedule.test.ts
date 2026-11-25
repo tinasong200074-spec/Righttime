@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { fmtClock } from './format';
 import { judgeArrival, rec } from './recommend';
 import { calcPlan, computeSchedule, rollForward, scaleSteps } from './schedule';
-import { completeStep, createSession, depart, arrive, isGlowOn, snooze, startPrep, tickSession, toRecord } from './session';
+import { applyTransitCheck, arrive, completeStep, createSession, depart, isGlowOn, snooze, startPrep, tickSession, toRecord, transitChecksDue } from './session';
 import { DAY, DEFAULT_SETTINGS, MIN, type Plan, type RecordRow } from './types';
 
 const at = (h: number, m: number) => new Date(2026, 10, 26, h, m).getTime();
@@ -136,5 +136,32 @@ describe('isGlowOn (명세 15-7)', () => {
   it('출발하면 꺼진다', () => {
     expect(isGlowOn(depart(prep, c.leaveAt), c.leaveAt, 5)).toBe(false);
     expect(isGlowOn(null, c.leaveAt, 5)).toBe(false);
+  });
+});
+
+describe('이동 시간 재확인', () => {
+  const c = calcPlan(plan, DEFAULT_SETTINGS, [], [])!; // 이동 33 + 대기 8, 출발 08:14
+  const armed = createSession(c, '', at(6, 0), false);
+  const prep = startPrep(tickSession(armed, at(7, 24)), at(7, 30));
+  it('알람 전에는 확인하지 않고, 울린 뒤 1번, 출발 30분·10분 전에 1번씩', () => {
+    expect(transitChecksDue(armed, at(7, 0))).toBe(0);
+    expect(transitChecksDue(prep, at(7, 30))).toBe(1);
+    expect(transitChecksDue(prep, at(7, 44))).toBe(2);
+    expect(transitChecksDue(prep, at(8, 4))).toBe(3);
+    expect(transitChecksDue(depart(prep, at(8, 14)), at(8, 20))).toBe(0);
+  });
+  it('이동 시간이 늘면 출발을 당기고 안내를 남긴다', () => {
+    const s = applyTransitCheck(prep, 38, 1); // 33 → 38분
+    expect(s.travelMin).toBe(46);
+    expect(fmtClock(s.leaveAt)).toBe('08:09');
+    expect(s.transitNote).toBe('지금 기준으로 이동 시간이 5분 늘었어요. 출발을 08:09로 당겼어요.');
+    expect(s.transitChecked).toBe(1);
+  });
+  it('같으면 그대로, 조회에 실패해도 횟수만 올린다', () => {
+    expect(applyTransitCheck(prep, 33, 1).leaveAt).toBe(prep.leaveAt);
+    expect(applyTransitCheck(prep, 33, 1).transitNote).toBeUndefined();
+    const failed = applyTransitCheck(prep, null, 2);
+    expect(failed.transitChecked).toBe(2);
+    expect(failed.leaveAt).toBe(prep.leaveAt);
   });
 });

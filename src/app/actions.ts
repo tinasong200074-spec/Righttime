@@ -28,6 +28,7 @@ function sessionActions(set: SetState, clock: Clock) {
     arrive: () => onSession(set, (x) => S.arrive(x, clock.now())),
     setGeo: (geo: GeoResult) => onSession(set, (x) => S.setGeo(x, geo)),
     skipArrival: (arrival: Arrival) => onSession(set, (x) => S.skipArrival(x, arrival)),
+    applyTransit: (rideMin: number | null, checked: number) => onSession(set, (x) => S.applyTransitCheck(x, rideMin, checked)),
     toggleCheck: (key: string) => onSession(set, (x) => ({ ...x, checked: { ...x.checked, [key]: !x.checked[key] } })),
     cancelSession: () => set((s) => ({ ...s, session: null })),
     saveRecord: (excluded: boolean) =>

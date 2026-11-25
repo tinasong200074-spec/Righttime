@@ -40,6 +40,11 @@ function Shell() {
       <DemoBadge />
       <ShareBar />
       <SharedInbox />
+      {session?.transitNote && (
+        <p className="app-note" role="status">
+          {session.transitNote}
+        </p>
+      )}
       {inMorning ? (
         <main className="app-main is-full">
           <MorningFlow />

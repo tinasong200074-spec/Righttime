@@ -68,7 +68,10 @@ export interface Session {
   leaveAt: number;
   prepStartPlanAt: number;
   travelMin: number; // 이동 + 배차 대기
+  waitMin?: number; // 그중 배차 대기(예전에 저장된 세션에는 없을 수 있다)
   buffer: number;
+  transitChecked?: number; // 아침에 이동 시간을 다시 확인한 횟수
+  transitNote?: string; // 다시 확인해서 달라졌을 때 보여 줄 한 줄
   wakeMin: number; // 예상 기상 시간(분)
   placeId?: string;
   placeName: string;
