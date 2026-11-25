@@ -7,6 +7,7 @@ import '../today/fields.css';
 import '../today/main.css';
 import { SubScreen } from '../today/SubScreen';
 import { NumberField } from '../today/NumberField';
+import { FriendsScreen } from '../friends';
 import { ConfirmButton } from './ConfirmButton';
 import { CustomTone } from './CustomTone';
 import { PlaceManager } from './PlaceManager';
@@ -128,7 +129,7 @@ function DataSection() {
   );
 }
 
-type Page = 'menu' | 'alarm' | 'tone' | 'places' | 'weather' | 'data';
+type Page = 'menu' | 'alarm' | 'tone' | 'places' | 'weather' | 'data' | 'friends';
 
 function MenuRow({ title, sub, onClick }: { title: string; sub: string; onClick: () => void }) {
   return (
@@ -157,13 +158,14 @@ function Menu({ go }: { go: (p: Page) => void }) {
         <MenuRow title="말투" sub={toneName} onClick={() => go('tone')} />
         <MenuRow title="자주 가는 곳" sub={`${places.length}곳`} onClick={() => go('places')} />
         <MenuRow title="날씨 기준" sub={s.weatherAuto ? `자동 추천 켜짐 · 우산 ${s.rainTh}%` : '자동 추천 꺼짐'} onClick={() => go('weather')} />
+        <MenuRow title="친구" sub="준비 현황 공유 · 약속 기록(예시)" onClick={() => go('friends')} />
         <MenuRow title="시연 모드·데이터" sub={demo ? '시연 중' : '시연, 샘플 데이터, 삭제'} onClick={() => go('data')} />
       </section>
     </div>
   );
 }
 
-const TITLES: Record<Exclude<Page, 'menu'>, string> = {
+const TITLES: Record<Exclude<Page, 'menu' | 'friends'>, string> = {
   alarm: '알람·타이머',
   tone: '말투',
   places: '자주 가는 곳',
@@ -171,7 +173,7 @@ const TITLES: Record<Exclude<Page, 'menu'>, string> = {
   data: '시연 모드·데이터',
 };
 
-function Body({ page }: { page: Exclude<Page, 'menu'> }) {
+function Body({ page }: { page: Exclude<Page, 'menu' | 'friends'> }) {
   if (page === 'alarm') return <AlarmSection />;
   if (page === 'tone') return <ToneSection />;
   if (page === 'places') return <section className="m-card"><PlaceManager /></section>;
@@ -193,6 +195,7 @@ function Body({ page }: { page: Exclude<Page, 'menu'> }) {
 export function SettingsScreen() {
   const [page, setPage] = useState<Page>('menu');
   if (page === 'menu') return <Menu go={setPage} />;
+  if (page === 'friends') return <FriendsScreen onExit={() => setPage('menu')} />;
   return (
     <SubScreen title={TITLES[page]} onBack={() => setPage('menu')}>
       <Body page={page} />
