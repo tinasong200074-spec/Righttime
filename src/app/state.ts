@@ -4,6 +4,7 @@ import { createSession, toRecord } from '../domain/session';
 import { splitMemoText } from '../domain/weather';
 import type { AskItem, HelperResult } from '../domain/ai';
 import { addRecent, applyRecent, freshPlan, toRecent, type RecentPlan } from '../domain/recent';
+import { minuteOfDay, nextRepeatArrive } from '../domain/repeat';
 import type { TransitLogEntry } from '../domain/transitLog';
 import {
   DEFAULT_SETTINGS, MIN,
@@ -109,7 +110,14 @@ export function restoreState(raw: unknown, now: number): AppState {
 
 export const calcOf = (s: AppState) => calcPlan(s.plan, s.settings, s.records, s.places, s.transitLog);
 
-export function armState(s: AppState, now: number, demo: boolean): AppState {
+// 요일 반복이면 도착 날짜를 다음 그 요일로 맞춘다(한 번만이면 고른 날짜 그대로)
+function withRepeatDate(plan: Plan, after: number): Plan {
+  const next = nextRepeatArrive(minuteOfDay(plan.arriveAt), plan.repeatDays ?? [], after);
+  return next === null ? plan : { ...plan, arriveAt: next };
+}
+
+export function armState(s0: AppState, now: number, demo: boolean): AppState {
+  const s = demo ? s0 : { ...s0, plan: withRepeatDate(s0.plan, now) };
   const c = calcOf(s);
   if (!c || c.arriveAt <= now) return s;
   const session = createSession(c, s.plan.title, now, demo);
@@ -148,7 +156,11 @@ export function saveRecordState(s: AppState, now: number, excluded: boolean): Ap
   const records = [...s.records, record];
   if (s.session.demo) return { ...s, records, session: null, plan: s.planBackup ?? s.plan, planBackup: null };
   const plan = { ...s.plan, arriveAt: rollForward(s.plan.arriveAt, now) };
-  return { ...s, records, session: null, plan, memos: s.memos.filter((m) => m.pin) };
+  const done = { ...s, records, session: null, plan, memos: s.memos.filter((m) => m.pin) };
+  if (!s.plan.repeatDays?.length) return done;
+  // 요일 반복이면 다음 그 요일로 알람을 바로 다시 켠다. 방금 끝난 약속과 같은 시각은 건너뛴다
+  const after = Math.max(now, s.session.arriveAt);
+  return armState({ ...done, plan: withRepeatDate(s.plan, after) }, after, false);
 }
 
 const DEMO_AHEAD_MIN = 95;

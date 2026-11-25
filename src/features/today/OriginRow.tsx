@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { PlaceShortcuts } from '../quick/PlaceShortcuts';
 import { useApp } from '../../app/store';
 import { roundCoord } from '../../domain/geo';
 import { readPositionOnce } from '../../infra/geo';
@@ -25,6 +26,7 @@ export function OriginRow() {
     <div>
       <h3 className="f-label">출발지</h3>
       <p>{origin ? origin.name : '아직 정하지 않았어요.'}</p>
+      <PlaceShortcuts target="origin" />
       <div className="f-row f-wrap">
         <button type="button" className="f-btn" aria-expanded={searching} onClick={() => setSearching((v) => !v)}>
           출발지 정하기

@@ -19,6 +19,7 @@ export interface Place {
   name: string;
   travelMin: number; // 평소 이동 시간(직접 입력)
   geo?: { lat: number; lon: number; r: number };
+  tag?: string; // 자주 가는 곳 분류(집, 회사, 학원 등). 한 분류에 장소 하나
 }
 
 export interface Step {
@@ -37,6 +38,7 @@ export interface Plan {
   waitMin: number; // 배차 대기(분). 대중교통 연동 전까지 직접 입력
   steps: Step[];
   kind: PlanKind;
+  repeatDays?: number[]; // 반복할 요일(0=일 … 6=토). 비어 있으면 한 번만
   notes?: string;
 }
 

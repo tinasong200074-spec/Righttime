@@ -1,3 +1,4 @@
+import { setPlaceTag } from '../domain/repeat';
 import * as S from '../domain/session';
 import { addTransitLog } from '../domain/transitLog';
 import type { Arrival, GeoResult, MemoItem, Place, Plan, RainChoice, Settings, Tone, WeatherResult } from '../domain/types';
@@ -46,6 +47,7 @@ function dataActions(set: SetState, clock: Clock) {
     updateSettings: (p: Partial<Settings>) => set((s) => ({ ...s, settings: { ...s.settings, ...p } })),
     savePlace: (p: Place) =>
       set((s) => ({ ...s, places: s.places.some((x) => x.id === p.id) ? s.places.map((x) => (x.id === p.id ? p : x)) : [...s.places, p] })),
+    setPlaceTag: (placeId: string, tag: string) => set((s) => ({ ...s, places: setPlaceTag(s.places, placeId, tag) })),
     removePlace: (id: string) =>
       set((s) => ({
         ...s,

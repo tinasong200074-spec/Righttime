@@ -1,3 +1,4 @@
+import { nextRepeatArrive, repeatLabel } from './repeat.js';
 import { DAY, MIN, type Place, type Plan, type PlanKind, type Step } from './types.js';
 
 // 최근 일정: 알람을 켰던 일정을 지도 앱의 검색 기록처럼 남겨 두고, 누르면 그대로 다시 채운다.
@@ -12,6 +13,7 @@ export interface RecentPlan {
   waitMin: number;
   steps: Step[];
   kind: PlanKind;
+  repeatDays?: number[];
   arriveMin: number; // 도착 시각(하루 중 몇 분째). 날짜는 남기지 않는다
   usedAt: number;
 }
@@ -29,6 +31,7 @@ export function toRecent(plan: Plan, placeName: string, now: number, id: string)
     waitMin: plan.waitMin,
     steps: plan.steps,
     kind: plan.kind,
+    repeatDays: plan.repeatDays?.length ? plan.repeatDays : undefined,
     arriveMin: minuteOfDay(plan.arriveAt),
     usedAt: now,
   };
@@ -51,15 +54,16 @@ export function nextOccurrence(arriveMin: number, now: number): number {
 // 기록을 눌렀을 때 일정에 다시 채운다. 그사이 지운 장소는 빼고, 이동 시간은 기록의 값을 쓴다
 export function applyRecent(r: RecentPlan, now: number, places: Place[]): Plan {
   const placeId = places.some((p) => p.id === r.placeId) ? r.placeId : undefined;
-  return {
+  const base: Plan = {
     title: r.title,
-    arriveAt: nextOccurrence(r.arriveMin, now),
+    arriveAt: nextRepeatArrive(r.arriveMin, r.repeatDays ?? [], now) ?? nextOccurrence(r.arriveMin, now),
     placeId,
     rideMin: r.rideMin,
     waitMin: r.waitMin,
     steps: r.steps,
     kind: r.kind,
   };
+  return r.repeatDays?.length ? { ...base, repeatDays: r.repeatDays } : base;
 }
 
 const DEFAULT_ARRIVE_MIN = 9 * 60;
@@ -75,5 +79,6 @@ export function recentLabel(r: RecentPlan): { title: string; sub: string } {
   const hh = String(Math.floor(r.arriveMin / 60)).padStart(2, '0');
   const mm = String(r.arriveMin % 60).padStart(2, '0');
   const where = r.placeName || '장소 없음';
-  return { title: r.title || where, sub: `${hh}:${mm} 도착 · ${r.title ? `${where} · ` : ''}이동 ${r.rideMin + r.waitMin}분` };
+  const repeat = r.repeatDays?.length ? ` · ${repeatLabel(r.repeatDays)}` : '';
+  return { title: r.title || where, sub: `${hh}:${mm} 도착 · ${r.title ? `${where} · ` : ''}이동 ${r.rideMin + r.waitMin}분${repeat}` };
 }

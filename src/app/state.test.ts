@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { applyRecentState, armState, defaultState, restoreState, type AppState } from './state';
+import { applyRecentState, armState, defaultState, restoreState, saveRecordState, type AppState } from './state';
 
 const at = (d: number, h: number, m: number) => new Date(2026, 10, d, h, m).getTime();
 const now = at(26, 20, 0);
@@ -65,5 +65,39 @@ describe('최근 일정', () => {
     const once = armState(planned(), now, false);
     const twice = armState({ ...once, session: null }, now + 1000, false);
     expect(twice.recentPlans).toHaveLength(1);
+  });
+});
+
+describe('요일 반복', () => {
+  // 11월 26일은 목요일. 월·수·금 10:00 반복
+  const repeating = (): AppState => {
+    const s = planned();
+    return { ...s, plan: { ...s.plan, repeatDays: [1, 3, 5] } };
+  };
+  it('알람을 켜면 도착 날짜가 다음 그 요일로 맞춰진다', () => {
+    const armed = armState(repeating(), now, false); // 목 20:00 → 금 10:00
+    expect(armed.session?.arriveAt).toBe(at(27, 10, 0));
+    expect(armed.plan.arriveAt).toBe(at(27, 10, 0));
+  });
+  it('기록을 저장하면 다음 그 요일로 알람이 다시 켜진다', () => {
+    const armed = armState(repeating(), now, false);
+    const session = { ...armed.session!, state: 'summary' as const, prepStartAt: at(27, 8, 0), leftAt: at(27, 9, 0), arrivedAt: at(27, 9, 55) };
+    const next = saveRecordState({ ...armed, session }, at(27, 9, 56), false);
+    expect(next.records).toHaveLength(1);
+    expect(next.session?.state).toBe('armed');
+    expect(next.session?.arriveAt).toBe(at(30, 10, 0)); // 금 → 다음 월(같은 날 10:00으로 다시 잡지 않는다)
+  });
+  it('한 번만이면 저장한 뒤 알람이 다시 켜지지 않는다', () => {
+    const armed = armState(planned(), now, false);
+    const session = { ...armed.session!, state: 'summary' as const, prepStartAt: at(27, 8, 0), leftAt: at(27, 9, 0), arrivedAt: at(27, 9, 55) };
+    expect(saveRecordState({ ...armed, session }, at(27, 9, 56), false).session).toBeNull();
+  });
+  it('최근 일정에 반복 요일이 남고, 다시 고르면 함께 채워진다', () => {
+    const armed = armState(repeating(), now, false);
+    const later = reopen({ ...armed, session: null }, at(28, 7, 0)); // 토요일 아침
+    expect(later.plan.repeatDays).toBeUndefined();
+    const filled = applyRecentState(later, later.recentPlans[0].id, at(28, 7, 0));
+    expect(filled.plan.repeatDays).toEqual([1, 3, 5]);
+    expect(filled.plan.arriveAt).toBe(at(30, 10, 0)); // 다음 월요일
   });
 });

@@ -5,6 +5,8 @@ import { roundCoord } from '../../domain/geo';
 import type { FoundPlace } from '../../domain/transit';
 import { Card, Icon } from '../../ui';
 import { readPositionOnce } from '../../infra/geo';
+import { PlaceShortcuts } from '../quick/PlaceShortcuts';
+import { RepeatPicker } from '../quick/RepeatPicker';
 import { newId } from './model';
 import { NumberField } from './NumberField';
 import { OriginRow } from './OriginRow';
@@ -101,8 +103,7 @@ export function PlaceField() {
       <div className="f-row">
         <Icon name="place" main="var(--ink)" det="var(--surface)" />
         <select
-          id="plan-place"
-          className="f-input f-grow"
+          id="plan-place" className="f-input f-grow"
           value={plan.placeId ?? ''}
           onChange={(e) => actions.updatePlan({ placeId: e.target.value || undefined })}
         >
@@ -114,6 +115,7 @@ export function PlaceField() {
           ))}
         </select>
       </div>
+      <PlaceShortcuts target="dest" />
       <div className="f-row f-wrap" style={{ marginTop: 8 }}>
         <button type="button" className="f-btn" aria-expanded={mode === 'search'} onClick={() => toggle('search')}>
           지도에서 찾기
@@ -168,6 +170,7 @@ export function PlanFields() {
           if (ms !== null) actions.updatePlan({ arriveAt: ms });
         }}
       />
+      <RepeatPicker />
     </Card>
   );
 }
