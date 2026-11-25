@@ -2,10 +2,14 @@ import { useState } from 'react';
 import { useApp } from '../../app/store';
 import { fmtClock, fromInputValue, toInputValue } from '../../domain/format';
 import { roundCoord } from '../../domain/geo';
+import type { FoundPlace } from '../../domain/transit';
 import { Card, Icon } from '../../ui';
-import { readPositionOnce } from './location';
+import { readPositionOnce } from '../../infra/geo';
 import { dayLabel, newId } from './model';
 import { NumberField } from './NumberField';
+import { OriginRow } from './OriginRow';
+import { PlaceSearch } from './PlaceSearch';
+import { TransitButton } from './TransitButton';
 
 const DEFAULT_RADIUS_M = 150;
 const GEO_DIGITS = 4; // 소수 넷째 자리(약 11m), 기기에만 저장
@@ -70,9 +74,24 @@ function AddPlaceForm({ onDone }: { onDone: () => void }) {
   );
 }
 
+type PlaceMode = 'none' | 'add' | 'search';
+
+// 검색으로 고른 장소를 저장하고 도착 장소로 정한다. 이동 시간은 지금 적힌 값으로 시작한다
+function useAddFound() {
+  const { plan, actions } = useApp();
+  return (p: FoundPlace) => {
+    const id = newId();
+    const geo = { lat: roundCoord(p.lat, GEO_DIGITS), lon: roundCoord(p.lon, GEO_DIGITS), r: DEFAULT_RADIUS_M };
+    actions.savePlace({ id, name: p.name.slice(0, 30), travelMin: plan.rideMin, geo });
+    actions.updatePlan({ placeId: id });
+  };
+}
+
 function PlaceField() {
   const { plan, places, actions } = useApp();
-  const [adding, setAdding] = useState(false);
+  const [mode, setMode] = useState<PlaceMode>('none');
+  const addFound = useAddFound();
+  const toggle = (m: PlaceMode) => setMode((cur) => (cur === m ? 'none' : m));
 
   return (
     <div>
@@ -94,12 +113,28 @@ function PlaceField() {
             </option>
           ))}
         </select>
-        <button type="button" className="f-btn" onClick={() => setAdding((v) => !v)} aria-expanded={adding}>
-          추가
+      </div>
+      <div className="f-row f-wrap" style={{ marginTop: 8 }}>
+        <button type="button" className="f-btn" aria-expanded={mode === 'search'} onClick={() => toggle('search')}>
+          지도에서 찾기
+        </button>
+        <button type="button" className="f-btn" aria-expanded={mode === 'add'} onClick={() => toggle('add')}>
+          직접 추가
         </button>
       </div>
-      {adding && <AddPlaceForm onDone={() => setAdding(false)} />}
-      {plan.placeId && !adding && <SaveHereButton placeId={plan.placeId} />}
+      {mode === 'add' && <AddPlaceForm onDone={() => setMode('none')} />}
+      {mode === 'search' && (
+        <PlaceSearch
+          label="도착 장소 검색"
+          onPick={(p) => {
+            addFound(p);
+            setMode('none');
+          }}
+        />
+      )}
+      {plan.placeId && mode === 'none' && <SaveHereButton placeId={plan.placeId} />}
+      <OriginRow />
+      <TransitButton />
     </div>
   );
 }

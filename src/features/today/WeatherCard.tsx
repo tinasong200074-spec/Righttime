@@ -3,7 +3,7 @@ import { roundCoord } from '../../domain/geo';
 import type { RainChoice } from '../../domain/types';
 import { Card, Icon, Pill } from '../../ui';
 import { WEATHER_CREDIT } from '../../infra/weather';
-import { readPositionOnce } from './location';
+import { readPositionOnce } from '../../infra/geo';
 import { useWeather, type WeatherMode } from './useWeather';
 
 const CHOICES: Array<{ id: RainChoice; label: string }> = [
