@@ -1,6 +1,6 @@
 # 문제 정의: 제때 (Righttime)
 
-> 상태: **v2 수정 (2026-11-25, 사용자 확인 대기)**. 문제와 근거는 그대로이고, 사용자·범위·해결 방향을 "제때" 명세(`docs/reference/jette-spec.md`)에 맞췄다.
+> 상태: **v2 확정 (2026-11-26 사용자 확인)**. 문제와 근거는 그대로이고, 사용자·범위·해결 방향을 "제때" 명세(`docs/reference/jette-spec.md`)에 맞췄다.
 > 작성일: 2026-11-25 / 제출 마감: 2026-11-26 오전 10시
 > 근거 자료: `docs/research/community-stories.md`(지각하는 쪽), `docs/research/waiting-side-stories.md`(기다리는 쪽)
 
