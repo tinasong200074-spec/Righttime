@@ -1,4 +1,4 @@
-import type { TimelineStep } from './sample';
+import type { TimelineStep } from './types';
 
 function Node({ status }: { status: TimelineStep['status'] }) {
   return (
@@ -45,7 +45,7 @@ export function Timeline({ steps, stages, stageNow, unknown = false }: Props) {
           <div className="fr-body">
             <div className={`fr-row is-${s.status}`}>
               <span>{s.label}</span>
-              <span className="fr-time">{s.time}</span>
+              {s.time && <span className="fr-time">{s.time}</span>}
             </div>
             {s.note && <div className="fr-note">{s.note}</div>}
             {s.status === 'now' && s.progress !== undefined && !unknown && <Segments stages={stages} now={stageNow} progress={s.progress} />}

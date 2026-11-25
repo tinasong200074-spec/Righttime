@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 
-// 목업 상단: 44px 뒤로 가기 + 20px 제목, 오른쪽에 알약. 화면마다 "예시" 표시를 붙인다
+// 목업 상단: 44px 뒤로 가기 + 20px 제목, 오른쪽에 알약
 export function TopBar({ title, onBack, tag }: { title: string; onBack: () => void; tag?: ReactNode }) {
   return (
     <div className="fr-top">
@@ -10,10 +10,7 @@ export function TopBar({ title, onBack, tag }: { title: string; onBack: () => vo
         </svg>
       </button>
       <h1>{title}</h1>
-      <span className="fr-tags">
-        {tag}
-        <span className="fr-tag">예시</span>
-      </span>
+      <span className="fr-tags">{tag}</span>
     </div>
   );
 }
