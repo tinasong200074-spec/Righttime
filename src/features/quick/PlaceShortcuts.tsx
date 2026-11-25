@@ -53,7 +53,7 @@ export function PlaceShortcuts({ target }: { target: Target }) {
 
   const pick = (tag: string) => {
     const place = placeByTag(places, tag);
-    if (!place) return setMsg(current ? `아직 “${tag}”이(가) 없어요. 아래 “분류 고치기”에서 지금 장소를 저장해 주세요.` : `아직 “${tag}”이(가) 없어요. 장소를 먼저 고른 뒤 “분류 고치기”로 저장해 주세요.`);
+    if (!place) return setMsg(current ? `아직 “${tag}”이(가) 없어요. 아래 “기타”에서 지금 장소를 저장해 주세요.` : `아직 “${tag}”이(가) 없어요. 장소를 먼저 고른 뒤 “기타”로 저장해 주세요.`);
     setMsg('');
     if (target === 'dest') return actions.updatePlan({ placeId: place.id });
     if (!place.geo) return setMsg(`“${place.name}”에 위치가 없어서 출발지로 쓸 수 없어요. 지도에서 찾아 저장한 장소만 돼요.`);
@@ -75,7 +75,7 @@ export function PlaceShortcuts({ target }: { target: Target }) {
         })}
         {target === 'dest' && current && (
           <button type="button" className="q-chip is-edit" aria-expanded={editing} onClick={() => setEditing((v) => !v)}>
-            분류 고치기
+            기타
           </button>
         )}
       </div>
