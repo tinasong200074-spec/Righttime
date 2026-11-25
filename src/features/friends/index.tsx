@@ -18,7 +18,9 @@ type View = { name: 'list' } | { name: 'setup' } | { name: 'live' } | { name: 'm
 // 친구 기록 화면. 끊기는 서버 함수 friend_remove가 내 참여 기록을 지운다(양쪽 목록에서 함께 사라진다)
 function RecordRoute({ friend, toList, onGone }: { friend: Friend; toList: () => void; onGone: (id: string) => void }) {
   const cut = async () => {
-    const ok = (await callRpc<boolean>('friend_remove', { p_other: friend.userId })) === true;
+    // true=끊음, false=지울 기록이 없음(다른 기기에서 이미 끊음), null=서버 오류. 앞의 둘은 목록에서 뺀다
+    const res = await callRpc<boolean>('friend_remove', { p_other: friend.userId });
+    const ok = res !== null;
     if (ok) {
       onGone(friend.userId);
       toList();
