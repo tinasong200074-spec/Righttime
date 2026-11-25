@@ -39,6 +39,7 @@ export function TransitButton() {
       const found = await fetchTransit(origin, to);
       if (!found) return setMsg('대중교통 경로를 찾지 못했어요. 직접 적어 주세요.');
       actions.savePlace({ ...place, travelMin: found.rideMin });
+      actions.logTransit(place.id, found.rideMin); // 비슷한 시간대 조회 기록으로 남긴다
       setRoute(found);
       setMsg('이동 시간을 넣었어요.');
     } catch (e) {
