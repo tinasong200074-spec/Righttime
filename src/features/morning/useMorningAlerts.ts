@@ -1,12 +1,10 @@
 import { useEffect, useRef } from 'react';
 import { MIN, type ChecklistItem, type Session, type Settings } from '../../domain/types';
 import { notify, startAlarmSound, stopAlarmSound } from '../../infra/alarm';
-import { stepOverMin } from './progress';
 
-// 알람 소리, 단계 초과, 출발 임박 알림. 한 번 울린 알림은 같은 단계·같은 세션에서 다시 울리지 않는다.
+// 알람 소리와 출발 전 알림. 출발 전 알림은 시각마다 한 번만 울린다.
 export function useMorningAlerts(s: Session, now: number, settings: Settings, checklist: ChecklistItem[]): void {
-  const overStep = useRef(-1);
-  const preLeaveDone = useRef(false);
+  const done = useRef(new Set<number>());
 
   useEffect(() => {
     if (s.state !== 'ringing') return;
@@ -16,18 +14,15 @@ export function useMorningAlerts(s: Session, now: number, settings: Settings, ch
     return stopAlarmSound;
   }, [s.state, s.snoozeCount, settings.sound]);
 
+  // 출발 30분 전, 15분 전, preLeave분 전. 이미 지난 시각의 알림은 한꺼번에 울리지 않고 가장 가까운 하나만 울린다.
   useEffect(() => {
-    const step = s.steps[s.stepIdx];
-    if (!step || stepOverMin(s, now) <= 0 || overStep.current === s.stepIdx) return;
-    overStep.current = s.stepIdx;
-    notify(`${step.name} 예상 시간이 지났어요`, `예상은 ${Math.round(step.est)}분이었어요`, { sound: settings.sound });
-  }, [s, now, settings.sound]);
-
-  useEffect(() => {
-    const active = s.state === 'prep' || s.state === 'check';
-    if (!active || preLeaveDone.current || (s.leaveAt - now) / MIN > settings.preLeave) return;
-    preLeaveDone.current = true;
-    const asks = checklist.map((c) => c.ask).join(' ');
-    notify(`출발 ${settings.preLeave}분 전이에요`, asks || '나갈 준비를 마무리해 주세요', { sound: settings.sound });
-  }, [s, now, settings.preLeave, settings.sound, checklist]);
+    if (s.state !== 'prep' && s.state !== 'check') return;
+    const left = (s.leaveAt - now) / MIN;
+    const crossed = [30, 15, settings.preLeave].filter((m) => left <= m && !done.current.has(m));
+    if (!crossed.length) return;
+    crossed.forEach((m) => done.current.add(m));
+    const m = Math.min(...crossed);
+    const asks = m === settings.preLeave ? checklist.map((c) => c.ask).join(' ') : '';
+    notify(`출발 ${m}분 전이에요`, asks || '슬슬 준비해 주세요', { sound: settings.sound });
+  }, [s.state, s.leaveAt, now, settings.preLeave, settings.sound, checklist]);
 }

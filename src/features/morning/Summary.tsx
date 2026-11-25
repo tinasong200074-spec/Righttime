@@ -65,16 +65,6 @@ export function Summary() {
         {s.geo?.status === 'mismatch' && (
           <p className="morning-note">위치는 건물 안이나 근처에서 부정확할 수 있어서 참고로만 보여 드려요.</p>
         )}
-        <ul className="morning-log" aria-label="단계별 시간">
-          {s.log.map((l, i) => (
-            <li key={`${l.name}-${i}`}>
-              <span>{l.name}</span>
-              <span>
-                {l.act == null ? '건너뜀' : fmtMin(l.act)} / 입력 {fmtMin(l.userEst)}
-              </span>
-            </li>
-          ))}
-        </ul>
       </Card>
       <NotifyCard />
       <label className="morning-exclude">
