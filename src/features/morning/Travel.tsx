@@ -5,7 +5,7 @@ import { lateInfo, projArrive } from '../../domain/message';
 import type { Arrival } from '../../domain/types';
 import { useApp } from '../../app/store';
 import { readPositionOnce } from '../../infra/geo';
-import { HeroCard, OutlineButton, Pill, PrimaryButton } from '../../ui';
+import { HeroCard, OutlineButton, PrimaryButton } from '../../ui';
 import { NotifyCard } from '../notify';
 import { fmtTimer } from './progress';
 
@@ -39,8 +39,9 @@ export function Travel() {
           {fmtTimer(now - (s.leftAt ?? now))}
         </p>
         <p className="ui-hero-label">
-          도착 목표 {fmtClock(s.arriveAt)} · 남은 시간 {fmtHMS(s.arriveAt - now)}{' '}
-          <Pill tone="dark">{info.isLate ? `늦는 중 ${Math.ceil(info.lateMin)}분` : '여유 있어요'}</Pill>
+          {info.isLate
+            ? `미안해요, 늦을 것 같아요. 약 ${info.lateN}분 늦어요. ${info.etaText}쯤 도착해요.`
+            : `도착 목표 ${fmtClock(s.arriveAt)} · 남은 시간 ${fmtHMS(s.arriveAt - now)}`}
         </p>
       </HeroCard>
       <NotifyCard />
