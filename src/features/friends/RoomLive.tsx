@@ -6,6 +6,7 @@ import { lateMessage } from '../../domain/message';
 import { memberLine, type RoomMember, type RoomView } from '../../domain/room';
 import { STAGE_ROWS } from '../../domain/share';
 import { roomUrl, sayInRoom, setRoomSharing } from '../../infra/rooms';
+import { ActiveMark } from './ActiveMark';
 import { TopBar } from './TopBar';
 
 const stageLabel = (s: string) => STAGE_ROWS.find((r) => r.id === s)?.label ?? s;
@@ -49,12 +50,17 @@ function Others({ others, onOpen }: { others: RoomMember[]; onOpen: (id: string)
   if (others.length === 0) return <p className="fr-small">아직 아무도 들어오지 않았어요. 초대 링크를 보내 주세요.</p>;
   return (
     <>
-      {others.map((m) => (
+      {[...others]
+        .sort((a, b) => Number(b.sharing) - Number(a.sharing)) // 공유 중인 사람을 위로
+        .map((m) => (
         <button key={m.userId} type="button" className="fr-card" onClick={() => onOpen(m.userId)}>
           <span className="fr-person">
             <span className="fr-avatar is-live">{m.name.slice(0, 1)}</span>
             <span className="fr-grow">
-              <div style={{ fontWeight: 800 }}>{m.name}</div>
+              <div style={{ fontWeight: 800 }}>
+                {m.name}
+                {m.sharing && <ActiveMark />}
+              </div>
               <div className="m-muted">{memberLine(m, stageLabel)}</div>
             </span>
           </span>

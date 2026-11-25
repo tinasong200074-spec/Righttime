@@ -1,5 +1,6 @@
 import type { RoomState } from '../../app/state';
 import type { Friend } from '../../domain/room';
+import { ActiveMark } from './ActiveMark';
 
 // 목업 15번의 ✅·⏰ 표시는 목업과 명세 7.3에 그대로 적힌 것이라 글자 그대로 쓴다(줄 늘어놓기는 하지 않는다)
 function Count({ icon, n, label }: { icon: string; n: number; label: string }) {
@@ -31,7 +32,10 @@ function FriendCard({ f }: { f: Friend }) {
       <div className="fr-person">
         <span className={`fr-avatar ${f.active ? 'is-live' : ''}`}>{f.name.slice(0, 1)}</span>
         <span className="fr-grow">
-          <div style={{ fontWeight: 800 }}>{f.name}</div>
+          <div style={{ fontWeight: 800 }}>
+            {f.name}
+            {f.active && <ActiveMark />}
+          </div>
           <div className="m-muted">함께한 약속 {f.together}회</div>
         </span>
         {f.active && <span className="fr-tag is-accent">지금 준비 중</span>}
@@ -80,7 +84,9 @@ export function FriendList({ friends, room, onAdd, onOpenRoom }: Props) {
         <span>✅ 지켰어요</span>
         <span>⏰ 늦었어요</span>
       </div>
-      {friends.map((f) => (
+      {[...friends]
+        .sort((a, b) => Number(b.active) - Number(a.active)) // 활성 친구를 위로
+        .map((f) => (
         <FriendCard key={f.userId} f={f} />
       ))}
       <p className="fr-small">{friends.length > 0 ? '기록은 나와 그 친구에게만 보여요.' : '약속 방에서 함께한 친구가 여기에 쌓여요.'}</p>

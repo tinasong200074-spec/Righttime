@@ -452,3 +452,19 @@
   border-color: var(--ink);
   background: var(--ink);
 }
+.fr-live {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: 8px;
+  font-size: 0.8125rem;
+  font-weight: 800;
+}
+.fr-live i {
+  box-sizing: border-box;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: 2px solid var(--ink);
+  background: var(--accent);
+}
