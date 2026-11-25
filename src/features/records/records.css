@@ -1,0 +1,71 @@
+.r-chart {
+  display: flex;
+  align-items: stretch;
+  gap: 6px;
+  height: 170px;
+  margin: 12px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.r-col {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-size: 0.75rem;
+}
+.r-plot {
+  position: relative;
+  width: 100%;
+  flex: 1;
+  display: flex;
+  align-items: flex-end;
+}
+.r-bar {
+  width: 100%;
+  border-radius: 6px 6px 0 0;
+  background: var(--muted);
+}
+.r-bar.is-today {
+  background: var(--accent);
+  border: 2px solid var(--ink);
+}
+.r-plan {
+  position: absolute;
+  left: -3px;
+  right: -3px;
+  border-top: 2px dashed var(--ink);
+}
+.r-val {
+  font-weight: 800;
+}
+.r-day {
+  color: var(--muted);
+}
+.r-stat {
+  text-align: center;
+}
+.r-stat-num {
+  display: block;
+  font-size: 1.5rem;
+  font-weight: 800;
+}
+.r-stat-label {
+  display: block;
+  color: var(--muted);
+  font-size: 0.75rem;
+  line-height: 1.4;
+}
+.r-old {
+  color: var(--on-dark);
+  font-size: 1.25rem;
+  font-weight: 700;
+  text-decoration: line-through;
+}
+.r-line {
+  margin: 8px 0 0;
+  color: var(--on-dark);
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
