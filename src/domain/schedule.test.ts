@@ -5,6 +5,9 @@ import { calcPlan, computeSchedule, rollForward, scaleSteps } from './schedule';
 import { applyTransitCheck, arrive, completeStep, createSession, depart, isGlowOn, snooze, startPrep, tickSession, toRecord, transitChecksDue } from './session';
 import { DAY, DEFAULT_SETTINGS, MIN, type Plan, type RecordRow } from './types';
 
+// 기대 시각은 여유 5분 기준으로 적었다. 기본값이 바뀌어도 흔들리지 않게 고정한다
+const SETTINGS = { ...DEFAULT_SETTINGS, buffer: 5 };
+
 const at = (h: number, m: number) => new Date(2026, 10, 26, h, m).getTime();
 
 describe('computeSchedule (명세 15-1)', () => {
@@ -72,7 +75,7 @@ const plan: Plan = {
 
 describe('calcPlan', () => {
   it('기록이 없으면 입력값 그대로 계산한다', () => {
-    const c = calcPlan(plan, DEFAULT_SETTINGS, [], [])!;
+    const c = calcPlan(plan, SETTINGS, [], [])!;
     expect(fmtClock(c.leaveAt)).toBe('08:14');
     expect(fmtClock(c.prepStartAt)).toBe('07:34');
     expect(fmtClock(c.alarmAt)).toBe('07:24');
@@ -82,15 +85,15 @@ describe('calcPlan', () => {
       id: 'r', date: 0, title: '', latency: 30, snoozeCount: 0, prepActual: 90, userPrep: 40,
       steps: [], leaveDiff: 0, demo: false, excluded: false, ...over,
     });
-    const c = calcPlan(plan, DEFAULT_SETTINGS, [row({ demo: true }), row({ excluded: true })], [])!;
+    const c = calcPlan(plan, SETTINGS, [row({ demo: true }), row({ excluded: true })], [])!;
     expect(c.prep.val).toBe(40);
     expect(c.wake.val).toBe(10);
   });
-  it('단계가 없으면 null', () => expect(calcPlan({ ...plan, steps: [] }, DEFAULT_SETTINGS, [], [])).toBeNull());
+  it('단계가 없으면 null', () => expect(calcPlan({ ...plan, steps: [] }, SETTINGS, [], [])).toBeNull());
 });
 
 describe('세션 흐름', () => {
-  const c = calcPlan(plan, DEFAULT_SETTINGS, [], [])!;
+  const c = calcPlan(plan, SETTINGS, [], [])!;
   const armed = createSession(c, plan.title, at(6, 0), false);
 
   it('알람 시각이 되면 울리고, 미루면 다시 울린다', () => {
@@ -127,7 +130,7 @@ describe('세션 흐름', () => {
 
 describe('toRecord: 준비 시간', () => {
   it('마지막 단계를 끝낸 뒤 출발까지 기다린 시간은 준비 시간에 넣지 않는다', () => {
-    const c = calcPlan(plan, DEFAULT_SETTINGS, [], [])!;
+    const c = calcPlan(plan, SETTINGS, [], [])!;
     let s = startPrep(tickSession(createSession(c, '', at(6, 0), false), at(7, 24)), at(7, 30));
     s = completeStep(completeStep(s, at(7, 50)), at(8, 5)); // 준비 35분
     const r = toRecord(depart(s, at(8, 14)), 'id', false); // 9분 기다렸다가 출발
@@ -137,7 +140,7 @@ describe('toRecord: 준비 시간', () => {
 });
 
 describe('isGlowOn (명세 15-7)', () => {
-  const c = calcPlan(plan, DEFAULT_SETTINGS, [], [])!;
+  const c = calcPlan(plan, SETTINGS, [], [])!;
   const prep = startPrep(tickSession(createSession(c, '', at(6, 0), false), at(7, 24)), at(7, 30));
   it('출발 5분 전부터 켜지고 늦어져도 유지', () => {
     expect(isGlowOn(prep, c.leaveAt - 6 * MIN, 5)).toBe(false);
@@ -151,7 +154,7 @@ describe('isGlowOn (명세 15-7)', () => {
 });
 
 describe('이동 시간 재확인', () => {
-  const c = calcPlan(plan, DEFAULT_SETTINGS, [], [])!; // 이동 33 + 대기 8, 출발 08:14
+  const c = calcPlan(plan, SETTINGS, [], [])!; // 이동 33 + 대기 8, 출발 08:14
   const armed = createSession(c, '', at(6, 0), false);
   const prep = startPrep(tickSession(armed, at(7, 24)), at(7, 30));
   it('알람 전에는 확인하지 않고, 울린 뒤 1번, 출발 30분·10분 전에 1번씩', () => {

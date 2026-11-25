@@ -59,7 +59,7 @@ export function applyRecent(r: RecentPlan, now: number, places: Place[]): Plan {
     arriveAt: nextRepeatArrive(r.arriveMin, r.repeatDays ?? [], now) ?? nextOccurrence(r.arriveMin, now),
     placeId,
     rideMin: r.rideMin,
-    waitMin: r.waitMin,
+    waitMin: 0, // 배차 대기 입력이 없어져서 예전 기록의 값은 쓰지 않는다
     steps: r.steps,
     kind: r.kind,
   };
@@ -72,7 +72,7 @@ const DEFAULT_ARRIVE_MIN = 9 * 60;
 export function freshPlan(prev: Plan, now: number): Plan {
   const d = new Date(now + DAY);
   d.setHours(0, 0, 0, 0);
-  return { title: '', arriveAt: d.getTime() + DEFAULT_ARRIVE_MIN * MIN, rideMin: 30, waitMin: 5, steps: prev.steps, kind: prev.kind };
+  return { title: '', arriveAt: d.getTime() + DEFAULT_ARRIVE_MIN * MIN, rideMin: 30, waitMin: 0, steps: prev.steps, kind: prev.kind };
 }
 
 export function recentLabel(r: RecentPlan): { title: string; sub: string } {

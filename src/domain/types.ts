@@ -166,7 +166,7 @@ export interface ChecklistItem {
 }
 
 export const DEFAULT_SETTINGS: Settings = {
-  buffer: 5,
+  buffer: 10, // 배차 대기 입력을 없앤 대신 여유를 넉넉히 둔다
   snooze: 5,
   latency: 10,
   preLeave: 5,

@@ -4,12 +4,15 @@ import { arrive, completeStep, createSession, depart, snooze, startPrep, tickSes
 import { buildShareStatus, isStale, randomToken, shareExpiresAt, stageOf } from './share';
 import { DEFAULT_SETTINGS, MIN, type Plan } from './types';
 
+// 기대 시각은 여유 5분 기준으로 적었다. 기본값이 바뀌어도 흔들리지 않게 고정한다
+const SETTINGS = { ...DEFAULT_SETTINGS, buffer: 5 };
+
 const at = (h: number, m: number) => new Date(2026, 10, 26, h, m).getTime();
 const plan: Plan = {
   title: 'A사 면접', arriveAt: at(9, 0), rideMin: 33, waitMin: 8, kind: 'interview',
   steps: [{ id: 's1', name: '씻기', est: 20 }, { id: 's2', name: '옷 입기', est: 20 }],
 };
-const c = calcPlan(plan, DEFAULT_SETTINGS, [], [])!; // 알람 07:24, 준비 07:34, 출발 08:14
+const c = calcPlan(plan, SETTINGS, [], [])!; // 알람 07:24, 준비 07:34, 출발 08:14
 const ringing = tickSession(createSession(c, plan.title, at(6, 0), false), at(7, 24));
 const opts = { name: '지민', showStage: true, showEta: true };
 

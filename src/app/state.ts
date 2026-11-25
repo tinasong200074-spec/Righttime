@@ -66,7 +66,7 @@ export function defaultState(now: number): AppState {
       title: '',
       arriveAt: tomorrowNine(now),
       rideMin: 30,
-      waitMin: 5,
+      waitMin: 0,
       kind: 'interview',
       steps: [
         { id: 's1', name: '씻기', est: 15 },

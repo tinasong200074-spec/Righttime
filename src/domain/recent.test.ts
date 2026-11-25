@@ -37,7 +37,7 @@ describe('nextOccurrence, applyRecent', () => {
   });
   it('기록을 누르면 일정이 그대로 채워진다', () => {
     const r = toRecent(plan, 'A사', at(26, 22, 0), 'r1');
-    expect(applyRecent(r, at(28, 7, 0), places)).toEqual({ ...plan, arriveAt: at(28, 10, 0) });
+    expect(applyRecent(r, at(28, 7, 0), places)).toEqual({ ...plan, waitMin: 0, arriveAt: at(28, 10, 0) }); // 배차 대기는 다시 채우지 않는다
   });
   it('그사이 지운 장소는 빼고 채운다', () => {
     const r = toRecent(plan, 'A사', 0, 'r1');
@@ -48,7 +48,7 @@ describe('nextOccurrence, applyRecent', () => {
 describe('freshPlan', () => {
   it('제목·장소·이동 시간은 비우고 준비 단계는 둔다', () => {
     const f = freshPlan(plan, at(26, 23, 30));
-    expect(f).toEqual({ title: '', arriveAt: at(27, 9, 0), rideMin: 30, waitMin: 5, steps: plan.steps, kind: 'interview' });
+    expect(f).toEqual({ title: '', arriveAt: at(27, 9, 0), rideMin: 30, waitMin: 0, steps: plan.steps, kind: 'interview' });
     expect(f.placeId).toBeUndefined();
   });
 });

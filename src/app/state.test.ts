@@ -55,7 +55,7 @@ describe('최근 일정', () => {
     const armed = armState(planned(), now, false);
     const later = reopen({ ...armed, session: null }, at(28, 7, 0));
     const filled = applyRecentState(later, later.recentPlans[0].id, at(28, 7, 0));
-    expect(filled.plan).toMatchObject({ title: 'A사 면접', placeId: 'p1', rideMin: 33, waitMin: 8, arriveAt: at(28, 10, 0) });
+    expect(filled.plan).toMatchObject({ title: 'A사 면접', placeId: 'p1', rideMin: 33, waitMin: 0, arriveAt: at(28, 10, 0) });
     expect(filled.plan.steps).toEqual(planned().plan.steps);
   });
   it('시연은 최근 일정에 남기지 않는다', () => {
@@ -99,5 +99,14 @@ describe('요일 반복', () => {
     const filled = applyRecentState(later, later.recentPlans[0].id, at(28, 7, 0));
     expect(filled.plan.repeatDays).toEqual([1, 3, 5]);
     expect(filled.plan.arriveAt).toBe(at(30, 10, 0)); // 다음 월요일
+  });
+});
+
+describe('기본값', () => {
+  it('새 계획은 배차 대기 0분, 도착 여유는 10분', () => {
+    const s = defaultState(now);
+    expect(s.plan.waitMin).toBe(0);
+    expect(s.settings.buffer).toBe(10);
+    expect(reopen(planned(), now + 60_000).plan.waitMin).toBe(0);
   });
 });
