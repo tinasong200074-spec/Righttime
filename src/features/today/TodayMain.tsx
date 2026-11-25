@@ -8,6 +8,7 @@ import { Icon, type IconName } from '../../ui';
 import { dayLabel } from './model';
 import { useWeather } from './useWeather';
 import { WeatherRow } from './WeatherRow';
+import { isNativeApp } from '../../infra/nativeAlarm';
 
 export type View = 'main' | 'plan' | 'place' | 'steps' | 'weather' | 'carry' | 'helper';
 type Go = (v: View) => void;
@@ -155,7 +156,7 @@ function ArmButton() {
         알람 켜기
       </button>
       <p className="m-note">
-        {calc && calc.alarmAt <= now ? '알람 시각이 이미 지났어요. 도착 시각을 확인해 주세요. ' : ''}웹 앱이라 화면이 열려 있을 때만 울려요 · {WEATHER_CREDIT}
+        {calc && calc.alarmAt <= now ? '알람 시각이 이미 지났어요. 도착 시각을 확인해 주세요. ' : ''}{isNativeApp() ? '앱을 닫아도 알람이 울려요' : '웹 앱이라 화면이 열려 있을 때만 울려요'} · {WEATHER_CREDIT}
       </p>
     </>
   );
