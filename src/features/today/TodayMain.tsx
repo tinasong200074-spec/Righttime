@@ -1,7 +1,9 @@
+import { useState } from 'react';
 import { useApp } from '../../app/store';
 import { fmtClock } from '../../domain/format';
 import type { PlanCalc } from '../../domain/schedule';
 import { WEATHER_CREDIT } from '../../infra/weather';
+import { RecentPlans } from '../recent/RecentPlans';
 import { Icon, type IconName } from '../../ui';
 import { dayLabel } from './model';
 import { useWeather } from './useWeather';
@@ -52,14 +54,26 @@ function TravelBar({ calc }: { calc: PlanCalc }) {
 }
 
 function DestCard({ calc, go }: { calc: PlanCalc | null; go: Go }) {
-  const { origin } = useApp();
+  const { origin, recentPlans, session } = useApp();
+  const [open, setOpen] = useState(false);
+  const hasRecent = !session && recentPlans.length > 0;
+  // 최근 일정이 있으면 도착 장소를 누를 때 그 아래에 펼치고, 없으면 바로 장소 고르기로 간다
+  const press = () => (hasRecent ? setOpen((v) => !v) : go('place'));
   return (
     <section className="m-card">
       <span className="m-muted">도착 장소</span>
-      <button type="button" className={`m-dest ${calc?.place ? '' : 'is-empty'}`} onClick={() => go('place')}>
+      <button type="button" className={`m-dest ${calc?.place ? '' : 'is-empty'}`} aria-expanded={hasRecent ? open : undefined} onClick={press}>
         <Icon name="place" main="var(--ink)" det="var(--surface)" size={22} />
         {calc?.place?.name ?? '눌러서 도착 장소 정하기'}
       </button>
+      {hasRecent && open && (
+        <div onClick={(e) => (e.target as HTMLElement).closest('.recent-pick') && setOpen(false)}>
+          <RecentPlans />
+          <button type="button" className="f-btn" style={{ width: '100%', marginTop: 8 }} onClick={() => go('place')}>
+            다른 장소 고르기
+          </button>
+        </div>
+      )}
       <div className="m-muted" style={{ marginTop: 6 }}>
         출발지 · {origin?.name ?? '정하지 않았어요'}
       </div>
