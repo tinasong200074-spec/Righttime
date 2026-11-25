@@ -18,6 +18,16 @@ function Root() {
   return token ? <Viewer token={token} /> : <App />;
 }
 
+// 새 버전이 배포되면 서비스 워커가 바뀐다. 그때 한 번 새로고침해서 예전 화면이 남지 않게 한다.
+// 진행 중인 상태는 기기에 저장돼 있어서 새로고침해도 이어진다
+if ('serviceWorker' in navigator) {
+  let controlled = navigator.serviceWorker.controller !== null;
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if (controlled) location.reload();
+    controlled = true;
+  });
+}
+
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <Root />
