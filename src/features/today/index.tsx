@@ -1,42 +1,58 @@
+import { useState, type ReactNode } from 'react';
 import { useApp } from '../../app/store';
-import { Card } from '../../ui';
-import { ArmBar } from './ArmBar';
 import { CarryCard } from './CarryCard';
 import './fields.css';
-import { HelperCard } from './HelperCard';
+import { HelperForm } from './HelperForm';
+import { HelperResult } from './HelperResult';
+import './main.css';
 import { MemoBar } from './MemoBar';
-import { PlanCard } from './PlanCard';
-import { ScheduleCard } from './ScheduleCard';
+import { PlaceField, PlanFields } from './PlanCard';
 import { StepsEditor } from './StepsEditor';
+import { SubScreen } from './SubScreen';
 import './today.css';
+import { TodayMain, type View } from './TodayMain';
 import { TravelCard } from './TravelCard';
 import { WeatherCard } from './WeatherCard';
 
-// ① 오늘: 도착 시각에서 거꾸로 알람·준비·출발 시각을 보여 준다
-export function TodayScreen() {
-  const { calc, session } = useApp();
+function CarryScreen({ go }: { go: (v: View) => void }) {
   return (
-    <div className="f-stack">
-      <MemoBar />
-      <fieldset className="f-fieldset" disabled={session !== null}>
-        <PlanCard />
-        {calc ? (
-          <>
-            <TravelCard calc={calc} />
-            <ScheduleCard calc={calc} />
-          </>
-        ) : (
-          <Card>
-            <p className="f-sub">준비 단계를 하나 이상 넣으면 알람 시각을 계산해 줘요.</p>
-          </Card>
-        )}
-        <StepsEditor />
-      </fieldset>
-      {session && <p className="f-sub">알람이 켜져 있는 동안은 일정을 바꿀 수 없어요. 바꾸려면 알람을 끄세요.</p>}
-      <WeatherCard />
+    <>
+      <section className="m-card">
+        <MemoBar />
+      </section>
       <CarryCard />
-      <HelperCard />
-      <ArmBar />
-    </div>
+      <button type="button" className="m-ghost" onClick={() => go('helper')}>
+        글이나 사진으로 준비물 정리하기
+      </button>
+    </>
   );
+}
+
+// 보조 화면: 오늘 화면에서 탭한 칸을 고치는 곳
+function Sub({ view, go }: { view: Exclude<View, 'main'>; go: (v: View) => void }) {
+  const { calc } = useApp();
+  const back = () => go(view === 'helper' ? 'carry' : 'main');
+  const body: Record<Exclude<View, 'main'>, { title: string; badge?: string; node: ReactNode }> = {
+    plan: { title: '일정', node: <PlanFields /> },
+    place: { title: '도착 장소', node: <section className="m-card"><PlaceField /></section> },
+    travel: { title: '이동 시간', node: calc ? <TravelCard calc={calc} /> : null },
+    steps: { title: '준비 단계', node: <StepsEditor /> },
+    weather: { title: '날씨', node: <WeatherCard /> },
+    carry: { title: '출발할 때 알려줘요', node: <CarryScreen go={go} /> },
+    helper: { title: '일정 준비 도우미', badge: '초안', node: <><HelperForm /><HelperResult /></> },
+  };
+  const b = body[view];
+  return (
+    <SubScreen title={b.title} badge={b.badge} onBack={back}>
+      {b.node}
+    </SubScreen>
+  );
+}
+
+// ① 오늘: 목업 6번과 같은 한 화면과, 칸을 탭하면 열리는 보조 화면들
+export function TodayScreen() {
+  const { session } = useApp();
+  const [view, setView] = useState<View>('main');
+  const go = (v: View) => setView(session && v !== 'main' && v !== 'carry' && v !== 'helper' && v !== 'weather' ? 'main' : v);
+  return view === 'main' ? <TodayMain go={go} /> : <Sub view={view} go={go} />;
 }

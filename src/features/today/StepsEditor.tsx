@@ -35,8 +35,10 @@ export function StepsEditor() {
 
   return (
     <Card>
-      <details>
-        <summary className="t-summary">준비 단계 편집 · 지금 {plan.steps.length}단계, {sum}분</summary>
+      <div>
+        <p className="f-sub" style={{ marginTop: 0 }}>
+          지금 {plan.steps.length}단계, {sum}분이에요.
+        </p>
         <ul className="f-list">
           {plan.steps.map((s) => (
             <StepRow
@@ -56,7 +58,7 @@ export function StepsEditor() {
             단계에 나눠 넣기
           </button>
         </div>
-      </details>
+      </div>
     </Card>
   );
 }

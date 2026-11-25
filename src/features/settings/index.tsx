@@ -1,8 +1,11 @@
+import { useState } from 'react';
 import { useApp } from '../../app/store';
 import { TONES, buildMessage } from '../../domain/message';
 import type { ToneMode } from '../../domain/types';
 import { Card } from '../../ui';
 import '../today/fields.css';
+import '../today/main.css';
+import { SubScreen } from '../today/SubScreen';
 import { NumberField } from '../today/NumberField';
 import { ConfirmButton } from './ConfirmButton';
 import { CustomTone } from './CustomTone';
@@ -14,7 +17,6 @@ function AlarmSection() {
   const set = actions.updateSettings;
   return (
     <Card>
-      <h2 className="f-title">알람·타이머</h2>
       <div className="f-grid3" style={{ gridTemplateColumns: 'repeat(2, minmax(0, 1fr))' }}>
         <NumberField label="도착 여유" value={s.buffer} min={0} max={60} onChange={(buffer) => set({ buffer })} />
         <NumberField label="미루기 간격" value={s.snooze} min={1} max={30} onChange={(snooze) => set({ snooze })} />
@@ -35,7 +37,6 @@ function ToneSection() {
   const preview = buildMessage(tone, 'eta', { time: '09:00' });
   return (
     <Card>
-      <h2 className="f-title">말투</h2>
       <p className="f-sub">약속 상대에게 보낼 문구의 말투예요.</p>
       <div className="f-chips" role="group" aria-label="말투 고르기">
         {MODES.map((m) => (
@@ -58,7 +59,6 @@ function WeatherSection() {
   const set = actions.updateSettings;
   return (
     <Card>
-      <h2 className="f-title">날씨 기준</h2>
       <Switch label="날씨 자동 추천" on={s.weatherAuto} onChange={(weatherAuto) => set({ weatherAuto })} />
       <div className="f-grid3">
         <NumberField label="우산 기준" unit="%" value={s.rainTh} min={0} max={100} onChange={(rainTh) => set({ rainTh })} />
@@ -128,20 +128,74 @@ function DataSection() {
   );
 }
 
-export function SettingsScreen() {
+type Page = 'menu' | 'alarm' | 'tone' | 'places' | 'weather' | 'data';
+
+function MenuRow({ title, sub, onClick }: { title: string; sub: string; onClick: () => void }) {
   return (
-    <div className="f-stack">
-      <h1 className="f-title" style={{ fontSize: '1.5rem' }}>설정</h1>
-      <AlarmSection />
-      <ToneSection />
-      <Card>
-        <h2 className="f-title">자주 가는 곳</h2>
-        <PlaceManager />
-      </Card>
+    <button type="button" className="m-row s-menu" onClick={onClick}>
+      <span className="m-grow">
+        <div className="m-name">{title}</div>
+        <div className="m-sub">{sub}</div>
+      </span>
+      <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+        <path d="M9 5l7 7-7 7" stroke="var(--muted)" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+      </svg>
+    </button>
+  );
+}
+
+function Menu({ go }: { go: (p: Page) => void }) {
+  const { settings: s, tone, places, demo } = useApp();
+  const toneName = tone.mode === 'custom' ? '내 말투' : TONES[tone.mode].name;
+  return (
+    <div className="m-screen">
+      <div className="m-titlerow">
+        <h1 className="m-h1">설정</h1>
+      </div>
+      <section className="m-card m-rows">
+        <MenuRow title="알람·타이머" sub={`도착 여유 ${s.buffer}분 · 미루기 ${s.snooze}분`} onClick={() => go('alarm')} />
+        <MenuRow title="말투" sub={toneName} onClick={() => go('tone')} />
+        <MenuRow title="자주 가는 곳" sub={`${places.length}곳`} onClick={() => go('places')} />
+        <MenuRow title="날씨 기준" sub={s.weatherAuto ? `자동 추천 켜짐 · 우산 ${s.rainTh}%` : '자동 추천 꺼짐'} onClick={() => go('weather')} />
+        <MenuRow title="시연 모드·데이터" sub={demo ? '시연 중' : '시연, 샘플 데이터, 삭제'} onClick={() => go('data')} />
+      </section>
+    </div>
+  );
+}
+
+const TITLES: Record<Exclude<Page, 'menu'>, string> = {
+  alarm: '알람·타이머',
+  tone: '말투',
+  places: '자주 가는 곳',
+  weather: '날씨 기준',
+  data: '시연 모드·데이터',
+};
+
+function Body({ page }: { page: Exclude<Page, 'menu'> }) {
+  if (page === 'alarm') return <AlarmSection />;
+  if (page === 'tone') return <ToneSection />;
+  if (page === 'places') return <section className="m-card"><PlaceManager /></section>;
+  if (page === 'weather') return (
+    <>
       <WeatherSection />
       <RuleNote />
+    </>
+  );
+  return (
+    <>
       <DemoSection />
       <DataSection />
-    </div>
+    </>
+  );
+}
+
+// 설정: 목업처럼 한 화면짜리 메뉴와, 항목마다 열리는 화면
+export function SettingsScreen() {
+  const [page, setPage] = useState<Page>('menu');
+  if (page === 'menu') return <Menu go={setPage} />;
+  return (
+    <SubScreen title={TITLES[page]} onBack={() => setPage('menu')}>
+      <Body page={page} />
+    </SubScreen>
   );
 }

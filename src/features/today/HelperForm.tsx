@@ -2,7 +2,7 @@ import { useState, type ClipboardEvent } from 'react';
 import { useApp } from '../../app/store';
 import { KIND_NAMES } from '../../domain/ai';
 import type { PlanKind } from '../../domain/types';
-import { OutlineButton, PrimaryButton } from '../../ui';
+import { PhotoIcon } from './PhotoIcon';
 import { useHelperRun } from './useHelperRun';
 
 const MAX_IMAGES = 3;
@@ -42,25 +42,53 @@ function NotesField(p: { notes: string; onNotes: (v: string) => void; onPaste: (
   );
 }
 
-function ImageField(p: { images: File[]; note: string; onAdd: (f: File[]) => void; onClear: () => void }) {
+function TextPanel(p: { notes: string; onNotes: (v: string) => void; onPaste: (e: ClipboardEvent<HTMLTextAreaElement>) => void }) {
+  const { plan, actions } = useApp();
   return (
-    <>
-      <label className="f-label" htmlFor="h-img">
-        사진·캡처 (선택, 최대 {MAX_IMAGES}장)
+    <section className="m-card">
+      <label className="f-label" htmlFor="h-kind" style={{ marginTop: 0 }}>
+        일정 종류
       </label>
-      <input id="h-img" type="file" accept={IMAGE_TYPES.join(',')} multiple onChange={(e) => p.onAdd(Array.from(e.target.files ?? []))} />
-      <p className="f-status" aria-live="polite">
-        {p.images.length > 0 ? `사진 ${p.images.length}장 선택됨` : ''} {p.note}
-      </p>
-      {p.images.length > 0 && <OutlineButton onClick={p.onClear}>사진 비우기</OutlineButton>}
-    </>
+      <select id="h-kind" className="f-input" value={plan.kind} onChange={(e) => actions.updatePlan({ kind: e.target.value as PlanKind })}>
+        {KINDS.map((k) => (
+          <option key={k} value={k}>
+            {KIND_NAMES[k]}
+          </option>
+        ))}
+      </select>
+      <NotesField notes={p.notes} onNotes={p.onNotes} onPaste={p.onPaste} />
+    </section>
   );
 }
 
-// 일정 종류, 안내문 글, 사진(최대 3장), 전송 동의
+function Tiles(p: { count: number; showText: boolean; onAdd: (f: File[]) => void; onToggle: () => void }) {
+  return (
+    <div className="m-tiles2">
+      <label className="m-dash">
+        <input className="m-vh" id="h-img" type="file" accept={IMAGE_TYPES.join(',')} multiple onChange={(e) => p.onAdd(Array.from(e.target.files ?? []))} />
+        <span className="m-tile">
+          <PhotoIcon />
+        </span>
+        <span>사진·캡처</span>
+        <span className="m-sub">{p.count > 0 ? `${p.count}장 선택됨` : `최대 ${MAX_IMAGES}장`}</span>
+      </label>
+      <button type="button" className="m-dash" aria-expanded={p.showText} onClick={p.onToggle}>
+        <span className="m-tile">
+          <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true">
+            <rect x="4" y="7" width="16" height="3" rx="1.5" fill="var(--ink)" />
+            <rect x="7" y="13" width="10" height="3" rx="1.5" fill="var(--ink)" />
+          </svg>
+        </span>
+        <span>글 붙여넣기</span>
+      </button>
+    </div>
+  );
+}
+
+// 사진·글 타일 두 개, 전송 동의, "읽고 정리하기"(목업 10번)
 export function HelperForm() {
-  const { plan, actions } = useApp();
   const [notes, setNotes] = useState('');
+  const [showText, setShowText] = useState(false);
   const [agree, setAgree] = useState(false);
   const [note, setNote] = useState('');
   const { busy, msg, run } = useHelperRun();
@@ -83,29 +111,25 @@ export function HelperForm() {
   };
 
   return (
-    <div>
-      <label className="f-label" htmlFor="h-kind">
-        일정 종류
-      </label>
-      <select id="h-kind" className="f-input" value={plan.kind} onChange={(e) => actions.updatePlan({ kind: e.target.value as PlanKind })}>
-        {KINDS.map((k) => (
-          <option key={k} value={k}>
-            {KIND_NAMES[k]}
-          </option>
-        ))}
-      </select>
-      <NotesField notes={notes} onNotes={setNotes} onPaste={paste} />
-      <ImageField images={images} note={note} onAdd={add} onClear={clear} />
+    <>
+      <Tiles count={images.length} showText={showText} onAdd={add} onToggle={() => setShowText((v) => !v)} />
+      {showText && <TextPanel notes={notes} onNotes={setNotes} onPaste={paste} />}
+      {images.length > 0 && (
+        <button type="button" className="f-btn" onClick={clear}>
+          사진 비우기
+        </button>
+      )}
+      <p className="f-status" aria-live="polite">
+        {note} {msg}
+      </p>
+      <div className="m-spacer" />
       <label className="t-consent">
         <input type="checkbox" checked={agree} onChange={(e) => setAgree(e.target.checked)} />
         <span>글과 사진은 AI로 전송돼요. 개인 정보가 있는 부분은 빼고 올려 주세요.</span>
       </label>
-      <PrimaryButton disabled={!ready} onClick={submit}>
+      <button type="button" className="m-ghost" disabled={!ready} onClick={submit}>
         {busy ? '읽는 중이에요…' : '읽고 정리하기'}
-      </PrimaryButton>
-      <p className="f-status" aria-live="polite">
-        {msg}
-      </p>
-    </div>
+      </button>
+    </>
   );
 }

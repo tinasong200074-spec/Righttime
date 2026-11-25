@@ -1,11 +1,11 @@
 import { useState } from 'react';
 import { useApp } from '../../app/store';
-import { fmtClock, fromInputValue, toInputValue } from '../../domain/format';
+import { fromInputValue, toInputValue } from '../../domain/format';
 import { roundCoord } from '../../domain/geo';
 import type { FoundPlace } from '../../domain/transit';
 import { Card, Icon } from '../../ui';
 import { readPositionOnce } from '../../infra/geo';
-import { dayLabel, newId } from './model';
+import { newId } from './model';
 import { NumberField } from './NumberField';
 import { OriginRow } from './OriginRow';
 import { PlaceSearch } from './PlaceSearch';
@@ -87,7 +87,7 @@ function useAddFound() {
   };
 }
 
-function PlaceField() {
+export function PlaceField() {
   const { plan, places, actions } = useApp();
   const [mode, setMode] = useState<PlaceMode>('none');
   const addFound = useAddFound();
@@ -139,16 +139,12 @@ function PlaceField() {
   );
 }
 
-// 일정 제목, 도착 시각, 도착 장소
-export function PlanCard() {
-  const { plan, now, actions } = useApp();
+// 일정 제목과 도착 시각
+export function PlanFields() {
+  const { plan, actions } = useApp();
   return (
     <Card>
-      <div className="t-head">
-        <p className="t-date">{dayLabel(plan.arriveAt, now)}</p>
-        <p className="t-big-time">{fmtClock(plan.arriveAt)}</p>
-      </div>
-      <label className="f-label" htmlFor="plan-title">
+      <label className="f-label" htmlFor="plan-title" style={{ marginTop: 0 }}>
         일정 제목
       </label>
       <input
@@ -172,7 +168,6 @@ export function PlanCard() {
           if (ms !== null) actions.updatePlan({ arriveAt: ms });
         }}
       />
-      <PlaceField />
     </Card>
   );
 }

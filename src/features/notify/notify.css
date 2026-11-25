@@ -1,9 +1,56 @@
+/* 목업 11번 규격: 말투 / 도착 시각 / 늦을 때 카드 */
+.n-title {
+  margin: 0 0 10px;
+  font-size: 0.875rem;
+  font-weight: 800;
+}
+.n-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.n-chip {
+  min-height: 44px;
+  padding: 0 16px;
+  border: 1px solid var(--empty);
+  border-radius: var(--r-pill);
+  background: var(--surface);
+  font-weight: 500;
+  cursor: pointer;
+}
+.n-chip[aria-pressed='true'] {
+  border: 1.5px solid var(--ink);
+  background: var(--accent);
+  font-weight: 800;
+}
+.n-hint {
+  margin: 12px 0 0;
+  padding: 10px 14px;
+  border-radius: var(--r-input);
+  background: var(--chip);
+  font-size: 0.8125rem;
+}
 .n-preview {
-  margin: 8px 0;
+  margin: 0 0 10px;
   padding: 12px 14px;
   border-radius: var(--r-input);
   background: var(--chip);
   line-height: 1.5;
+}
+.n-btn {
+  width: 100%;
+  min-height: 52px;
+  border: 1px solid var(--ink);
+  border-radius: var(--r-btn);
+  background: transparent;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+.n-btn.is-strong {
+  border: 0;
+  background: var(--accent);
+  font-weight: 800;
 }
 .n-box {
   width: 100%;
@@ -13,7 +60,4 @@
   border: 1.5px solid var(--empty);
   border-radius: var(--r-input);
   background: var(--surface);
-}
-.n-block + .n-block {
-  margin-top: 16px;
 }
