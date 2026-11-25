@@ -56,6 +56,7 @@ function dataActions(set: SetState, clock: Clock) {
     toggleHelperDone: (key: string) => set((s) => ({ ...s, helperDone: { ...s.helperDone, [key]: !s.helperDone[key] } })),
     removeMemo: (id: string) => set((s) => ({ ...s, memos: s.memos.filter((m) => m.id !== id) })),
     toggleMemoPin: (id: string) => set((s) => ({ ...s, memos: s.memos.map((m) => (m.id === id ? { ...m, pin: !m.pin } : m)) })),
+    setOrigin: (origin: AppState['origin']) => set((s) => ({ ...s, origin })),
     setRain: (rain: RainChoice) => set((s) => ({ ...s, rain })),
     setWeather: (weather: WeatherResult | null) => set((s) => ({ ...s, weather })),
     setWeatherCoord: (weatherCoord: AppState['weatherCoord']) => set((s) => ({ ...s, weatherCoord, weather: null })),

@@ -21,6 +21,7 @@ export interface AppState {
   tone: Tone;
   session: Session | null;
   planBackup: Plan | null; // 시연이 끝나면 되돌릴 원래 계획
+  origin: { name: string; lat: number; lon: number } | null; // 출발지(대중교통 이동 시간 계산용). 기기에만 저장한다
   share: ShareState | null; // 준비 현황 링크 공유 중이면 값이 있다
   shareName: string; // 상대에게 보일 내 이름
   helper: HelperResult | null; // 일정 준비 도우미가 읽은 결과(사진·글 원본은 저장하지 않는다)
@@ -69,6 +70,7 @@ export function defaultState(now: number): AppState {
     tone: { mode: 'polite' },
     session: null,
     planBackup: null,
+    origin: null,
     share: null,
     shareName: '',
     helper: null,
