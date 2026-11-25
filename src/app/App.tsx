@@ -3,6 +3,7 @@ import { MorningFlow } from '../features/morning';
 import { RecordsScreen } from '../features/records';
 import { SettingsScreen } from '../features/settings';
 import { ShareBar } from '../features/share/ShareBar';
+import { SharedInbox } from '../features/shareTarget/SharedInbox';
 import { TodayScreen } from '../features/today';
 import { Icon, type IconName } from '../ui';
 import { AppProvider, useApp } from './store';
@@ -38,6 +39,7 @@ function Shell() {
     <div className="app">
       <DemoBadge />
       <ShareBar />
+      <SharedInbox />
       {inMorning ? (
         <main className="app-main is-full">
           <MorningFlow />

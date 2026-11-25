@@ -52,6 +52,8 @@ export default defineConfig({
     devApi(),
     VitePWA({
       registerType: 'autoUpdate',
+      // 공유창으로 받은 사진을 처리하는 코드를 서비스 워커에 덧붙인다
+      workbox: { importScripts: ['share-sw.js'] },
       manifest: {
         name: '제때',
         short_name: '제때',
@@ -61,6 +63,13 @@ export default defineConfig({
         start_url: '/',
         theme_color: '#14181f',
         background_color: '#f3f4f6',
+        // 안드로이드에서 홈 화면에 설치하면 공유창에 '제때'가 뜬다. 아이폰은 지원하지 않는다
+        share_target: {
+          action: '/share-target',
+          method: 'POST',
+          enctype: 'multipart/form-data',
+          params: { title: 'title', text: 'text', url: 'url', files: [{ name: 'images', accept: ['image/*'] }] },
+        },
         icons: [
           { src: 'icon-192.png', sizes: '192x192', type: 'image/png' },
           { src: 'icon-512.png', sizes: '512x512', type: 'image/png' },
