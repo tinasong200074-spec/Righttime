@@ -1,7 +1,7 @@
 import { useApp } from '../../app/store';
 import { Icon } from '../../ui';
 import type { View } from './TodayMain';
-import type { WeatherMode } from './useWeather';
+import { useWeatherBasis, type WeatherMode } from './useWeather';
 
 const MANUAL_TITLE = { none: '비 없음', maybe: '비 올 수도 있어요', yes: '비가 와요', auto: '날씨' } as const;
 
@@ -16,9 +16,10 @@ const SUB: Partial<Record<WeatherMode, string>> = {
 
 function useRowText(mode: WeatherMode): { title: string; sub: string } {
   const { weather, rain } = useApp();
+  const basis = useWeatherBasis();
   if (mode === 'ok' && weather?.line) {
     const [title, ...rest] = weather.line.split(' · ');
-    return { title, sub: rest.join(' · ') };
+    return { title, sub: [...rest, basis.label].filter(Boolean).join(' · ') };
   }
   if (mode === 'manual') return { title: MANUAL_TITLE[rain], sub: '직접 골랐어요' };
   return { title: '날씨', sub: SUB[mode] ?? '' };

@@ -9,12 +9,24 @@ const MAX_AHEAD_DAYS = 15;
 
 export type WeatherMode = 'demo' | 'manual' | 'off' | 'need-location' | 'too-far' | 'loading' | 'error' | 'ok';
 
+export type WeatherBasis = { kind: 'place' | 'origin' | 'mine' | 'none'; label: string; coord: { lat: number; lon: number } | null };
+
+// 날씨를 어느 위치 기준으로 볼지 정한다: 도착 장소 → 출발지 → 따로 허용한 내 위치 순서
+export function useWeatherBasis(): WeatherBasis {
+  const { calc, origin, weatherCoord } = useApp();
+  const place = calc?.place;
+  if (place?.geo) return { kind: 'place', label: `${place.name || '도착 장소'} 기준`, coord: place.geo };
+  if (origin) return { kind: 'origin', label: `출발지(${origin.name}) 기준`, coord: origin };
+  if (weatherCoord) return { kind: 'mine', label: '내 위치 기준 (약 1km 단위)', coord: weatherCoord };
+  return { kind: 'none', label: '', coord: null };
+}
+
 // 날씨를 불러와 판정 결과를 store에 넣고, 화면이 보여 줄 상태를 돌려준다
 export function useWeather(): WeatherMode {
-  const { calc, weatherCoord, settings, rain, demo, now, weather, actions } = useApp();
+  const { calc, settings, rain, demo, now, weather, actions } = useApp();
   const [busy, setBusy] = useState(false);
   const [failed, setFailed] = useState(false);
-  const coord = calc?.place?.geo ?? weatherCoord;
+  const { coord } = useWeatherBasis();
   const tooFar = calc ? calc.arriveAt - now > MAX_AHEAD_DAYS * DAY : false;
   const active = !demo && settings.weatherAuto && rain === 'auto' && !!calc && !!coord && !tooFar;
   const leaveAt = calc?.leaveAt ?? 0;
@@ -23,6 +35,7 @@ export function useWeather(): WeatherMode {
   useEffect(() => {
     if (!active || !coord) return;
     let stale = false;
+    actions.setWeather(null); // 위치나 시간이 바뀌면 예전 결과를 바로 지운다(다른 지역 날씨가 남아 보이지 않게)
     const timer = setTimeout(() => {
       setBusy(true);
       setFailed(false);

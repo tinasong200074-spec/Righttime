@@ -1,0 +1,59 @@
+/* 동작 확인용 기본 모양. 디자인은 목업에 맞춰 다시 입힌다 */
+.recent {
+  padding: var(--pad) var(--pad) 0;
+}
+.recent-title {
+  margin: 0 0 8px;
+  font-size: 0.875rem;
+  color: var(--muted);
+}
+.recent-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-card);
+  overflow: hidden;
+}
+.recent-item {
+  display: flex;
+  align-items: stretch;
+  border-top: 1px solid var(--line);
+}
+.recent-item:first-child {
+  border-top: 0;
+}
+.recent-pick {
+  flex: 1;
+  min-width: 0;
+  min-height: 56px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  border: 0;
+  background: none;
+  text-align: left;
+  cursor: pointer;
+}
+.recent-text {
+  min-width: 0;
+  display: grid;
+}
+.recent-text span {
+  color: var(--muted);
+  font-size: 0.8125rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.recent-remove {
+  min-width: 56px;
+  min-height: 56px;
+  border: 0;
+  background: none;
+  color: var(--muted);
+  font-size: 0.8125rem;
+  cursor: pointer;
+}

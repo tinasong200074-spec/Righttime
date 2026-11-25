@@ -2,7 +2,7 @@ import * as S from '../domain/session';
 import { addTransitLog } from '../domain/transitLog';
 import type { Arrival, GeoResult, MemoItem, Place, Plan, RainChoice, Settings, Tone, WeatherResult } from '../domain/types';
 import type { AskItem, HelperResult } from '../domain/ai';
-import { addMemoItemsState, addMemosState, armState, defaultState, endDemoState, loadSampleState, saveRecordState, startDemoState, type AppState, type RoomState, type ShareState } from './state';
+import { addMemoItemsState, addMemosState, applyRecentState, armState, defaultState, endDemoState, loadSampleState, saveRecordState, startDemoState, type AppState, type RoomState, type ShareState } from './state';
 
 type SetState = (fn: (s: AppState) => AppState) => void;
 
@@ -52,6 +52,7 @@ function dataActions(set: SetState, clock: Clock) {
         places: s.places.filter((x) => x.id !== id),
         plan: s.plan.placeId === id ? { ...s.plan, placeId: undefined } : s.plan,
       })),
+    applyRecent: (id: string) => set((s) => applyRecentState(s, id, clock.now())),
     addMemos: (text: string) => set((s) => addMemosState(s, text)),
     addMemoItems: (items: AskItem[], src: NonNullable<MemoItem['src']>) => set((s) => addMemoItemsState(s, items, src)),
     setHelper: (helper: HelperResult | null) => set((s) => ({ ...s, helper, helperDone: {} })),
@@ -80,6 +81,7 @@ function dataActions(set: SetState, clock: Clock) {
 
 function shareActions(set: SetState) {
   return {
+    removeRecent: (id: string) => set((s) => ({ ...s, recentPlans: (s.recentPlans ?? []).filter((r) => r.id !== id) })),
     setPushEndpoint: (pushEndpoint: string | null) => set((s) => ({ ...s, pushEndpoint })),
     setRoom: (room: RoomState | null) => set((s) => ({ ...s, room })),
     setShareName: (shareName: string) => set((s) => ({ ...s, shareName })),

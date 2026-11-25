@@ -4,7 +4,7 @@ import type { RainChoice } from '../../domain/types';
 import { Card, Icon, Pill } from '../../ui';
 import { WEATHER_CREDIT } from '../../infra/weather';
 import { readPositionOnce } from '../../infra/geo';
-import { useWeather, type WeatherMode } from './useWeather';
+import { useWeather, useWeatherBasis, type WeatherMode } from './useWeather';
 
 const CHOICES: Array<{ id: RainChoice; label: string }> = [
   { id: 'auto', label: '자동' },
@@ -34,6 +34,36 @@ function LocationButton() {
       <button type="button" className="f-btn" onClick={ask}>
         내 위치로 날씨 보기
       </button>
+    </div>
+  );
+}
+
+// 어느 위치의 날씨인지 보여 주고, 내 위치 기준일 때는 다시 읽거나 지울 수 있게 한다
+function BasisRow() {
+  const { actions } = useApp();
+  const basis = useWeatherBasis();
+  if (basis.kind === 'none') return null;
+  const reread = async () => {
+    const pos = await readPositionOnce();
+    if (pos) actions.setWeatherCoord({ lat: roundCoord(pos.lat, 2), lon: roundCoord(pos.lon, 2) });
+  };
+  return (
+    <div>
+      <p className="f-sub">
+        {basis.label}
+        {basis.kind === 'place' && ' · 도착 장소를 바꾸면 날씨도 바뀌어요.'}
+        {basis.kind === 'origin' && ' · 도착 장소에 위치가 없어서 출발지 날씨를 보여 줘요.'}
+      </p>
+      {basis.kind === 'mine' && (
+        <div className="f-chips">
+          <button type="button" className="f-btn" onClick={reread}>
+            내 위치 다시 읽기
+          </button>
+          <button type="button" className="f-btn" onClick={() => actions.setWeatherCoord(null)}>
+            위치 지우기
+          </button>
+        </div>
+      )}
     </div>
   );
 }
@@ -82,6 +112,7 @@ export function WeatherCard() {
         <h2 className="f-title">날씨</h2>
       </div>
       {mode === 'ok' && <Summary />}
+      <BasisRow />
       {mode === 'need-location' && <LocationButton />}
       {mode === 'manual' && <ManualItems />}
       {NOTES[mode] && <p className="f-sub" aria-live="polite">{NOTES[mode]}</p>}

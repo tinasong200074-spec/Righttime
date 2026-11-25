@@ -3,6 +3,7 @@ import { calcPlan, rollForward } from '../domain/schedule';
 import { createSession, toRecord } from '../domain/session';
 import { splitMemoText } from '../domain/weather';
 import type { AskItem, HelperResult } from '../domain/ai';
+import { addRecent, applyRecent, freshPlan, toRecent, type RecentPlan } from '../domain/recent';
 import type { TransitLogEntry } from '../domain/transitLog';
 import {
   DEFAULT_SETTINGS, MIN,
@@ -22,6 +23,7 @@ export interface AppState {
   tone: Tone;
   session: Session | null;
   planBackup: Plan | null; // 시연이 끝나면 되돌릴 원래 계획
+  recentPlans: RecentPlan[]; // 알람을 켰던 일정(검색 기록처럼). 누르면 다시 채운다
   pushEndpoint: string | null; // 푸시 알림을 켰으면 이 기기의 구독 주소
   transitLog: TransitLogEntry[]; // 대중교통 조회 기록(장소·시각·분). 비슷한 시간대 값을 찾는 데 쓴다
   origin: { name: string; lat: number; lon: number } | null; // 출발지(대중교통 이동 시간 계산용). 기기에만 저장한다
@@ -81,6 +83,7 @@ export function defaultState(now: number): AppState {
     tone: { mode: 'polite' },
     session: null,
     planBackup: null,
+    recentPlans: [],
     pushEndpoint: null,
     transitLog: [],
     origin: null,
@@ -99,7 +102,8 @@ export function restoreState(raw: unknown, now: number): AppState {
   const saved = raw as Partial<AppState>;
   let s: AppState = { ...base, ...saved, settings: { ...base.settings, ...saved.settings }, plan: { ...base.plan, ...saved.plan } };
   if (s.session?.demo) s = { ...s, session: null, plan: s.planBackup ?? s.plan, planBackup: null };
-  if (!s.session) s = { ...s, plan: { ...s.plan, arriveAt: rollForward(s.plan.arriveAt || base.plan.arriveAt, now) } };
+  // 진행 중인 알람이 없으면 일정 입력을 비운다. 지난 일정은 최근 일정 목록에서 다시 고른다
+  if (!s.session) s = { ...s, plan: freshPlan(s.plan, now), rain: 'auto', weather: null, weatherCoord: null, helper: null, helperDone: {} };
   return s;
 }
 
@@ -108,7 +112,17 @@ export const calcOf = (s: AppState) => calcPlan(s.plan, s.settings, s.records, s
 export function armState(s: AppState, now: number, demo: boolean): AppState {
   const c = calcOf(s);
   if (!c || c.arriveAt <= now) return s;
-  return { ...s, session: createSession(c, s.plan.title, now, demo) };
+  const session = createSession(c, s.plan.title, now, demo);
+  if (demo) return { ...s, session };
+  // 알람을 켠 일정을 최근 일정에 남긴다
+  const recent = toRecent(s.plan, c.place?.name ?? '', now, uid());
+  return { ...s, session, recentPlans: addRecent(s.recentPlans ?? [], recent) };
+}
+
+export function applyRecentState(s: AppState, id: string, now: number): AppState {
+  const r = (s.recentPlans ?? []).find((x) => x.id === id);
+  if (!r || s.session) return s;
+  return { ...s, plan: applyRecent(r, now, s.places), weather: null };
 }
 
 export function addMemosState(s: AppState, text: string): AppState {
