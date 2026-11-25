@@ -1,0 +1,119 @@
+.t-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+.t-date {
+  margin: 0;
+  font-weight: 700;
+}
+.t-big-time {
+  margin: 0;
+  font-size: 1.75rem;
+  font-weight: 800;
+  line-height: 1.2;
+}
+.t-total {
+  margin-left: 6px;
+  font-weight: 800;
+}
+.t-legend {
+  margin: 4px 0 8px;
+  color: var(--muted);
+  font-size: 0.8125rem;
+  line-height: 1.5;
+}
+.t-times {
+  display: flex;
+  justify-content: space-between;
+  gap: 4px;
+  font-size: 0.8125rem;
+  font-weight: 700;
+}
+.t-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.t-circle {
+  width: 44px;
+  height: 44px;
+  flex: none;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--chip);
+}
+.t-circle.is-accent {
+  background: var(--accent);
+  border: 2px solid var(--ink); /* 흰 카드 위 라임 원은 테두리를 둔다 */
+}
+.t-row-name {
+  display: block;
+  font-weight: 800;
+}
+.t-row-note {
+  display: block;
+  color: var(--muted);
+  font-size: 0.8125rem;
+  line-height: 1.4;
+}
+.t-memo {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 0 0 0 14px;
+  border: 1.5px solid var(--empty);
+  border-radius: var(--r-pill);
+  background: var(--surface);
+  font-weight: 700;
+}
+.t-memo-pin {
+  min-height: 44px;
+  padding: 0 8px;
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  font-size: 0.8125rem;
+  text-decoration: underline;
+  cursor: pointer;
+}
+.t-memo-pin[aria-pressed='true'] {
+  color: var(--ink);
+  font-weight: 800;
+}
+.t-summary {
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  font-weight: 800;
+  cursor: pointer;
+}
+.t-step {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+}
+.t-step-min {
+  width: 96px;
+  flex: none;
+}
+.t-split {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  margin-top: 8px;
+}
+.t-split > :first-child {
+  flex: 1;
+  min-width: 0;
+}
+.t-weather-line {
+  margin: 8px 0 0;
+  font-size: 1.125rem;
+  font-weight: 800;
+}
+.t-src {
+  font-size: 0.75rem;
+}

@@ -1,0 +1,141 @@
+/* 오늘·설정·기록·알리기 화면이 함께 쓰는 폼·칩 스타일. 색은 tokens.css 변수만 쓴다 */
+.f-stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap);
+  min-width: 0;
+}
+.f-fieldset {
+  border: 0;
+  margin: 0;
+  padding: 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap);
+}
+.f-fieldset:disabled {
+  opacity: 0.6;
+}
+.f-title {
+  margin: 0;
+  font-size: 1.0625rem;
+  font-weight: 800;
+}
+.f-sub {
+  margin: 4px 0 0;
+  color: var(--muted);
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+.f-label {
+  display: block;
+  margin: 12px 0 6px;
+  font-size: 0.875rem;
+  font-weight: 700;
+}
+.f-input {
+  width: 100%;
+  min-height: 48px;
+  padding: 0 12px;
+  border: 1.5px solid var(--empty);
+  border-radius: var(--r-input);
+  background: var(--surface);
+}
+.f-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.f-wrap {
+  flex-wrap: wrap;
+}
+.f-grow {
+  flex: 1;
+  min-width: 0;
+}
+.f-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 8px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.f-chip {
+  min-height: 44px;
+  padding: 0 14px;
+  border: 1.5px solid var(--empty);
+  border-radius: var(--r-pill);
+  background: var(--chip);
+  font-weight: 700;
+  cursor: pointer;
+}
+.f-chip[aria-pressed='true'] {
+  border: 2px solid var(--ink);
+  background: var(--accent);
+}
+.f-btn {
+  min-height: 44px;
+  padding: 0 14px;
+  border: 1.5px solid var(--ink);
+  border-radius: var(--r-btn);
+  background: transparent;
+  font-weight: 700;
+  cursor: pointer;
+}
+.f-btn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+.f-icon-btn {
+  width: 44px;
+  height: 44px;
+  flex: none;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  cursor: pointer;
+}
+.f-num {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.f-num .f-input {
+  min-width: 0;
+}
+.f-unit {
+  color: var(--muted);
+  font-size: 0.875rem;
+}
+.f-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.f-list > li {
+  padding: 10px 0;
+  border-top: 1px solid var(--line);
+}
+.f-list > li:first-child {
+  border-top: 0;
+}
+.f-credit {
+  margin: 12px 0 0;
+  color: var(--muted);
+  font-size: 0.75rem;
+}
+.f-status {
+  margin: 6px 0 0;
+  min-height: 1.25rem;
+  color: var(--muted);
+  font-size: 0.875rem;
+}
+.f-grid3 {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
