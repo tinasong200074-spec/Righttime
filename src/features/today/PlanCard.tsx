@@ -9,9 +9,8 @@ import { PlaceShortcuts } from '../quick/PlaceShortcuts';
 import { RepeatPicker } from '../quick/RepeatPicker';
 import { newId } from './model';
 import { NumberField } from './NumberField';
-import { OriginRow } from './OriginRow';
 import { PlaceSearch } from './PlaceSearch';
-import { TransitButton } from './TransitButton';
+import { TransitAuto } from './TransitAuto';
 
 const DEFAULT_RADIUS_M = 150;
 const GEO_DIGITS = 4; // 소수 넷째 자리(약 11m), 기기에만 저장
@@ -135,8 +134,7 @@ export function PlaceField() {
         />
       )}
       {plan.placeId && mode === 'none' && <SaveHereButton placeId={plan.placeId} />}
-      <OriginRow />
-      <TransitButton />
+      <TransitAuto />
     </div>
   );
 }
