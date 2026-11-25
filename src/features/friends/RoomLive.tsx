@@ -4,7 +4,7 @@ import { useApp } from '../../app/store';
 import { fmtClock } from '../../domain/format';
 import { lateMessage } from '../../domain/message';
 import { memberLine, type RoomMember, type RoomView } from '../../domain/room';
-import { STAGE_ROWS } from '../../domain/share';
+import { buildShareStatus, STAGE_ROWS } from '../../domain/share';
 import { roomUrl, sayInRoom, setRoomSharing } from '../../infra/rooms';
 import { ActiveMark } from './ActiveMark';
 import { TopBar } from './TopBar';
@@ -96,9 +96,12 @@ interface Props {
 
 // 내 화면 · 공유 중(목업 2번)과 함께하는 사람들. 보이는 것은 단계와 도착 예정뿐이다
 export function RoomLive({ room, view, onBack, onOpen }: Props) {
-  const { session, tone, now, actions } = useApp();
+  const { session, tone, now, shareName, actions } = useApp();
   const [msg, setMsg] = useState('');
-  const me = view?.members.find((m) => m.isMe);
+  const server = view?.members.find((m) => m.isMe);
+  // 서버에서 돌아오기(최대 5초)를 기다리지 않고, 이 기기가 아는 내 상태를 바로 보여 준다
+  const local = session && room.sharing ? buildShareStatus(session, now, { name: shareName, showStage: true, showEta: true }) : null;
+  const me = server && local ? { ...server, stage: local.stage, stepIdx: local.stepIdx, stepCount: local.stepCount, etaMs: local.etaMs, lateMin: local.lateMin } : server;
   const others = view?.members.filter((m) => !m.isMe) ?? [];
 
   const toggle = () => {

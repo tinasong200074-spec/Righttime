@@ -34,7 +34,8 @@ describe('memberLine', () => {
   };
   const label = (s: string) => ({ woke: '일어남', prep: '준비 중', depart: '곧 출발', travel: '이동 중', arrived: '도착' })[s] ?? s;
   it('상태에 맞는 한 줄', () => {
-    expect(memberLine(base, label)).toBe('아직 준비 전');
+    expect(memberLine(base, label)).toBe('아직 알람을 켜지 않았어요');
+    expect(memberLine({ ...base, etaMs: 1 }, label)).toBe('준비 전 · 알람 켜 둠');
     expect(memberLine({ ...base, stage: 'prep', stepIdx: 2, stepCount: 4 }, label)).toBe('준비 중 · 3/4');
     expect(memberLine({ ...base, stage: 'travel' }, label)).toBe('이동 중');
     expect(memberLine({ ...base, stage: 'arrived', result: 'late' }, label)).toBe('도착 · 늦었어요');

@@ -21,13 +21,18 @@ export function useRoomSync(state: AppState, now: number, actions: Actions): voi
       actions.setRoom(null);
       return;
     }
-    if (!session || session.demo || !room.sharing) return;
+    if (!room.sharing) {
+      last.current.key = ''; // 다시 켜면 1분을 기다리지 않고 바로 올리게 한다
+      return;
+    }
+    if (!session) return;
 
     if (session.state === 'summary') {
       // 도착을 눌렀을 때만 결과를 남긴다. 건너뛴 약속은 집계하지 않는다
       const arrival = session.arrivedAt !== undefined ? judgeArrival((session.arrivedAt - session.arriveAt) / MIN) : undefined;
       const result = resultOf(arrival);
-      if (result && last.current.finished !== room.roomId) {
+      // 시연은 약속 기록(지켰어요/늦었어요)에 남기지 않는다
+      if (result && !session.demo && last.current.finished !== room.roomId) {
         last.current.finished = room.roomId;
         void finishRoom(room.roomId, result);
       }

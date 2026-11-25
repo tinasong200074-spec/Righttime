@@ -54,11 +54,12 @@ export function cleanCode(input: string): string | null {
 // 주소의 #r=코드 부분을 읽는다
 export const codeFromHash = (hash: string): string | null => cleanCode(hash.match(/^#r=([A-Za-z0-9-]{6,8})$/)?.[1] ?? '');
 
-// 상대 한 줄 요약: "준비 중 · 3/4", "아직 준비 전", "공유를 껐어요"
+// 상대 한 줄 요약: "준비 중 · 3/4", "준비 전 · 알람 켜 둠", "공유를 껐어요"
 export function memberLine(m: RoomMember, stageLabel: (s: ShareStage) => string): string {
   if (!m.sharing) return '공유를 껐어요';
   if (m.result) return m.result === 'kept' ? '도착 · 지켰어요' : '도착 · 늦었어요';
-  if (!m.stage) return '아직 준비 전';
+  // 알람을 켜면 도착 예정이 먼저 올라가고, 알람이 울린 뒤부터 단계가 올라간다
+  if (!m.stage) return m.etaMs !== null ? '준비 전 · 알람 켜 둠' : '아직 알람을 켜지 않았어요';
   const steps = m.stage === 'prep' && m.stepCount ? ` · ${(m.stepIdx ?? 0) + 1}/${m.stepCount}` : '';
   return stageLabel(m.stage) + steps;
 }

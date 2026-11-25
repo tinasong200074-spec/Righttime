@@ -74,7 +74,7 @@ function ShareActive({ share }: { share: ShareState }) {
 export function ShareBar() {
   const { session, share } = useApp();
   const [open, setOpen] = useState(false);
-  if (!shareAvailable || !session || session.demo) return null;
+  if (!shareAvailable || !session) return null;
 
   if (!open) {
     return (
