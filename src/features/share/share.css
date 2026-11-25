@@ -394,3 +394,12 @@
   display: grid;
   gap: 12px;
 }
+.share-ok {
+  min-height: 44px;
+  border: 1.5px solid var(--ink);
+  border-radius: 12px;
+  background: transparent;
+  font-size: 0.875rem;
+  font-weight: 700;
+  cursor: pointer;
+}

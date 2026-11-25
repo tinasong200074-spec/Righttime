@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { MorningFlow } from '../features/morning';
+import { AlarmHint } from '../features/push/AlarmHint';
 import { PushToggle } from '../features/push/PushToggle';
 import { RecordsScreen } from '../features/records';
 import { FriendsScreen } from '../features/room';
@@ -41,6 +42,7 @@ function Shell() {
   return (
     <div className="app">
       <DemoBadge />
+      <AlarmHint />
       <ShareBar />
       <SharedInbox />
       {session?.transitNote && (
