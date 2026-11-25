@@ -2,6 +2,7 @@ import { buildSampleRecords, SAMPLE_PLACE } from '../domain/sample';
 import { calcPlan, rollForward } from '../domain/schedule';
 import { createSession, toRecord } from '../domain/session';
 import { splitMemoText } from '../domain/weather';
+import type { AskItem, HelperResult } from '../domain/ai';
 import {
   DEFAULT_SETTINGS, MIN,
   type MemoItem, type Place, type Plan, type RainChoice, type RecordRow, type Session, type Settings, type Tone, type WeatherResult,
@@ -20,6 +21,8 @@ export interface AppState {
   tone: Tone;
   session: Session | null;
   planBackup: Plan | null; // 시연이 끝나면 되돌릴 원래 계획
+  helper: HelperResult | null; // 일정 준비 도우미가 읽은 결과(사진·글 원본은 저장하지 않는다)
+  helperDone: Record<string, boolean>; // 준비할 것·전날 할 일 체크
 }
 
 export const uid = () => Math.random().toString(36).slice(2, 9);
@@ -56,6 +59,8 @@ export function defaultState(now: number): AppState {
     tone: { mode: 'polite' },
     session: null,
     planBackup: null,
+    helper: null,
+    helperDone: {},
   };
 }
 
@@ -83,6 +88,14 @@ export function addMemosState(s: AppState, text: string): AppState {
     .filter((m, i, arr) => arr.findIndex((x) => x.text === m.text) === i)
     .filter((m) => !s.memos.some((x) => x.text === m.text))
     .map((m) => ({ id: uid(), text: m.text, ask: m.ask, pin: false, src: 'user' as const }));
+  return fresh.length ? { ...s, memos: [...s.memos, ...fresh] } : s;
+}
+
+// AI가 나눈 항목을 챙길 것에 담는다(이미 있는 것은 건너뛴다)
+export function addMemoItemsState(s: AppState, items: AskItem[], src: NonNullable<MemoItem['src']>): AppState {
+  const fresh = items
+    .filter((m) => m.item && !s.memos.some((x) => x.text === m.item))
+    .map((m) => ({ id: uid(), text: m.item, ask: m.ask, pin: false, src }));
   return fresh.length ? { ...s, memos: [...s.memos, ...fresh] } : s;
 }
 

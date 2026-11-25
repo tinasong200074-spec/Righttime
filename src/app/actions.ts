@@ -1,6 +1,7 @@
 import * as S from '../domain/session';
-import type { Arrival, GeoResult, Place, Plan, RainChoice, Settings, Tone, WeatherResult } from '../domain/types';
-import { addMemosState, armState, defaultState, endDemoState, loadSampleState, saveRecordState, startDemoState, type AppState } from './state';
+import type { Arrival, GeoResult, MemoItem, Place, Plan, RainChoice, Settings, Tone, WeatherResult } from '../domain/types';
+import type { AskItem, HelperResult } from '../domain/ai';
+import { addMemoItemsState, addMemosState, armState, defaultState, endDemoState, loadSampleState, saveRecordState, startDemoState, type AppState } from './state';
 
 type SetState = (fn: (s: AppState) => AppState) => void;
 
@@ -50,6 +51,9 @@ function dataActions(set: SetState, clock: Clock) {
         plan: s.plan.placeId === id ? { ...s.plan, placeId: undefined } : s.plan,
       })),
     addMemos: (text: string) => set((s) => addMemosState(s, text)),
+    addMemoItems: (items: AskItem[], src: NonNullable<MemoItem['src']>) => set((s) => addMemoItemsState(s, items, src)),
+    setHelper: (helper: HelperResult | null) => set((s) => ({ ...s, helper, helperDone: {} })),
+    toggleHelperDone: (key: string) => set((s) => ({ ...s, helperDone: { ...s.helperDone, [key]: !s.helperDone[key] } })),
     removeMemo: (id: string) => set((s) => ({ ...s, memos: s.memos.filter((m) => m.id !== id) })),
     toggleMemoPin: (id: string) => set((s) => ({ ...s, memos: s.memos.map((m) => (m.id === id ? { ...m, pin: !m.pin } : m)) })),
     setRain: (rain: RainChoice) => set((s) => ({ ...s, rain })),

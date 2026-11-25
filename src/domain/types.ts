@@ -117,7 +117,7 @@ export interface MemoItem {
   text: string;
   ask: string;
   pin: boolean; // true면 매일, false면 오늘만
-  src?: 'user' | 'weather';
+  src?: 'user' | 'weather' | 'notice' | 'general'; // notice=안내문에 적힌 것, general=AI 제안
 }
 
 export type ToneMode = 'polite' | 'casual' | 'short' | 'formal' | 'custom';
