@@ -21,7 +21,10 @@ export function useTransitRecheck(state: AppState, now: number, actions: Actions
     }
     busy.current = true;
     fetchTransit(origin, geo)
-      .then((route) => actions.applyTransit(route?.rideMin ?? null, due))
+      .then((route) => {
+        if (route && session.placeId) actions.logTransit(session.placeId, route.rideMin);
+        actions.applyTransit(route?.rideMin ?? null, due);
+      })
       .catch(() => actions.applyTransit(null, due)) // 실패하면 전날 값을 그대로 쓴다
       .finally(() => {
         busy.current = false;

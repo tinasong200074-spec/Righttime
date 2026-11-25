@@ -3,6 +3,7 @@ import { calcPlan, rollForward } from '../domain/schedule';
 import { createSession, toRecord } from '../domain/session';
 import { splitMemoText } from '../domain/weather';
 import type { AskItem, HelperResult } from '../domain/ai';
+import type { TransitLogEntry } from '../domain/transitLog';
 import {
   DEFAULT_SETTINGS, MIN,
   type MemoItem, type Place, type Plan, type RainChoice, type RecordRow, type Session, type Settings, type Tone, type WeatherResult,
@@ -21,6 +22,7 @@ export interface AppState {
   tone: Tone;
   session: Session | null;
   planBackup: Plan | null; // 시연이 끝나면 되돌릴 원래 계획
+  transitLog: TransitLogEntry[]; // 대중교통 조회 기록(장소·시각·분). 비슷한 시간대 값을 찾는 데 쓴다
   origin: { name: string; lat: number; lon: number } | null; // 출발지(대중교통 이동 시간 계산용). 기기에만 저장한다
   share: ShareState | null; // 준비 현황 링크 공유 중이면 값이 있다
   shareName: string; // 상대에게 보일 내 이름
@@ -70,6 +72,7 @@ export function defaultState(now: number): AppState {
     tone: { mode: 'polite' },
     session: null,
     planBackup: null,
+    transitLog: [],
     origin: null,
     share: null,
     shareName: '',
@@ -89,7 +92,7 @@ export function restoreState(raw: unknown, now: number): AppState {
   return s;
 }
 
-export const calcOf = (s: AppState) => calcPlan(s.plan, s.settings, s.records, s.places);
+export const calcOf = (s: AppState) => calcPlan(s.plan, s.settings, s.records, s.places, s.transitLog);
 
 export function armState(s: AppState, now: number, demo: boolean): AppState {
   const c = calcOf(s);
