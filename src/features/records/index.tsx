@@ -99,7 +99,7 @@ function PlaceList() {
       <h2 className="f-title">장소별 이동 평균</h2>
       <ul className="f-list">
         {stats.map((p) => (
-          <li key={p.id} className="f-row" style={{ justifyContent: 'space-between' }}>
+          <li key={p.id} className="f-row f-wrap" style={{ justifyContent: 'space-between' }}>
             <span>
               {p.name} <span className="f-unit">({p.count}회)</span>
             </span>

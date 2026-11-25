@@ -61,7 +61,7 @@ function WeatherSection() {
       <h2 className="f-title">날씨 기준</h2>
       <Switch label="날씨 자동 추천" on={s.weatherAuto} onChange={(weatherAuto) => set({ weatherAuto })} />
       <div className="f-grid3">
-        <NumberField label="우산 기준 강수확률" unit="%" value={s.rainTh} min={0} max={100} onChange={(rainTh) => set({ rainTh })} />
+        <NumberField label="우산 기준" unit="%" value={s.rainTh} min={0} max={100} onChange={(rainTh) => set({ rainTh })} />
         <NumberField label="쌀쌀한 기준" unit="°C" value={s.coldTh} min={-10} max={30} onChange={(coldTh) => set({ coldTh })} />
         <NumberField label="더운 기준" unit="°C" value={s.hotTh} min={10} max={45} onChange={(hotTh) => set({ hotTh })} />
       </div>

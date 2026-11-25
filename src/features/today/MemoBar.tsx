@@ -53,7 +53,7 @@ export function MemoBar() {
         <input
           className="f-input f-grow"
           aria-label="챙길 것 또는 기억할 것"
-          placeholder="챙길 것·기억할 것 (예: 면접 서류, 충전기)"
+          placeholder="챙길 것 (예: 면접 서류)"
           maxLength={200}
           value={text}
           onChange={(e) => setText(e.target.value)}
