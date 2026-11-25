@@ -80,6 +80,7 @@ function dataActions(set: SetState, clock: Clock) {
 
 function shareActions(set: SetState) {
   return {
+    setPushEndpoint: (pushEndpoint: string | null) => set((s) => ({ ...s, pushEndpoint })),
     setShareName: (shareName: string) => set((s) => ({ ...s, shareName })),
     startShare: (share: ShareState) => set((s) => ({ ...s, share })),
     updateShare: (p: Partial<Pick<ShareState, 'showStage' | 'showEta'>>) => set((s) => (s.share ? { ...s, share: { ...s.share, ...p } } : s)),

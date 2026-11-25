@@ -52,8 +52,8 @@ export default defineConfig({
     devApi(),
     VitePWA({
       registerType: 'autoUpdate',
-      // 공유창으로 받은 사진을 처리하는 코드를 서비스 워커에 덧붙인다
-      workbox: { importScripts: ['share-sw.js'] },
+      // 공유창으로 받은 사진과 푸시 알림을 처리하는 코드를 서비스 워커에 덧붙인다
+      workbox: { importScripts: ['share-sw.js', 'push-sw.js'] },
       manifest: {
         name: '제때',
         short_name: '제때',

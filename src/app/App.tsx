@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { MorningFlow } from '../features/morning';
+import { PushToggle } from '../features/push/PushToggle';
 import { RecordsScreen } from '../features/records';
 import { SettingsScreen } from '../features/settings';
 import { ShareBar } from '../features/share/ShareBar';
@@ -54,6 +55,7 @@ function Shell() {
           <main className="app-main">
             {tab === 'today' && <TodayScreen />}
             {tab === 'records' && <RecordsScreen />}
+            {tab === 'settings' && <PushToggle />}
             {tab === 'settings' && <SettingsScreen />}
           </main>
           <nav className="app-tabs" aria-label="화면 이동">

@@ -22,6 +22,7 @@ export interface AppState {
   tone: Tone;
   session: Session | null;
   planBackup: Plan | null; // 시연이 끝나면 되돌릴 원래 계획
+  pushEndpoint: string | null; // 푸시 알림을 켰으면 이 기기의 구독 주소
   transitLog: TransitLogEntry[]; // 대중교통 조회 기록(장소·시각·분). 비슷한 시간대 값을 찾는 데 쓴다
   origin: { name: string; lat: number; lon: number } | null; // 출발지(대중교통 이동 시간 계산용). 기기에만 저장한다
   share: ShareState | null; // 준비 현황 링크 공유 중이면 값이 있다
@@ -72,6 +73,7 @@ export function defaultState(now: number): AppState {
     tone: { mode: 'polite' },
     session: null,
     planBackup: null,
+    pushEndpoint: null,
     transitLog: [],
     origin: null,
     share: null,
