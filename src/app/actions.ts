@@ -2,7 +2,7 @@ import * as S from '../domain/session';
 import { addTransitLog } from '../domain/transitLog';
 import type { Arrival, GeoResult, MemoItem, Place, Plan, RainChoice, Settings, Tone, WeatherResult } from '../domain/types';
 import type { AskItem, HelperResult } from '../domain/ai';
-import { addMemoItemsState, addMemosState, armState, defaultState, endDemoState, loadSampleState, saveRecordState, startDemoState, type AppState, type ShareState } from './state';
+import { addMemoItemsState, addMemosState, armState, defaultState, endDemoState, loadSampleState, saveRecordState, startDemoState, type AppState, type RoomState, type ShareState } from './state';
 
 type SetState = (fn: (s: AppState) => AppState) => void;
 
@@ -81,6 +81,7 @@ function dataActions(set: SetState, clock: Clock) {
 function shareActions(set: SetState) {
   return {
     setPushEndpoint: (pushEndpoint: string | null) => set((s) => ({ ...s, pushEndpoint })),
+    setRoom: (room: RoomState | null) => set((s) => ({ ...s, room })),
     setShareName: (shareName: string) => set((s) => ({ ...s, shareName })),
     startShare: (share: ShareState) => set((s) => ({ ...s, share })),
     updateShare: (p: Partial<Pick<ShareState, 'showStage' | 'showEta'>>) => set((s) => (s.share ? { ...s, share: { ...s.share, ...p } } : s)),

@@ -73,6 +73,13 @@ const ICONS: Record<string, Draw> = {
       <path d="M12.5 11.5 20 4M14.5 4H20v5.5" stroke={d} {...STROKE} strokeWidth={2.4} />
     </>
   ),
+  friend: (m, d) => (
+    <>
+      <circle cx="9" cy="8.5" r="3.8" fill={m} />
+      <path d="M2.5 20a6.5 6.5 0 0 1 13 0Z" fill={m} />
+      <circle cx="17.4" cy="9.8" r="2.8" fill={d} />
+    </>
+  ),
   place: (m, d) => (
     <>
       <path d="M12 22s7-6 7-12a7 7 0 1 0-14 0c0 6 7 12 7 12Z" fill={m} />
@@ -100,7 +107,7 @@ const ICONS: Record<string, Draw> = {
 
 export type IconName =
   | 'wake' | 'prep' | 'leave' | 'rain' | 'umbrella' | 'temp' | 'bag' | 'bell'
-  | 'clock' | 'share' | 'place' | 'record' | 'settings' | 'check';
+  | 'clock' | 'share' | 'friend' | 'place' | 'record' | 'settings' | 'check';
 
 interface IconProps {
   name: IconName;

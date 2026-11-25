@@ -1,0 +1,80 @@
+/* 동작 확인용 기본 모양. 디자인은 목업(⑩~⑮)에 맞춰 다시 입힌다 */
+.room-title {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+.room-title h1,
+.room-h2 {
+  margin: 0;
+  font-size: 1.25rem;
+}
+.room-title h1 {
+  font-size: 1.75rem;
+}
+
+.ui-card .ui-btn,
+.ui-card .share-field,
+.ui-card .share-pills,
+.ui-hero .ui-btn {
+  margin-top: 10px;
+}
+
+.room-bubble {
+  margin: 10px 0 0;
+  padding: 10px 12px;
+  border-radius: var(--r-input);
+  background: var(--chip);
+  color: var(--ink);
+  font-size: 0.9375rem;
+}
+
+.room-friend-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.room-initial {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--chip);
+  font-weight: 800;
+  flex: none;
+}
+.room-friend-name {
+  flex: 1;
+  display: grid;
+}
+.room-rows {
+  margin: 12px 0 0;
+  display: grid;
+  gap: 8px;
+}
+.room-rows > div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.room-rows dt {
+  font-weight: 700;
+}
+.room-rows dd {
+  margin: 0;
+  display: flex;
+  gap: 6px;
+}
+.room-count {
+  padding: 4px 10px;
+  border-radius: var(--r-pill);
+  background: var(--chip);
+  font-weight: 700;
+  font-size: 0.875rem;
+}
+.room-count.is-zero {
+  color: var(--muted);
+}

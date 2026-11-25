@@ -25,6 +25,7 @@ export interface AppState {
   pushEndpoint: string | null; // 푸시 알림을 켰으면 이 기기의 구독 주소
   transitLog: TransitLogEntry[]; // 대중교통 조회 기록(장소·시각·분). 비슷한 시간대 값을 찾는 데 쓴다
   origin: { name: string; lat: number; lon: number } | null; // 출발지(대중교통 이동 시간 계산용). 기기에만 저장한다
+  room: RoomState | null; // 들어가 있는 친구 약속 방
   share: ShareState | null; // 준비 현황 링크 공유 중이면 값이 있다
   shareName: string; // 상대에게 보일 내 이름
   helper: HelperResult | null; // 일정 준비 도우미가 읽은 결과(사진·글 원본은 저장하지 않는다)
@@ -37,6 +38,13 @@ export interface ShareState {
   showStage: boolean;
   showEta: boolean;
   expiresAt: number;
+}
+
+export interface RoomState {
+  roomId: string;
+  code: string;
+  sharing: boolean;
+  arriveMs: number;
 }
 
 export const uid = () => Math.random().toString(36).slice(2, 9);
@@ -76,6 +84,7 @@ export function defaultState(now: number): AppState {
     pushEndpoint: null,
     transitLog: [],
     origin: null,
+    room: null,
     share: null,
     shareName: '',
     helper: null,
