@@ -1,76 +1,140 @@
 import { describe, expect, it } from 'vitest';
-import {
-  computeTimes,
-  getNextAppointment,
-  getPhase,
-  minutesUntilDeparture,
-} from './schedule';
-import type { Appointment } from './types';
+import { fmtClock } from './format';
+import { judgeArrival, rec } from './recommend';
+import { calcPlan, computeSchedule, rollForward, scaleSteps } from './schedule';
+import { completeStep, createSession, depart, arrive, isGlowOn, snooze, startPrep, tickSession, toRecord } from './session';
+import { DAY, DEFAULT_SETTINGS, MIN, type Plan, type RecordRow } from './types';
 
-const make = (overrides: Partial<Appointment> = {}): Appointment => ({
-  id: 'a1',
-  title: '친구 저녁',
-  appointmentAt: '2026-11-26T09:00:00Z',
-  travelMin: 40,
-  prepMin: 30,
-  bufferMin: 10,
-  ...overrides,
-});
+const at = (h: number, m: number) => new Date(2026, 10, 26, h, m).getTime();
 
-const at = (hhmm: string) => new Date(`2026-11-26T${hhmm}:00Z`);
-
-describe('computeTimes (R01)', () => {
-  it('약속 09:00, 이동 40분, 여유 10분이면 출발 08:10, 준비 시작 07:40', () => {
-    const { departAt, prepStartAt } = computeTimes(make());
-    expect(departAt.toISOString()).toBe('2026-11-26T08:10:00.000Z');
-    expect(prepStartAt.toISOString()).toBe('2026-11-26T07:40:00.000Z');
+describe('computeSchedule (명세 15-1)', () => {
+  it('도착 09:00, 이동 33, 대기 8, 여유 5, 준비 60, 기상 14 → 출발 08:14, 준비 07:14, 알람 07:00', () => {
+    const s = computeSchedule({ arriveAt: at(9, 0), rideMin: 33, waitMin: 8, buffer: 5, prepMin: 60, latency: 14 });
+    expect(fmtClock(s.leaveAt)).toBe('08:14');
+    expect(fmtClock(s.prepStartAt)).toBe('07:14');
+    expect(fmtClock(s.alarmAt)).toBe('07:00');
+    expect(s.travelTotal).toBe(41);
   });
 });
 
-describe('minutesUntilDeparture', () => {
-  it('출발 10분 전이면 10', () => {
-    expect(minutesUntilDeparture(make(), at('08:00'))).toBe(10);
+describe('rec (명세 15-2)', () => {
+  it('기록이 없으면 입력값', () => expect(rec(40, []).val).toBe(40));
+  it('1~2회는 입력값과 섞는다', () => {
+    expect(rec(40, [70]).val).toBe(50); // 40·(2/3) + 70·(1/3)
+    expect(rec(40, [70, 70]).val).toBe(60);
   });
-  it('출발이 지나면 음수', () => {
-    expect(minutesUntilDeparture(make(), at('08:15'))).toBe(-5);
-  });
-  it('출발 30초 전은 0으로 내림', () => {
-    const now = new Date('2026-11-26T08:09:30Z');
-    expect(minutesUntilDeparture(make(), now)).toBe(0);
-  });
-});
-
-describe('getPhase', () => {
-  const cases: Array<[string, string]> = [
-    ['07:00', 'relaxed'], // 준비 시작(07:40) 전
-    ['07:40', 'prepare'],
-    ['07:54', 'prepare'], // 남은 16분
-    ['07:55', 'soon'], // 남은 15분
-    ['08:04', 'soon'], // 남은 6분
-    ['08:05', 'leaveNow'], // 남은 5분
-    ['08:10', 'leaveNow'], // 남은 0분
-    ['08:11', 'late'],
-  ];
-  it.each(cases)('%s → %s', (time, phase) => {
-    expect(getPhase(make(), at(time))).toBe(phase);
-  });
-
-  it('준비 시간이 짧아도 단계 순서가 뒤집히지 않는다', () => {
-    const a = make({ prepMin: 5 }); // 준비 시작 08:05
-    expect(getPhase(a, at('07:50'))).toBe('relaxed');
-    expect(getPhase(a, at('07:56'))).toBe('soon');
+  it('3회 이상은 최근 5회 평균 + 표본 표준편차의 절반', () => {
+    expect(rec(40, [58, 52, 61, 55, 49, 63, 57]).val).toBe(60);
+    expect(rec(10, [12, 8, 15, 5, 10, 18, 9]).val).toBe(14);
+    expect(rec(30, [34, 38, 31, 41, 33, 45, 36]).val).toBe(41);
   });
 });
 
-describe('getNextAppointment', () => {
-  const early = make({ id: 'early', appointmentAt: '2026-11-26T09:00:00Z' });
-  const late = make({ id: 'late', appointmentAt: '2026-11-26T12:00:00Z' });
-  const past = make({ id: 'past', appointmentAt: '2026-11-25T09:00:00Z' });
+describe('judgeArrival (명세 15-3)', () => {
+  it.each([
+    [0.4, 'ontime'],
+    [0.6, 'late'],
+    [-5.1, 'early'],
+    [-5, 'ontime'],
+  ])('%f분 → %s', (diff, expected) => expect(judgeArrival(diff)).toBe(expected));
+});
 
-  it('아직 안 지난 약속 중 가장 빠른 것을 고른다', () => {
-    expect(getNextAppointment([late, past, early], at('08:00'))?.id).toBe('early');
+describe('scaleSteps, rollForward', () => {
+  it('추천 총시간에 맞춰 비율대로 나눈다', () => {
+    const steps = scaleSteps(
+      [
+        { id: 'a', name: '씻기', est: 30 },
+        { id: 'b', name: '옷', est: 10 },
+      ],
+      60,
+    );
+    expect(steps.map((s) => s.est)).toEqual([45, 15]);
+    expect(steps.map((s) => s.userEst)).toEqual([30, 10]);
   });
-  it('남은 약속이 없으면 undefined', () => {
-    expect(getNextAppointment([past], at('08:00'))).toBeUndefined();
+  it('지난 일정은 하루 단위로 앞으로 옮긴다', () => {
+    expect(rollForward(at(9, 0), at(8, 0))).toBe(at(9, 0));
+    expect(rollForward(at(9, 0), at(10, 0))).toBe(at(9, 0) + DAY);
+    expect(rollForward(at(9, 0), at(10, 0) + 3 * DAY)).toBe(at(9, 0) + 4 * DAY);
+  });
+});
+
+const plan: Plan = {
+  title: 'A사 면접',
+  arriveAt: at(9, 0),
+  rideMin: 33,
+  waitMin: 8,
+  kind: 'interview',
+  steps: [
+    { id: 's1', name: '씻기', est: 20 },
+    { id: 's2', name: '옷 입기', est: 20 },
+  ],
+};
+
+describe('calcPlan', () => {
+  it('기록이 없으면 입력값 그대로 계산한다', () => {
+    const c = calcPlan(plan, DEFAULT_SETTINGS, [], [])!;
+    expect(fmtClock(c.leaveAt)).toBe('08:14');
+    expect(fmtClock(c.prepStartAt)).toBe('07:34');
+    expect(fmtClock(c.alarmAt)).toBe('07:24');
+  });
+  it('시연·제외 기록은 추천에 쓰지 않는다', () => {
+    const row = (over: Partial<RecordRow>): RecordRow => ({
+      id: 'r', date: 0, title: '', latency: 30, snoozeCount: 0, prepActual: 90, userPrep: 40,
+      steps: [], leaveDiff: 0, demo: false, excluded: false, ...over,
+    });
+    const c = calcPlan(plan, DEFAULT_SETTINGS, [row({ demo: true }), row({ excluded: true })], [])!;
+    expect(c.prep.val).toBe(40);
+    expect(c.wake.val).toBe(10);
+  });
+  it('단계가 없으면 null', () => expect(calcPlan({ ...plan, steps: [] }, DEFAULT_SETTINGS, [], [])).toBeNull());
+});
+
+describe('세션 흐름', () => {
+  const c = calcPlan(plan, DEFAULT_SETTINGS, [], [])!;
+  const armed = createSession(c, plan.title, at(6, 0), false);
+
+  it('알람 시각이 되면 울리고, 미루면 다시 울린다', () => {
+    expect(tickSession(armed, at(7, 23))).toBe(armed);
+    const ringing = tickSession(armed, at(7, 24));
+    expect(ringing.state).toBe('ringing');
+    const snoozed = snooze(ringing, at(7, 25), 5);
+    expect(tickSession(snoozed, at(7, 29)).state).toBe('snoozed');
+    expect(tickSession(snoozed, at(7, 30)).state).toBe('ringing');
+  });
+
+  it('기상 시간은 첫 울림부터 준비 시작까지(미룬 시간 포함)', () => {
+    const ringing = tickSession(armed, at(7, 24));
+    const prep = startPrep(snooze(ringing, at(7, 25), 5), at(7, 36));
+    expect(prep.latency).toBe(12);
+  });
+
+  it('끝까지 진행하면 기록이 만들어진다', () => {
+    let s = startPrep(tickSession(armed, at(7, 24)), at(7, 30));
+    s = completeStep(s, at(7, 55));
+    expect(s.state).toBe('prep');
+    s = completeStep(s, at(8, 20));
+    expect(s.state).toBe('check');
+    s = arrive(depart(s, at(8, 20)), at(9, 4));
+    const r = toRecord(s, 'id1', false);
+    expect(r.prepActual).toBe(50);
+    expect(r.leaveDiff).toBe(6);
+    expect(r.travelActual).toBe(44);
+    expect(r.arrival).toBe('late');
+    expect(r.steps.map((x) => x.act)).toEqual([25, 25]);
+    expect(JSON.stringify(r)).not.toMatch(/"lat"|"lon"/); // 도착 좌표를 남기지 않는다
+  });
+});
+
+describe('isGlowOn (명세 15-7)', () => {
+  const c = calcPlan(plan, DEFAULT_SETTINGS, [], [])!;
+  const prep = startPrep(tickSession(createSession(c, '', at(6, 0), false), at(7, 24)), at(7, 30));
+  it('출발 5분 전부터 켜지고 늦어져도 유지', () => {
+    expect(isGlowOn(prep, c.leaveAt - 6 * MIN, 5)).toBe(false);
+    expect(isGlowOn(prep, c.leaveAt - 5 * MIN, 5)).toBe(true);
+    expect(isGlowOn(prep, c.leaveAt + 10 * MIN, 5)).toBe(true);
+  });
+  it('출발하면 꺼진다', () => {
+    expect(isGlowOn(depart(prep, c.leaveAt), c.leaveAt, 5)).toBe(false);
+    expect(isGlowOn(null, c.leaveAt, 5)).toBe(false);
   });
 });

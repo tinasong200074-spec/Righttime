@@ -1,0 +1,162 @@
+.ui-card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-card);
+  padding: var(--pad);
+}
+
+.ui-hero {
+  background: var(--ink);
+  color: #fff;
+  border-radius: var(--r-hero);
+  padding: 20px;
+  --pulse-color: rgba(207, 242, 68, 0.5);
+}
+.ui-hero.is-dashed {
+  background: transparent;
+  color: var(--ink);
+  border: 2px dashed var(--empty);
+}
+.ui-hero-label {
+  color: var(--on-dark);
+  font-size: 0.875rem;
+}
+.ui-hero-num {
+  color: var(--accent);
+  font-size: 4rem;
+  font-weight: 800;
+  line-height: 1.1;
+}
+
+.ui-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border-radius: var(--r-pill);
+  font-size: 0.8125rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.ui-pill.is-chip {
+  background: var(--chip);
+  color: var(--ink);
+}
+.ui-pill.is-soft {
+  background: var(--accent-soft);
+  color: var(--ink);
+}
+.ui-pill.is-accent {
+  background: var(--accent);
+  color: var(--ink);
+}
+.ui-pill.is-dark {
+  background: rgba(255, 255, 255, 0.14);
+  color: #fff;
+}
+
+.ui-btn {
+  width: 100%;
+  min-height: 56px;
+  border-radius: var(--r-btn);
+  padding: 0 16px;
+  font-size: 1.0625rem;
+  cursor: pointer;
+}
+.ui-btn.is-primary {
+  background: var(--accent);
+  color: var(--ink);
+  border: 2px solid var(--ink); /* 밝은 바탕에서 라임 대비가 약해 테두리를 둔다 */
+  font-weight: 800;
+}
+.ui-btn.is-outline {
+  background: transparent;
+  color: inherit;
+  border: 1.5px solid currentColor;
+  font-weight: 700;
+}
+.ui-btn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.ui-stagebar {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  gap: 8px;
+}
+.ui-stagebar li {
+  flex: 1;
+  display: grid;
+  justify-items: center;
+  gap: 2px;
+  font-size: 0.8125rem;
+  color: var(--muted);
+}
+.ui-stage-dot {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--surface);
+  border: 2px solid var(--empty);
+}
+.ui-stagebar .is-done .ui-stage-dot {
+  background: var(--ink);
+  border-color: var(--ink);
+}
+.ui-stagebar .is-now .ui-stage-dot {
+  background: var(--accent);
+  border-color: var(--ink);
+  animation: pulse 1.8s ease-out infinite;
+}
+.ui-stagebar .is-now,
+.ui-stagebar .is-done {
+  color: var(--ink);
+}
+.ui-stage-name {
+  font-weight: 700;
+}
+
+.ui-fillbar {
+  position: relative;
+  padding: 6px 0;
+}
+.ui-fillbar-track {
+  display: flex;
+  height: 12px;
+  border-radius: var(--r-pill);
+  overflow: hidden;
+  background: rgba(128, 136, 148, 0.25);
+}
+.ui-fillbar-track span {
+  transition: width 0.6s linear;
+}
+.ui-fillbar-track .is-accent {
+  background: var(--accent);
+}
+.ui-fillbar-track .is-gray {
+  background: var(--muted);
+}
+.ui-fillbar-track .is-ink {
+  background: var(--ink);
+}
+.ui-fillbar-track .is-light {
+  background: var(--empty);
+}
+.ui-fillbar-head {
+  position: absolute;
+  top: 50%;
+  width: 16px;
+  height: 16px;
+  margin: -8px 0 0 -8px;
+  border-radius: 50%;
+  background: #fff;
+  border: 3px solid var(--accent);
+  box-shadow: 0 0 0 1px var(--ink);
+  transition: left 0.6s linear;
+  animation: pulse 1.8s ease-out infinite;
+}

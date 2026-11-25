@@ -1,0 +1,68 @@
+/* 명세 8장 디자인 토큰. 색은 여기서만 바꾼다 */
+:root {
+  --ground: #f3f4f6;
+  --surface: #ffffff;
+  --ink: #14181f;
+  --muted: #5b6572;
+  --line: #dde1e6;
+  --chip: #eceef1;
+  --empty: #b8bfc8;
+  --on-dark: #c5cbd3;
+  --accent: #cff244; /* 포인트 색은 이것 하나 */
+  --accent-soft: #eef8be;
+  --glow-red: rgba(255, 64, 64, 0.3); /* 붉은 조명에만 쓴다 */
+
+  --r-card: 20px;
+  --r-hero: 24px;
+  --r-btn: 16px;
+  --r-pill: 999px;
+  --r-input: 14px;
+  --gap: 12px;
+  --pad: 16px;
+  --tab-h: 60px;
+
+  font-family: 'Noto Sans KR', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  font-size: 16px;
+  color: var(--ink);
+  background: var(--ground);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+
+:focus-visible {
+  outline: 3px solid var(--ink);
+  outline-offset: 2px;
+}
+
+@keyframes pulse {
+  from {
+    box-shadow: 0 0 0 0 var(--pulse-color, rgba(20, 24, 31, 0.3));
+  }
+  to {
+    box-shadow: 0 0 0 12px transparent;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}

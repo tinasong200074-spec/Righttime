@@ -1,122 +1,117 @@
-# 역할 분담: Claude Code 창 3개
+# 역할 분담 v2: Claude Code 창 3개 (제때 명세 기준)
 
-> 마감: 2026-11-26 오전 10시. 기준 문서는 `docs/PRD.md`(요구사항 R01~R10)다.
-> **창 A = 이 세션(뼈대·계산 로직·통합·배포)**, **창 B = 홈 화면**, **창 C = 약속 추가·기록 화면**.
+> 마감: 2026-11-26 오전 10시. **기준 문서가 바뀌었다.**
+> - 명세: `docs/reference/jette-spec.md` (이하 "명세")
+> - 동작 기준 프로토타입: `docs/reference/jaettae-prototype.html` (이하 "프로토타입"). 둘이 다르면 명세가 우선.
+> - v1 분담(홈/약속 추가/기록 3화면)과 `docs/PRD.md`의 화면·요구사항은 **폐기**한다.
 
-## 1. 한눈에 보기
+## 1. 이번 제출 범위 (마감 때문에 줄임)
 
-| 창 | 맡은 일 | 소유 경로(여기만 수정) | 요구사항 |
-|---|---|---|---|
-| **A** | 프로젝트 뼈대, 공용 자료형·계산 로직(테스트 먼저), 앱 껍데기(탭), PWA, 통합, QA, 배포, README, push | `package.json`, 설정 파일, `index.html`, `public/`, `src/domain/**`, `src/app/**`, `README.md`, `docs/**` | R01, R08(저장 규칙), R09, R10 점검 |
-| **B** | 홈 화면(S01): 남은 시간 시각화, 단계 상태, 단계적 알림, 한 줄 알림 보내기 | `src/features/home/**`, `src/infra/notify/**` | R03, R04, R05 |
-| **C** | 약속 추가(S02), 기록(S03), 로컬 저장 | `src/features/appointment/**`, `src/features/history/**`, `src/infra/storage/**` | R02, R06, R07, R08 |
+**만든다 (명세 M0 + M1, 웹 PWA로):**
+명세 7.1의 ①오늘 ②기상 ③준비 ④출발 ⑤이동·도착·요약 ⑥기록, 설정, 챙길 것 메모, ⑧약속 상대에게 알리기(말투 4종), 날씨 자동 추천(9.4), 도착 위치 확인(9.5), 붉은 조명(10장), 시연 모드(9.11), 디자인 시스템(8장).
 
-**원칙:** 자기 소유 경로만 고친다. 다른 창의 경로를 고치고 싶으면 그 창에 전할 내용을 사용자에게 남긴다. `src/domain/**`은 A만 고친다. 필요한 함수가 없으면 A에게 요청한다(아래 계약을 먼저 쓴다).
+**만들지 않는다:**
+- 서버가 필요한 것 전부: 계정, 친구·방·링크 보기(M5·M6), 보호자-아이(M7), 대중교통 API(M3), Claude 호출(M4: 내 말투 만들기, 일정 준비 도우미, 메모 AI 분리), 공유창으로 받기(M8), 푸시
+- 네이티브 알람. 웹이라 **앱 화면이 열려 있을 때만** 알람이 울린다(명세 9.10에 적힌 한계)
+- 이동 시간은 **수동 입력**(이동 분 + 배차 대기 분). 메모 분리는 쉼표·줄바꿈 분리만
+- 클라이언트에 API 키를 넣지 않는다. Open-Meteo는 키가 없어 브라우저에서 직접 부른다
 
-## 2. 순서
+## 2. 한눈에 보기
 
-| 단계 | A | B | C |
-|---|---|---|---|
-| **0. 뼈대** (A가 끝내고 커밋하면 시작) | 뼈대 설치(승인 필요), `types.ts`·계산 함수 껍데기·테스트 | 대기. PRD와 이 문서를 읽고 화면 구상 | 대기. PRD와 이 문서를 읽고 화면 구상 |
-| **1. 화면 병렬** | 계산 로직 구현·테스트, 앱 탭 껍데기 | S01 구현 | S02, S03, 저장 구현 |
-| **2. 통합** | 세 쪽 합치기, 실행 확인, QA, 접근성 점검 | 버그 수정 | 버그 수정 |
-| **3. 제출** | README, 배포(승인 후), push(승인 후) | — | — |
+| 창 | 맡은 일 | 소유 경로(여기만 수정) |
+|---|---|---|
+| **A** (이 세션) | 설정 파일, 디자인 토큰·아이콘·공용 부품, 순수 계산(`domain`)과 테스트, 앱 상태(store)·저장·시계(시연 60배), 탭 껍데기, PWA, 통합, 배포, 문서 | 루트 설정 파일, `index.html`, `public/`, `src/domain/**`, `src/app/**`, `src/ui/**`, `src/infra/storage/**`, `docs/**`, `README.md` |
+| **B** | 아침 진행 화면: ②기상 ③준비 ④출발 ⑤이동·도착·요약, 붉은 조명, 알람 소리·알림, 도착 위치 읽기 | `src/features/morning/**`, `src/infra/alarm/**`, `src/infra/geo/**` |
+| **C** | 계획·기록 화면: ①오늘(일정·장소·단계·시간표 막대·날씨 카드·메모 입력줄), ⑥기록, 설정, ⑧알리기(말투), 날씨 불러오기 | `src/features/today/**`, `src/features/records/**`, `src/features/settings/**`, `src/features/notify/**`, `src/infra/weather/**` |
 
-## 3. 공용 계약 (A가 `src/domain`에 만든다. B와 C는 이 모양으로만 쓴다)
+- 자기 소유 경로만 고친다. `src/domain`, `src/app`, `src/ui`에 필요한 것이 없으면 직접 만들지 말고 사용자에게 "A에게 전달: ○○ 필요"라고 남긴다.
+- v1에서 만든 `src/features/home`, `appointment`, `history`는 A가 지운다. 건드리지 않는다.
 
-```ts
-// src/domain/types.ts
-export interface Appointment {
-  id: string;
-  title: string;            // 비어 있을 수 있음
-  appointmentAt: string;    // ISO 문자열
-  travelMin: number;        // 이동 시간(분)
-  prepMin: number;          // 준비 시간(분), 기본 30
-  bufferMin: number;        // 여유(분), 기본 10
-}
-export interface ArrivalRecord {
-  appointmentId: string;
-  title: string;
-  appointmentAt: string;
-  lateMin: number;          // 제시간 0, 일찍 와도 0
-  recordedAt: string;
-}
-export type Phase = 'relaxed' | 'prepare' | 'soon' | 'leaveNow' | 'late';
+## 3. 공용 계약 (A가 만든다. B·C는 가져다 쓰기만)
 
-// src/domain/schedule.ts
-computeTimes(a: Appointment): { departAt: Date; prepStartAt: Date };
-minutesUntilDeparture(a: Appointment, now: Date): number;   // 지나면 음수
-getPhase(a: Appointment, now: Date): Phase;
-getNextAppointment(list: Appointment[], now: Date): Appointment | undefined;
-
-// src/domain/escalation.ts
-getEscalationLevel(minLeft: number): 0 | 1 | 2 | 3 | 4;       // 30·15·5·0분 전에 1·2·3·4
-
-// src/domain/message.ts
-buildShareMessage(kind: 'departed' | 'late', lateMin?: number): string;
-
-// src/domain/stats.ts
-countSevereLate(records: ArrivalRecord[], now: Date, sinceDays?: number): number; // 10분 이상
-```
+A가 커밋하기 전에는 아래 이름을 그대로 가정하고 화면을 짠다. 커밋 메시지 `[M0] 공용 계약`이 올라오면 실제 파일에 맞춘다.
 
 ```ts
-// src/infra/storage/index.ts  (C가 만든다. B가 읽기만 쓴다)
-loadAppointments(): Appointment[];
-saveAppointment(a: Appointment): void;
-loadRecords(): ArrivalRecord[];
-saveRecord(r: ArrivalRecord): void;
+// src/domain/types.ts — 명세 13장의 Settings, Place, Step, Plan, Session, StepLog, RecordRow, MemoItem, Tone 그대로
+
+// src/domain/plan.ts (명세 9.1)
+computeSchedule(input: { arriveAt: number; rideMin: number; waitMin: number; buffer: number;
+  prepMin: number; latency: number }): { leaveAt: number; prepStartAt: number; alarmAt: number; travelTotal: number };
+scaleSteps(steps: Step[], prepRec: number): Step[];          // 추천 반영 시 비례 조정
+rollForward(arriveAt: number, now: number): number;           // 지난 일정 24시간 단위 이월
+
+// src/domain/recommend.ts (명세 9.3)
+rec(userVal: number, arr: number[]): { val: number; basis: string };
+usable(r: RecordRow): boolean;
+judgeArrival(arriveDiffMin: number): 'early' | 'ontime' | 'late';
+
+// src/domain/message.ts (명세 9.6)
+buildMessage(tone: Tone, kind: 'eta' | 'late' | 'maybe' | 'arrive',
+  v: { time?: string; min?: number; place?: string }): string;
+projArrive(session: Session, plan: Plan, travelMin: number, now: number): number;
+lateInfo(proj: number, arriveAt: number): { lateMin: number; etaText: string; lateN: number };
+
+// src/domain/weather.ts (명세 9.4) — 판정만. 불러오기는 C의 infra/weather
+judgeWeather(hours: HourWeather[], settings: Settings): { umbrella: boolean; clothing?: string; line: string; items: MemoItem[] };
+
+// src/domain/geo.ts (명세 9.5)
+checkArrival(place: Place, pos: { lat: number; lon: number; accuracy: number }): { status: 'match' | 'mismatch'; dist: number };
+
+// src/app/store.tsx — 상태와 동작. 저장(localStorage)은 A가 안에서 처리
+useApp(): {
+  now: number;                 // 시연 모드면 60배로 흐르는 시계. Date.now() 대신 반드시 이것을 쓴다
+  demo: boolean;
+  plan: Plan; settings: Settings; places: Place[]; memos: MemoItem[]; records: RecordRow[];
+  session: Session | null;
+  schedule: { leaveAt: number; prepStartAt: number; alarmAt: number; travelTotal: number };
+  actions: {
+    updatePlan(p: Partial<Plan>): void; updateSettings(s: Partial<Settings>): void;
+    savePlace(p: Place): void; removePlace(id: string): void;
+    addMemos(text: string): void; removeMemo(id: string): void; toggleMemoPin(id: string): void;
+    arm(): void;               // 알람 켜기
+    snooze(): void; startPrep(): void; completeStep(): void; skipStep(): void;
+    depart(): void; arrive(geo?: Session['geo']): void; skipArrival(arrival: 'early'|'ontime'|'late'): void;
+    saveRecord(excluded: boolean): void; cancelSession(): void;
+    setDemo(on: boolean): void; loadSampleData(): void; clearAllData(): void;
+  };
+};
+
+// src/ui — 공용 부품(A)
+<Icon name="wake|prep|leave|rain|umbrella|temp|bag|bell|clock|share|friend|place|record|photo|check" main det size />
+<HeroCard> <Pill> <PrimaryButton> <OutlineButton> <StageBar stage="wake|prep|leave" /> <FillBar segments progress />
+// 색·모서리·글꼴은 src/app/tokens.css의 CSS 변수(--ground, --surface, --ink, --muted, --line, --chip, --empty, --on-dark, --accent, --accent-soft, --glow-red)만 쓴다. 색 값을 직접 쓰지 않는다
 ```
 
-### 3-1. 화면 내보내기 계약 (뼈대에 자리 표시 파일을 이미 커밋해 둠. 자기 파일로 교체하되 이름은 유지)
+화면 내보내기(이름 고정, A의 탭 껍데기가 불러 쓴다):
 
 | 파일 | 내보내는 이름 | 담당 |
 |---|---|---|
-| `src/features/home/index.tsx` | `HomeScreen()` | B |
-| `src/features/appointment/index.tsx` | `AppointmentScreen({ onSaved })` (저장 뒤 `onSaved()` 호출) | C |
-| `src/features/history/index.tsx` | `HistoryScreen()` | C |
-| `src/infra/storage/index.ts` | `loadAppointments` `saveAppointment` `loadRecords` `saveRecord` | C |
+| `src/features/morning/index.tsx` | `MorningFlow()` : `session`이 있을 때 전체 화면으로 뜬다. 상태(`ringing/snoozed/prep/check/travel/summary`)별 화면을 안에서 고른다 | B |
+| `src/features/today/index.tsx` | `TodayScreen()` | C |
+| `src/features/records/index.tsx` | `RecordsScreen()` | C |
+| `src/features/settings/index.tsx` | `SettingsScreen()` | C |
+| `src/features/notify/index.tsx` | `NotifyCard()` : ⑧알리기 카드. B가 ③④⑤ 화면에 끼워 넣는다 | C |
+| `src/infra/weather/index.ts` | `fetchHourly(lat, lon, fromMs, toMs): Promise<HourWeather[]>` (1시간 캐시, 실패 10분) | C |
+| `src/infra/alarm/index.ts` | `startAlarmSound()`, `stopAlarmSound()`, `notify(title, body)` | B |
+| `src/infra/geo/index.ts` | `readPositionOnce(): Promise<{lat, lon, accuracy} | null>` (8초 제한, 좌표는 저장하지 않는다) | B |
 
-- 공용 상수와 자료형: `src/domain/types.ts`(`DEFAULT_PREP_MIN`, `DEFAULT_BUFFER_MIN` 포함). 공용 색·간격은 `src/app/app.css`의 CSS 변수(`--accent` 등)를 쓴다.
-- 확인 명령: `npm test`, `npm run typecheck`, `npm run lint`, `npm run dev`. 커밋 전에 앞의 세 개가 통과해야 한다.
+## 4. 공통 규칙
 
-## 4. 공통 규칙 (세 창 모두)
+- 먼저 `CLAUDE.md`, 이 문서, 명세의 자기 담당 절을 읽는다. 코드를 쓰기 전에 `ponytail` 스킬을 쓴다.
+- 프로토타입의 동작을 옮겨 오되 구조는 이 프로젝트의 것을 따른다(계산은 `domain`, 화면에는 계산을 두지 않는다).
+- 명세 16장 "하지 말 것"을 지킨다. 특히: 포인트 색은 라임 하나, 빨강은 붉은 조명에만, 이모지 금지, 줄무늬 막대 금지, 문구에 준비 단계 노출 금지, 자동 발송 금지, 비난하는 어조 금지.
+- 문구는 한국어 해요체. 명세의 숫자는 예시 값이니 하드코딩하지 않는다.
+- 접근성: 터치 44px, 대비 4.5:1, 아이콘 버튼에 `aria-label`, 색만으로 구분하지 않기, `prefers-reduced-motion`이면 애니메이션 끄기. 390px 기준, 360px에서도 가로 스크롤 없음.
+- 파일 300줄, 함수 50줄 이하. 이름·코드는 영어, 주석·커밋·화면 문구는 한국어.
+- 커밋은 `git add <내 경로>`로 자기 경로만. 메시지는 `[B 준비 화면] 요약`처럼. 커밋 전 `npm run typecheck`와 `npm run lint` 통과.
+- **하지 않는 것:** push, 배포, 새 라이브러리 설치, 브랜치 변경, `git stash`·`git reset`, 다른 창의 경로 수정.
+- 끝나면 **한 것 / 확인한 것 / 남은 것**을 짧게 보고한다.
 
-- 작업 전에 `CLAUDE.md`와 `docs/PRD.md`를 읽는다. 코드를 쓰기 전에 `ponytail` 스킬을 쓴다.
-- 이름·코드는 영어, **주석·커밋·화면 문구는 한국어**. 화면 문구는 쉬운 말.
-- 파일은 300줄 넘기지 않는다. 함수는 50줄 이하.
-- 의존은 안쪽으로만: `domain` ← `features` ← `infra`. `domain`은 화면·저장을 모른다.
-- **커밋은 자기 경로만** `git add <내 경로>`로 한다. 메시지는 `[화면 이름] 요약` 한국어. **push·배포·새 라이브러리 설치는 하지 않는다.** 필요하면 사용자에게 묻는다.
-- 같은 폴더를 함께 쓰므로 브랜치를 바꾸거나 `git stash`, `git reset`을 쓰지 않는다.
-- 접근성(R10): 색에만 의존하지 않기, 터치 영역 44px 이상, 360px 폭에서 가로 스크롤 없기.
-- 끝나면 사용자에게 **한 것 / 확인한 것 / 남은 것**을 짧게 보고한다.
+## 5. 순서
 
-## 5. 창 B, 창 C에 붙여넣을 시작 문구
-
-### 창 B (홈 화면)
-```
-너는 Righttime 프로젝트의 창 B다. 폴더는 C:\dev\Hackerthon.
-먼저 CLAUDE.md, docs/PRD.md, docs/ROLES.md를 읽어라.
-너의 일은 홈 화면(S01)이다: 요구사항 R03(남은 시간 시각화), R04(단계적 알림), R05(출발했어요/늦을 것 같아요 한 줄 알림).
-수정할 수 있는 경로: src/features/home/**, src/infra/notify/** 뿐이다. 다른 경로는 고치지 마라.
-src/domain의 함수는 docs/ROLES.md 3장의 계약대로 가져다 쓰기만 하고 고치지 마라. 아직 없으면 A(다른 창)가 뼈대를 커밋할 때까지 화면 구상과 notify부터 해라.
-저장소는 C 창이 만드는 src/infra/storage를 읽기만 써라.
-git add는 네 경로만, push와 새 라이브러리 설치는 하지 마라.
-```
-
-### 창 C (약속 추가·기록)
-```
-너는 Righttime 프로젝트의 창 C다. 폴더는 C:\dev\Hackerthon.
-먼저 CLAUDE.md, docs/PRD.md, docs/ROLES.md를 읽어라.
-너의 일은 약속 추가(S02), 기록(S03), 로컬 저장이다: 요구사항 R02(입력 4칸 이하, 마지막 입력값을 기본값으로), R06(도착 기록 2탭), R07(10분 이상 지각 통계), R08(localStorage).
-수정할 수 있는 경로: src/features/appointment/**, src/features/history/**, src/infra/storage/** 뿐이다. 다른 경로는 고치지 마라.
-src/domain의 함수와 자료형은 docs/ROLES.md 3장의 계약대로 가져다 쓰기만 하고 고치지 마라. 아직 없으면 A(다른 창)가 뼈대를 커밋할 때까지 storage 구현과 화면 구상부터 해라.
-git add는 네 경로만, push와 새 라이브러리 설치는 하지 마라.
-```
-
-## 6. A가 확인할 통합 체크리스트
-- [ ] 뼈대에서 `npm run dev`가 뜨고 세 화면 탭이 이동한다
-- [ ] R01 예시(18:00 약속, 이동 40, 여유 10 → 출발 17:10)가 테스트로 통과한다
-- [ ] 약속 추가 → 홈 카운트다운 → 도착 기록 → 통계가 이어진다
-- [ ] 새로고침 후에도 데이터가 남는다
-- [ ] 360px 폭, 오프라인에서 열림 확인
-- [ ] 배포 전 사용자 승인, push 전 사용자 승인
+| 단계 | A | B | C |
+|---|---|---|---|
+| 0 | 타입·토큰·아이콘·store 껍데기를 먼저 커밋(`[M0] 공용 계약`) | 명세 7.1 ②~⑤, 9.1, 9.10, 10장과 프로토타입 해당 부분 읽기. `infra/alarm`, `infra/geo`부터 | 명세 7.1 ①⑥, 7.5, 9.3, 9.4, 9.6, 9.9와 프로토타입 해당 부분 읽기. `infra/weather`부터 |
+| 1 | 계산 함수 구현과 테스트(명세 15장 1~6번), store 동작 | ② → ③ → ④ → 붉은 조명 → ⑤ | ① → 설정 → ⑥ → ⑧ |
+| 2 | 통합, 실행 확인, PWA, 접근성 점검 | 버그 수정 | 버그 수정 |
+| 3 | README, 배포·push(사용자 승인 후) | — | — |
