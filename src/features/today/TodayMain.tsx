@@ -7,7 +7,7 @@ import { dayLabel } from './model';
 import { useWeather } from './useWeather';
 import { WeatherRow } from './WeatherRow';
 
-export type View = 'main' | 'plan' | 'place' | 'travel' | 'steps' | 'weather' | 'carry' | 'helper';
+export type View = 'main' | 'plan' | 'place' | 'steps' | 'weather' | 'carry' | 'helper';
 type Go = (v: View) => void;
 
 function Header({ go }: { go: Go }) {
@@ -64,12 +64,12 @@ function DestCard({ calc, go }: { calc: PlanCalc | null; go: Go }) {
         출발지 · {origin?.name ?? '정하지 않았어요'}
       </div>
       {calc && (
-        <button type="button" className="m-link" onClick={() => go('travel')} aria-label="이동 시간, 배차 대기, 여유 고치기">
+        <div>
           <TravelBar calc={calc} />
           <div className="m-muted" style={{ marginTop: 6 }}>
-            {calc.waitMin > 0 ? `배차 대기 ${calc.waitMin}분을 넣어서 한 대 놓쳐도 늦지 않게 잡았어요.` : '이동 시간과 여유를 더해 출발 시각을 잡았어요.'}
+            이동 시간과 여유를 더해 출발 시각을 잡았어요.
           </div>
-        </button>
+        </div>
       )}
     </section>
   );

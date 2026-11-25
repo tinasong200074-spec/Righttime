@@ -6,7 +6,7 @@ import { readPositionOnce } from '../../infra/geo';
 import { fetchTransit, TRANSIT_ERROR_TEXT, TransitError } from '../../infra/transit';
 import { OriginRow } from './OriginRow';
 
-const BASIS_NOTE = '지금 출발 기준 시간이에요. 아침 시간대에는 다를 수 있어요. 배차 대기는 아래에서 직접 적어 주세요.';
+const BASIS_NOTE = '지금 출발 기준 시간이에요. 아침 시간대에는 다를 수 있어요. 카카오가 배차 간격을 알려 주지 않아서 대기 시간은 따로 넣지 않아요.';
 const KEY = 'jette:transit-on';
 const HERE = '현재 위치';
 const GEO_DIGITS = 4; // 소수 넷째 자리(약 11m)로 줄여 기기에만 저장한다
