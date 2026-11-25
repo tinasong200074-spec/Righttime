@@ -1,5 +1,5 @@
 import Anthropic from '@anthropic-ai/sdk';
-import { extractJson, helperPrompt, memoPrompt, normalizeHelper, normalizeMemo, normalizeTone, tonePrompt, type HelperInput } from '../src/domain/ai';
+import { extractJson, helperPrompt, memoPrompt, normalizeHelper, normalizeMemo, normalizeTone, tonePrompt, type HelperInput } from '../src/domain/ai.js';
 
 // Claude 프록시(서버 전용). 키는 환경 변수에만 있고 브라우저로 나가지 않는다.
 // 받은 글과 사진은 저장하지 않고, 호출이 끝나면 버린다.

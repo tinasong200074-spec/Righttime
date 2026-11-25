@@ -1,5 +1,5 @@
-import { fmtClock } from './format';
-import { MIN, type GeoResult, type Session, type Tone, type ToneMode, type ToneTemplates } from './types';
+import { fmtClock } from './format.js';
+import { MIN, type GeoResult, type Session, type Tone, type ToneMode, type ToneTemplates } from './types.js';
 
 // 명세 9.6: 문구는 도착 시각과 늦는 분만 말한다. 준비 단계는 절대 넣지 않는다
 export const TONES: Record<Exclude<ToneMode, 'custom'>, ToneTemplates & { name: string }> = {

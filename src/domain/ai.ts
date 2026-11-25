@@ -1,5 +1,5 @@
-import { TONES } from './message';
-import type { PlanKind, ToneTemplates } from './types';
+import { TONES } from './message.js'; // 서버 함수(ESM)에서도 불러 쓰므로 확장자를 붙인다
+import type { PlanKind, ToneTemplates } from './types.js';
 
 // Claude에 보낼 프롬프트(명세 9.6, 9.7 그대로)와, 돌아온 답을 믿지 않고 다듬는 검증 함수.
 // 계산은 AI가 하지 않는다. 문구와 분류만 맡는다.
