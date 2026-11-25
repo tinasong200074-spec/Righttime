@@ -102,6 +102,7 @@
 | R14 | 준비 현황 링크 공유 | Must | MOT-2 | 올라가는 값에 위치·미루기·기록이 없다. 15분 갱신이 없으면 "확인 안 됨". 끄면 바로 사라진다 | 구현 (배포에서 확인) |
 | R15 | 사진 공유 받기 | Could | CUJ #1 | 공유받은 사진은 확인을 누른 뒤에만 AI로 보낸다 | 구현 (실제 공유창은 미확인) |
 | R16 | 푸시 알림 | Could | MOT-1 | 앱을 닫아도 기상·출발 5분 전·출발 시각에 알림이 온다 | 구현 (실제 수신은 미확인) |
+| R18 | 친구 약속 방 | Should | MOT-2 | 방에 들어간 사람끼리만 서로의 단계·도착 예정을 본다. 안심 메시지는 정해 둔 문구만. 도착하면 결과(지켰어요/늦었어요)만 남는다 | 구현 (배포에서 확인, 한쪽은 스크립트) |
 | R17 | 접근성·반응형 | Must | 전체 | 360px에서 가로 스크롤 없음, 터치 44px, 색만으로 구분하지 않음, 움직임 줄이기 설정 존중 | 부분 (사람 확인 필요) |
 
 ### 7.2 비기능 요구사항
@@ -115,11 +116,12 @@
 ### 7.3 기술
 - Vite + React + TypeScript, PWA(`vite-plugin-pwa`), Vitest, ESLint.
 - 서버 함수: Vercel Functions(`api/claude`, `api/kakao`, `api/push-run`).
-- DB: Supabase(`shares`, `push_jobs`, 예약 실행 `pg_cron`).
+- DB: Supabase(`shares`, `push_jobs`, `rooms`, `room_members`, 예약 실행 `pg_cron`). 친구 기능은 익명 로그인으로 만든 기기 계정을 쓴다.
 - 외부: Claude(Anthropic SDK, 기본 모델 `claude-opus-5-5`), 카카오맵 REST API, Open-Meteo.
-- **ERD:** 서버 표는 두 개뿐이고 서로 관계가 없어 별도 ERD 문서는 생략한다. 설계는 `supabase/migrations/`에 있다.
+- **ERD:** 서버 표는 네 개이고 관계는 `room_members.room_id → rooms.id` 하나뿐이라 별도 ERD 문서는 생략한다. 설계는 `supabase/migrations/`에 있다.
   - `shares(token, write_hash, name, stage, step_idx, step_count, eta_ms, arrive_ms, late_min, updated_at, expires_at)`
   - `push_jobs(id, endpoint, fire_at)`
+  - `rooms(id, code, owner, title, arrive_ms)`, `room_members(room_id, user_id, name, sharing, stage, step_idx, step_count, eta_ms, late_min, message, cheer, result, updated_at)`
 
 ### 7.4 가정과 미결
 
@@ -135,8 +137,8 @@
 
 ## 8. 릴리즈
 
-- **이번 제출에 포함:** 7.1의 R01~R17.
-- **다음 버전:** 계정과 기기 간 동기화, 친구 목록과 약속 기록(지켰어요/늦었어요), 상대가 보내는 "천천히 와요" 메시지, 네이티브 앱(앱이 꺼져도 울리는 알람, 아이폰 공유 확장), 도착 시각 기준 대중교통 조회와 배차 간격 반영.
+- **이번 제출에 포함:** 7.1의 R01~R18. QA 결과는 `docs/qa/제출전-QA.md`.
+- **다음 버전:** 소셜 로그인과 기기 간 동기화(지금은 기기 계정이라 폰을 바꾸면 이어지지 않는다), 네이티브 앱(앱이 꺼져도 울리는 알람, 아이폰 공유 확장), 도착 시각 기준 대중교통 조회와 배차 간격 반영.
 - **명시적으로 하지 않는 것(Non-goals):**
   - 보호자-아이 모드: 14세 미만 개인정보·위치정보는 법률 검토가 먼저 필요하다.
   - 위치 상시 추적, 이동 경로 저장, 조회 여부 표시, 재촉 문구, 문자 자동 발송, 웹 크롤링, 공부·과제 모듈.
@@ -152,4 +154,5 @@
 | 2026-11-25 | 서버 범위를 넓힘: Claude, 카카오, 링크 공유, 사진 공유 받기, 푸시 | 사용자 요청 |
 | 2026-11-25 | 대중교통은 카카오맵 API | 사용자 선택. 도착 시각 기준 조회와 배차 간격이 없어 재조회와 과거 값으로 보정 |
 | 2026-11-25 | 푸시는 내용 없는 푸시 + 기기 안의 문구 | 새 라이브러리 없이 구현, 서버에 내용이 남지 않음 |
+| 2026-11-26 | 기기 계정(익명 로그인)과 친구 약속 방을 추가 | 사용자 요청. 로그인 화면 없이 친구 목록과 권한 규칙을 쓸 수 있다 |
 | 2026-11-25 | 화면 디자인은 사용자가 준 목업 파일을 기준으로 함 | 사용자 지시. 디자인 작업은 다른 창이 맡음 |
