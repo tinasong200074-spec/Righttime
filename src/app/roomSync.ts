@@ -2,13 +2,15 @@ import { useEffect, useRef } from 'react';
 import { judgeArrival } from '../domain/recommend';
 import { resultOf } from '../domain/room';
 import { buildShareStatus, shareKey } from '../domain/share';
-import { MIN } from '../domain/types';
+import { MIN, type SessionState } from '../domain/types';
 import { finishRoom, pushRoomStatus } from '../infra/rooms';
 import type { Actions } from './actions';
-import type { AppState } from './state';
+import type { AppState, RoomState } from './state';
 
 const HEARTBEAT_MS = 60_000;
 const KEEP_AFTER_MS = 60 * MIN; // 약속 한 시간 뒤에 방에서 나온다
+
+export const shouldLeaveRoom = (room: RoomState, sessionState: SessionState | null) => room.finished === true && sessionState !== 'summary';
 
 // 약속 방에 들어가 있으면 내 단계·도착 예정을 올리고, 도착하면 결과(지켰어요/늦었어요)를 남긴다
 export function useRoomSync(state: AppState, now: number, actions: Actions): void {
@@ -18,6 +20,12 @@ export function useRoomSync(state: AppState, now: number, actions: Actions): voi
   useEffect(() => {
     if (!room) return;
     if (Date.now() > room.arriveMs + KEEP_AFTER_MS) {
+      actions.setRoom(null);
+      return;
+    }
+    // 방은 약속 하나에만 쓴다. 결과를 남긴 뒤 다음 일정으로 넘어가면(기록 저장, 반복 알람) 방에서 나온다.
+    // 그러지 않으면 지난 약속의 "도착 · 지켰어요"가 새 일정에도 계속 보인다
+    if (shouldLeaveRoom(room, session?.state ?? null)) {
       actions.setRoom(null);
       return;
     }
@@ -35,6 +43,7 @@ export function useRoomSync(state: AppState, now: number, actions: Actions): voi
       if (result && !session.demo && last.current.finished !== room.roomId) {
         last.current.finished = room.roomId;
         void finishRoom(room.roomId, result);
+        actions.setRoom({ ...room, finished: true });
       }
       return;
     }
