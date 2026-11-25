@@ -114,6 +114,8 @@ export function applyTransitCheck(s: Session, rideMin: number | null, checked: n
 
 export function toRecord(s: Session, id: string, excluded: boolean): RecordRow {
   const left = s.leftAt ?? s.leaveAt;
+  // 준비 시간은 마지막 단계를 끝낸 때까지다. 출발 버튼을 누르기까지 기다린 시간은 넣지 않는다
+  const prepDone = s.log.length >= s.steps.length && s.stepStartAt !== undefined ? s.stepStartAt : left;
   const arriveDiff = s.arrivedAt !== undefined ? round1((s.arrivedAt - s.arriveAt) / MIN) : undefined;
   return {
     id,
@@ -121,7 +123,7 @@ export function toRecord(s: Session, id: string, excluded: boolean): RecordRow {
     title: s.title || '약속',
     latency: s.latency ?? 0,
     snoozeCount: s.snoozeCount,
-    prepActual: round1((left - (s.prepStartAt ?? left)) / MIN),
+    prepActual: round1((prepDone - (s.prepStartAt ?? prepDone)) / MIN),
     userPrep: s.userPrep,
     steps: s.log,
     leaveDiff: round1((left - s.leaveAt) / MIN),

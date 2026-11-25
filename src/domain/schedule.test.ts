@@ -125,6 +125,17 @@ describe('세션 흐름', () => {
   });
 });
 
+describe('toRecord: 준비 시간', () => {
+  it('마지막 단계를 끝낸 뒤 출발까지 기다린 시간은 준비 시간에 넣지 않는다', () => {
+    const c = calcPlan(plan, DEFAULT_SETTINGS, [], [])!;
+    let s = startPrep(tickSession(createSession(c, '', at(6, 0), false), at(7, 24)), at(7, 30));
+    s = completeStep(completeStep(s, at(7, 50)), at(8, 5)); // 준비 35분
+    const r = toRecord(depart(s, at(8, 14)), 'id', false); // 9분 기다렸다가 출발
+    expect(r.prepActual).toBe(35);
+    expect(r.leaveDiff).toBe(0);
+  });
+});
+
 describe('isGlowOn (명세 15-7)', () => {
   const c = calcPlan(plan, DEFAULT_SETTINGS, [], [])!;
   const prep = startPrep(tickSession(createSession(c, '', at(6, 0), false), at(7, 24)), at(7, 30));
