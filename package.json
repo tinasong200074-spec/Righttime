@@ -3,6 +3,8 @@
   "version": "1.0.0",
   "scripts": {
     "test": "vitest run",
+    "demo:cases": "vitest run src/cases.demo.test.ts --disable-console-intercept",
+    "demo:api": "python demo/api-cases.py",
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
     "lint": "eslint src",
