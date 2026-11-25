@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { MIN, type Session } from '../../domain/types';
-import { diffText, leavePillText, prepBar, stepOverMin, wakeBar } from './progress';
+import { diffText, fmtTimer, leavePillText, prepBar, stepOverMin, wakeBar, weatherParts } from './progress';
 
 const T0 = 7 * 60 * MIN; // 07:00
 const base: Session = {
@@ -53,6 +53,20 @@ describe('stepOverMin', () => {
   });
   it('예상 안이면 0', () => {
     expect(stepOverMin(base, T0 + 20 * MIN)).toBe(0);
+  });
+});
+
+describe('fmtTimer · weatherParts', () => {
+  it('두 자리로 채운다', () => {
+    expect(fmtTimer(161_000)).toBe('02:41');
+    expect(fmtTimer(3_761_000)).toBe('1:02:41');
+    expect(fmtTimer(-5)).toBe('00:00');
+  });
+  it('날씨 줄을 제목과 설명으로 나눈다', () => {
+    expect(weatherParts('춥고 비가 와요 · 체감 4°C · 비 70%', ['우산', '겉옷'])).toEqual({
+      title: '춥고 비가 와요',
+      detail: '체감 4°C · 비 70% · 우산, 겉옷 챙기세요',
+    });
   });
 });
 

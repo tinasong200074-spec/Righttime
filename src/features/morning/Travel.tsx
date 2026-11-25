@@ -7,6 +7,7 @@ import { useApp } from '../../app/store';
 import { readPositionOnce } from '../../infra/geo';
 import { HeroCard, OutlineButton, Pill, PrimaryButton } from '../../ui';
 import { NotifyCard } from '../notify';
+import { fmtTimer } from './progress';
 
 const ARRIVAL_CHOICES: Array<{ value: Arrival; label: string }> = [
   { value: 'early', label: '일찍 도착했어요' },
@@ -35,7 +36,7 @@ export function Travel() {
       <HeroCard>
         <p className="ui-hero-label">이동 중{s.placeName && ` · ${s.placeName}`}</p>
         <p className="ui-hero-num" aria-label="이동한 시간">
-          {fmtHMS(now - (s.leftAt ?? now))}
+          {fmtTimer(now - (s.leftAt ?? now))}
         </p>
         <p className="ui-hero-label">
           도착 목표 {fmtClock(s.arriveAt)} · 남은 시간 {fmtHMS(s.arriveAt - now)}{' '}

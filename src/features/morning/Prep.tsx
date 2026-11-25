@@ -1,50 +1,42 @@
 import { fmtClock, fmtHMS, fmtMin } from '../../domain/format';
 import { MIN, type Session } from '../../domain/types';
 import { useApp } from '../../app/store';
-import { Card, FillBar, HeroCard, Icon, OutlineButton, Pill, PrimaryButton, StageBar } from '../../ui';
-import { NotifyCard } from '../notify';
-import { prepBar, prepElapsedMs, stepElapsedMs, stepOverMin, wakeStartAt } from './progress';
+import { FillBar, HeroCard, Icon, Pill, PrimaryButton, StageBar } from '../../ui';
+import { fmtTimer, prepBar, prepElapsedMs, stepElapsedMs, stepOverMin, wakeStartAt } from './progress';
 
 function StepList({ s, now }: { s: Session; now: number }) {
   const over = stepOverMin(s, now);
   return (
-    <Card>
+    <section className="ui-card morning-steps-card">
       <ol className="morning-steps" aria-label="준비 단계">
         {s.steps.map((step, i) => {
           const log = s.log[i];
-          if (i < s.stepIdx) {
-            return (
-              <li key={step.id} className="is-done">
-                <Icon name="check" main="var(--ink)" size={20} />
-                <span>{step.name}</span>
-                <span>{log?.act == null ? '건너뜀' : fmtMin(log.act)}</span>
-              </li>
-            );
-          }
-          if (i === s.stepIdx) {
-            return (
-              <li key={step.id} className="is-now" aria-current="step">
-                <span className="morning-dot" aria-hidden="true" />
-                <span>{step.name}</span>
-                <span>{fmtHMS(stepElapsedMs(s, now))}</span>
-                {over > 0 && (
-                  <span className="morning-over" role="status">
-                    <Pill tone="chip">예상보다 {Math.ceil(over)}분 지났어요</Pill>
-                  </span>
-                )}
-              </li>
-            );
-          }
+          const isNow = i === s.stepIdx;
           return (
-            <li key={step.id}>
-              <span className="morning-empty" aria-hidden="true" />
-              <span>{step.name}</span>
-              <span>예상 {fmtMin(step.est)}</span>
+            <li key={step.id} className={i < s.stepIdx ? 'is-done' : isNow ? 'is-now' : ''} aria-current={isNow ? 'step' : undefined}>
+              {i < s.stepIdx && (
+                <span className="morning-done" aria-hidden="true">
+                  <Icon name="check" main="#fff" size={14} />
+                </span>
+              )}
+              {isNow && <span className="morning-dot" aria-hidden="true" />}
+              {i > s.stepIdx && <span className="morning-empty" aria-hidden="true" />}
+              <span className="morning-step-name">{step.name}</span>
+              <span>
+                {i < s.stepIdx && (log?.act == null ? '건너뜀' : fmtMin(log.act))}
+                {isNow && fmtHMS(stepElapsedMs(s, now))}
+                {i > s.stepIdx && `예상 ${fmtMin(step.est)}`}
+              </span>
+              {isNow && over > 0 && (
+                <span className="morning-over" role="status">
+                  <Pill tone="chip">예상보다 {Math.ceil(over)}분 지났어요</Pill>
+                </span>
+              )}
             </li>
           );
         })}
       </ol>
-    </Card>
+    </section>
   );
 }
 
@@ -71,29 +63,29 @@ function Stats({ s, now }: { s: Session; now: number }) {
 export function Prep() {
   const { session: s, now, actions } = useApp();
   if (!s) return null;
-  const step = s.steps[s.stepIdx];
   const bar = prepBar(s, now);
-  const start = wakeStartAt(s);
+  const prepMin = prepElapsedMs(s, now) / MIN;
 
   return (
     <>
-      <StageBar
-        current="prep"
-        notes={{ wake: fmtMin(s.latency ?? 0), prep: '지금', leave: fmtClock(s.leaveAt) }}
-      />
+      <StageBar current="prep" notes={{ wake: fmtMin(s.latency ?? 0), prep: fmtMin(prepMin), leave: fmtClock(s.leaveAt) }} />
       <HeroCard>
-        <p className="ui-hero-label">
-          준비 · {step?.name} <Pill tone="dark">기록 중</Pill>
-        </p>
+        <div className="morning-head">
+          <span className="morning-head-label">준비 · {s.steps[s.stepIdx]?.name}</span>
+          <Pill tone="dark">
+            <span className="morning-live" aria-hidden="true" />
+            기록 중
+          </Pill>
+        </div>
         <p className="ui-hero-num" aria-label="준비한 시간">
-          {fmtHMS(prepElapsedMs(s, now))}
+          {fmtTimer(prepElapsedMs(s, now))}
         </p>
         <p className="ui-hero-label">준비한 시간</p>
         <FillBar segments={bar.segments} progress={bar.progress} label="기상과 준비로 지난 시간" />
         <div className="morning-axis">
-          <span>{fmtClock(start)}</span>
+          <span>{fmtClock(wakeStartAt(s))}</span>
           <span>{fmtClock(s.prepStartAt ?? now)}</span>
-          <span>지금 {fmtClock(now)}</span>
+          <b>지금 {fmtClock(now)}</b>
           <span>{fmtClock(s.leaveAt)} 출발</span>
         </div>
         <Stats s={s} now={now} />
@@ -101,9 +93,7 @@ export function Prep() {
       <StepList s={s} now={now} />
       <div className="morning-actions">
         <PrimaryButton onClick={actions.completeStep}>다 했어요</PrimaryButton>
-        <OutlineButton onClick={actions.skipStep}>이 단계 건너뛰기</OutlineButton>
       </div>
-      <NotifyCard />
     </>
   );
 }

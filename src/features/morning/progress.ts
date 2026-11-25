@@ -52,6 +52,22 @@ export function prepBar(s: Session, now: number): BarView {
   };
 }
 
+// 카드의 큰 숫자용. 분과 초를 두 자리로 채운다(02:41). 한 시간이 넘으면 1:02:41
+export function fmtTimer(ms: number): string {
+  const total = Math.max(0, Math.floor(ms / 1000));
+  const pad = (n: number) => String(n).padStart(2, '0');
+  const h = Math.floor(total / 3600);
+  const m = Math.floor((total % 3600) / 60);
+  return h ? `${h}:${pad(m)}:${pad(total % 60)}` : `${pad(m)}:${pad(total % 60)}`;
+}
+
+// 날씨 한 줄("춥고 비가 와요 · 체감 4°C · 비 70%")을 제목과 설명으로 나누고, 날씨로 들어온 챙길 것을 덧붙인다
+export function weatherParts(line: string, itemTexts: string[]): { title: string; detail: string } {
+  const [title = '', ...rest] = line.split(' · ');
+  if (itemTexts.length) rest.push(`${itemTexts.join(', ')} 챙기세요`);
+  return { title, detail: rest.join(' · ') };
+}
+
 // 목표 시각과 실제 시각의 차이를 말로
 export function diffText(diffMin: number): string {
   if (diffMin > 0.5) return `목표보다 ${Math.round(diffMin)}분 늦게`;
