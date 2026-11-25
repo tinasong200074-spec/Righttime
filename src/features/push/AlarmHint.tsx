@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useApp } from '../../app/store';
 import { fmtClock } from '../../domain/format';
+import { isNativeApp } from '../../infra/nativeAlarm';
 import { Icon } from '../../ui';
 import '../share/share.css';
 
@@ -8,6 +9,7 @@ import '../share/share.css';
 export function AlarmHint() {
   const { session } = useApp();
   const [seenAt, setSeenAt] = useState<number | null>(null);
+  if (isNativeApp()) return null; // 설치 앱은 닫아도 울린다
   if (!session || session.demo || session.state !== 'armed' || seenAt === session.alarmAt) return null;
   const clock = fmtClock(session.alarmAt);
   return (

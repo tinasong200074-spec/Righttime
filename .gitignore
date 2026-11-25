@@ -8,3 +8,7 @@ build/
 *.log
 .DS_Store
 .vercel/
+
+# 안드로이드 빌드·시험 기록
+.gradle-build.log
+.emulator.log

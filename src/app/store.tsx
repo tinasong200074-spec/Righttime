@@ -5,6 +5,7 @@ import type { ChecklistItem } from '../domain/types';
 import { buildChecklist } from '../domain/weather';
 import { loadRaw, saveRaw } from '../infra/storage';
 import { makeActions, type Actions, type Clock } from './actions';
+import { useNativeAlarmSync } from './nativeAlarmSync';
 import { usePushSync } from './pushSync';
 import { useRoomSync } from './roomSync';
 import { useShareSync } from './shareSync';
@@ -64,6 +65,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   useShareSync(state, now, actions);
   useTransitRecheck(state, now, actions);
   usePushSync(state);
+  useNativeAlarmSync(state);
   useRoomSync(state, now, actions);
 
   const calc = useMemo(() => calcOf(state), [state]);
