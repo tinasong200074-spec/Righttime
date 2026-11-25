@@ -49,3 +49,21 @@ export async function syncNativeAlarms(entries: PushEntry[]): Promise<void> {
     // 예약에 실패해도 앱 안의 알람은 그대로 동작한다
   }
 }
+
+// 설치 앱을 처음 열 때 알림과 위치 권한을 차례로 묻는다. 한 번 물은 뒤에는 필요한 화면에서만 다시 묻는다
+export async function askNativePermissionsOnce(): Promise<void> {
+  if (!isNativeApp()) return;
+  try {
+    if (localStorage.getItem('jette:perm-asked')) return;
+    localStorage.setItem('jette:perm-asked', '1');
+  } catch {
+    return;
+  }
+  await prepare();
+  // 위치를 한 번 읽으려 하면 안드로이드가 위치 허용 창을 띄운다. 읽은 값은 쓰지 않는다
+  navigator.geolocation?.getCurrentPosition(
+    () => undefined,
+    () => undefined,
+    { timeout: 8000 },
+  );
+}
