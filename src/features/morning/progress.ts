@@ -82,3 +82,42 @@ export function leavePillText(leaveAt: number, now: number, preLeave: number): s
   if (left <= preLeave) return '곧 출발';
   return `여유 ${Math.floor(left)}분`;
 }
+
+export interface Leg {
+  label: '기상' | '준비' | '이동';
+  diff: number; // 예상보다 늦으면 +분
+}
+
+export interface Verdict {
+  headline: string;
+  prepText: string;
+  legs: Leg[];
+  culprit: Leg | null; // 1분 이상 늦어진 구간 중 가장 큰 것
+}
+
+const round = Math.round;
+
+function headlineOf(s: Session): string {
+  if (s.arrivedAt !== undefined) {
+    const d = (s.arrivedAt - s.arriveAt) / MIN;
+    if (d > 0.5) return `지각이에요. ${round(d)}분 늦게 도착했어요`;
+    return d < -0.5 ? `일찍 도착! ${round(-d)}분 여유가 있었어요` : '정시 도착!';
+  }
+  if (s.arrival) return { early: '일찍 도착!', ontime: '정시 도착!', late: '지각이에요' }[s.arrival];
+  return '도착 기록은 없어요';
+}
+
+// 오늘 기록을 한눈에 보는 문장. 예상은 알람을 켠 순간의 계획이다.
+export function verdictOf(s: Session): Verdict {
+  const left = s.leftAt ?? s.leaveAt;
+  const prep = (left - (s.prepStartAt ?? left)) / MIN;
+  const legs: Leg[] = [
+    { label: '기상', diff: round((s.latency ?? 0) - s.wakeMin) },
+    { label: '준비', diff: round(prep - s.userPrep) },
+  ];
+  if (s.arrivedAt !== undefined) legs.push({ label: '이동', diff: round((s.arrivedAt - left) / MIN - s.travelMin) });
+  const worst = legs.reduce((a, b) => (b.diff > a.diff ? b : a));
+  const p = round(prep - s.userPrep);
+  const prepText = p === 0 ? '평소만큼 준비했어요' : p > 0 ? `평소보다 ${p}분 더 준비했어요` : `평소보다 ${-p}분 덜 준비했어요`;
+  return { headline: headlineOf(s), prepText, legs, culprit: worst.diff >= 1 ? worst : null };
+}

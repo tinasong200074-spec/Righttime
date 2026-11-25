@@ -319,31 +319,30 @@
   clip-path: inset(50%);
 }
 
-/* 요약 */
-.morning-rows {
-  margin: 0;
+/* 요약: 한 문장 판정 + 구간 세 줄 */
+.morning-verdict {
+  word-break: keep-all;
+  margin: 8px 0 2px;
+  font-size: 1.5rem;
+  font-weight: 800;
 }
-.morning-rows div,
-.morning-log li {
+.morning-legs {
+  list-style: none;
+  margin: 12px 0 8px;
+  padding: 0;
+}
+.morning-legs li {
   display: flex;
   justify-content: space-between;
   gap: 12px;
-  padding: 10px 0;
+  min-height: 44px;
+  align-items: center;
   border-bottom: 1px solid var(--line);
-}
-.morning-rows dt {
   color: var(--muted);
 }
-.morning-rows dd {
-  margin: 0;
-  font-weight: 700;
-  text-align: right;
-}
-.morning-log {
-  list-style: none;
-  margin: 8px 0 0;
-  padding: 0;
-  font-size: 0.875rem;
+.morning-legs .is-culprit {
+  color: var(--ink);
+  font-weight: 800;
 }
 .morning-exclude {
   display: flex;

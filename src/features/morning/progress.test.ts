@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { MIN, type Session } from '../../domain/types';
-import { diffText, fmtTimer, leavePillText, prepBar, stepOverMin, wakeBar, weatherParts } from './progress';
+import { diffText, fmtTimer, leavePillText, prepBar, stepOverMin, verdictOf, wakeBar, weatherParts } from './progress';
 
 const T0 = 7 * 60 * MIN; // 07:00
 const base: Session = {
@@ -80,5 +80,24 @@ describe('문구', () => {
     expect(leavePillText(T0 + 30 * MIN, T0, 5)).toBe('여유 30분');
     expect(leavePillText(T0 + 3 * MIN, T0, 5)).toBe('곧 출발');
     expect(leavePillText(T0 - MIN, T0, 5)).toBe('출발 시각이 지났어요');
+  });
+});
+
+describe('verdictOf', () => {
+  const done: Session = { ...base, state: 'summary', latency: 14, leftAt: T0 + 74 * MIN, arrivedAt: T0 + 120 * MIN };
+  it('계획대로면 정시 도착이고 늦어진 구간이 없다', () => {
+    const v = verdictOf({ ...done, userPrep: 60, travelMin: 46 });
+    expect(v.headline).toBe('정시 도착!');
+    expect(v.prepText).toBe('평소만큼 준비했어요');
+    expect(v.culprit).toBeNull();
+  });
+  it('준비가 가장 많이 늦어졌으면 준비를 짚는다', () => {
+    const v = verdictOf({ ...done, arrivedAt: T0 + 128 * MIN, userPrep: 52, travelMin: 46 });
+    expect(v.headline).toBe('지각이에요. 8분 늦게 도착했어요');
+    expect(v.prepText).toBe('평소보다 8분 더 준비했어요');
+    expect(v.culprit).toEqual({ label: '준비', diff: 8 });
+  });
+  it('도착 버튼 대신 직접 고른 값도 문장이 된다', () => {
+    expect(verdictOf({ ...done, arrivedAt: undefined, arrival: 'late' }).headline).toBe('지각이에요');
   });
 });
