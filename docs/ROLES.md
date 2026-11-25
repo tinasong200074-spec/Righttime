@@ -27,59 +27,72 @@
 - 자기 소유 경로만 고친다. `src/domain`, `src/app`, `src/ui`에 필요한 것이 없으면 직접 만들지 말고 사용자에게 "A에게 전달: ○○ 필요"라고 남긴다.
 - v1에서 만든 `src/features/home`, `appointment`, `history`는 A가 지운다. 건드리지 않는다.
 
-## 3. 공용 계약 (A가 만든다. B·C는 가져다 쓰기만)
+## 3. 공용 계약 (A가 만들어 커밋함. B·C는 가져다 쓰기만)
 
-A가 커밋하기 전에는 아래 이름을 그대로 가정하고 화면을 짠다. 커밋 메시지 `[M0] 공용 계약`이 올라오면 실제 파일에 맞춘다.
+실제 파일이 기준이다. 아래는 요약이고, 정확한 모양은 각 파일을 열어 본다.
 
 ```ts
-// src/domain/types.ts — 명세 13장의 Settings, Place, Step, Plan, Session, StepLog, RecordRow, MemoItem, Tone 그대로
+// src/domain/types.ts — Settings, Place, Step, Plan(rideMin·waitMin 직접 입력), Session, StepLog, RecordRow,
+//   MemoItem, Tone, RainChoice, HourWeather, WeatherResult, ChecklistItem, GeoResult, DEFAULT_SETTINGS, MIN, DAY
 
-// src/domain/plan.ts (명세 9.1)
-computeSchedule(input: { arriveAt: number; rideMin: number; waitMin: number; buffer: number;
-  prepMin: number; latency: number }): { leaveAt: number; prepStartAt: number; alarmAt: number; travelTotal: number };
-scaleSteps(steps: Step[], prepRec: number): Step[];          // 추천 반영 시 비례 조정
-rollForward(arriveAt: number, now: number): number;           // 지난 일정 24시간 단위 이월
+// src/domain/schedule.ts (명세 9.1)
+computeSchedule({ arriveAt, rideMin, waitMin, buffer, prepMin, latency }): { leaveAt, prepStartAt, alarmAt, travelTotal };
+calcPlan(plan, settings, records, places): PlanCalc | null;   // 화면은 보통 useApp().calc를 쓴다
+// PlanCalc = { arriveAt, leaveAt, prepStartAt, alarmAt, travelTotal, steps, userPrep, prep, wake, ride, waitMin, buffer, place }
+//   prep·wake·ride는 { val, n, basis } (추천값, 쓴 기록 수, 근거 문구)
 
 // src/domain/recommend.ts (명세 9.3)
-rec(userVal: number, arr: number[]): { val: number; basis: string };
-usable(r: RecordRow): boolean;
-judgeArrival(arriveDiffMin: number): 'early' | 'ontime' | 'late';
+rec(userVal, arr): { val, n, basis };  usable(record);  recentValues(records, key, placeId?);  average(arr);  judgeArrival(diffMin);
+
+// src/domain/session.ts — 진행 상태 판정
+isGlowOn(session, now, preLeave);     // 보통 useApp().glow를 쓴다
 
 // src/domain/message.ts (명세 9.6)
-buildMessage(tone: Tone, kind: 'eta' | 'late' | 'maybe' | 'arrive',
-  v: { time?: string; min?: number; place?: string }): string;
-projArrive(session: Session, plan: Plan, travelMin: number, now: number): number;
-lateInfo(proj: number, arriveAt: number): { lateMin: number; etaText: string; lateN: number };
+TONES;  buildMessage(tone, kind, { time?, min?, place? });
+projArrive(session, now);  lateInfo(proj, arriveAt): { lateMin, isLate, etaText, lateN };
+etaMessage(tone, session, now);  lateMessage(tone, session, now);  arriveMessage(tone, placeName, geo?);
 
 // src/domain/weather.ts (명세 9.4) — 판정만. 불러오기는 C의 infra/weather
-judgeWeather(hours: HourWeather[], settings: Settings): { umbrella: boolean; clothing?: string; line: string; items: MemoItem[] };
+judgeWeather(hours: HourWeather[], settings): WeatherResult;   // C가 결과를 actions.setWeather로 넣는다
 
 // src/domain/geo.ts (명세 9.5)
-checkArrival(place: Place, pos: { lat: number; lon: number; accuracy: number }): { status: 'match' | 'mismatch'; dist: number };
+checkArrival(place, { lat, lon, accuracy }): GeoResult;  roundCoord(v, digits);
 
-// src/app/store.tsx — 상태와 동작. 저장(localStorage)은 A가 안에서 처리
+// src/domain/format.ts
+fmtClock(ms)  fmtHMS(ms)  fmtMin(x)  fmtDay(ms)  toInputValue(ms)  fromInputValue(v)
+
+// src/app/store.tsx — 상태와 동작. 저장(localStorage)은 안에서 처리한다
 useApp(): {
-  now: number;                 // 시연 모드면 60배로 흐르는 시계. Date.now() 대신 반드시 이것을 쓴다
+  now: number;        // Date.now() 대신 반드시 이것을 쓴다(시연이면 60배)
   demo: boolean;
-  plan: Plan; settings: Settings; places: Place[]; memos: MemoItem[]; records: RecordRow[];
-  session: Session | null;
-  schedule: { leaveAt: number; prepStartAt: number; alarmAt: number; travelTotal: number };
+  settings; plan; places; memos; records; rain; weather; weatherCoord; tone; session;
+  calc: PlanCalc | null;          // 지금 계획의 알람·준비·출발 시각
+  checklist: ChecklistItem[];     // 내가 적은 것 + 날씨 항목. 체크 상태는 session.checked[key]
+  glow: boolean;                  // 붉은 조명을 켤지
   actions: {
-    updatePlan(p: Partial<Plan>): void; updateSettings(s: Partial<Settings>): void;
-    savePlace(p: Place): void; removePlace(id: string): void;
-    addMemos(text: string): void; removeMemo(id: string): void; toggleMemoPin(id: string): void;
-    arm(): void;               // 알람 켜기
-    snooze(): void; startPrep(): void; completeStep(): void; skipStep(): void;
-    depart(): void; arrive(geo?: Session['geo']): void; skipArrival(arrival: 'early'|'ontime'|'late'): void;
-    saveRecord(excluded: boolean): void; cancelSession(): void;
-    setDemo(on: boolean): void; loadSampleData(): void; clearAllData(): void;
+    // 계획·설정 (주로 C)
+    updatePlan(p)  updateSettings(p)  savePlace(place)  removePlace(id)
+    addMemos(text)  removeMemo(id)  toggleMemoPin(id)
+    setRain(choice)  setWeather(result | null)  setWeatherCoord({lat, lon} | null)  setTone(p)
+    toggleRecordExcluded(id)  removeRecord(id)  loadSampleData()  clearSampleData()  clearAllData()
+    startDemo()  endDemo()
+    arm()  cancelSession()        // 알람 켜기 / 끄기
+    // 아침 진행 (주로 B)
+    snooze()  startPrep()  completeStep()  skipStep()  finishEarly()
+    toggleCheck(key)  depart()  arrive()  setGeo(geoResult)  skipArrival('early'|'ontime'|'late')
+    saveRecord(excluded)
   };
 };
+// 알람·다시 울림 시각이 되면 store가 session.state를 'ringing'으로 바꾼다. B는 상태를 보고 소리만 낸다.
+// 도착: B가 actions.arrive() → readPositionOnce() → checkArrival() → actions.setGeo() 순서로 부른다.
 
-// src/ui — 공용 부품(A)
-<Icon name="wake|prep|leave|rain|umbrella|temp|bag|bell|clock|share|friend|place|record|photo|check" main det size />
-<HeroCard> <Pill> <PrimaryButton> <OutlineButton> <StageBar stage="wake|prep|leave" /> <FillBar segments progress />
-// 색·모서리·글꼴은 src/app/tokens.css의 CSS 변수(--ground, --surface, --ink, --muted, --line, --chip, --empty, --on-dark, --accent, --accent-soft, --glow-red)만 쓴다. 색 값을 직접 쓰지 않는다
+// src/ui — 공용 부품
+<Icon name="wake|prep|leave|rain|umbrella|temp|bag|bell|clock|share|place|record|settings|check" main det size label />
+<Card> <HeroCard dashed?> <Pill tone="chip|soft|accent|dark"> <PrimaryButton> <OutlineButton>
+<StageBar current="wake|prep|leave" notes={{ wake: '14분' }} />
+<FillBar segments={[{ ratio, tone: 'accent'|'gray'|'ink'|'light' }]} progress={0~1} label="설명" />
+// 히어로 카드 안: className "ui-hero-label", "ui-hero-num"
+// 색·모서리는 src/app/tokens.css의 CSS 변수만 쓴다. 색 값을 직접 쓰지 않는다
 ```
 
 화면 내보내기(이름 고정, A의 탭 껍데기가 불러 쓴다):
