@@ -21,8 +21,18 @@ export interface AppState {
   tone: Tone;
   session: Session | null;
   planBackup: Plan | null; // 시연이 끝나면 되돌릴 원래 계획
+  share: ShareState | null; // 준비 현황 링크 공유 중이면 값이 있다
+  shareName: string; // 상대에게 보일 내 이름
   helper: HelperResult | null; // 일정 준비 도우미가 읽은 결과(사진·글 원본은 저장하지 않는다)
   helperDone: Record<string, boolean>; // 준비할 것·전날 할 일 체크
+}
+
+export interface ShareState {
+  token: string;
+  writeKey: string; // 이 기기만 아는 쓰기 키
+  showStage: boolean;
+  showEta: boolean;
+  expiresAt: number;
 }
 
 export const uid = () => Math.random().toString(36).slice(2, 9);
@@ -59,6 +69,8 @@ export function defaultState(now: number): AppState {
     tone: { mode: 'polite' },
     session: null,
     planBackup: null,
+    share: null,
+    shareName: '',
     helper: null,
     helperDone: {},
   };

@@ -1,7 +1,7 @@
 import * as S from '../domain/session';
 import type { Arrival, GeoResult, MemoItem, Place, Plan, RainChoice, Settings, Tone, WeatherResult } from '../domain/types';
 import type { AskItem, HelperResult } from '../domain/ai';
-import { addMemoItemsState, addMemosState, armState, defaultState, endDemoState, loadSampleState, saveRecordState, startDemoState, type AppState } from './state';
+import { addMemoItemsState, addMemosState, armState, defaultState, endDemoState, loadSampleState, saveRecordState, startDemoState, type AppState, type ShareState } from './state';
 
 type SetState = (fn: (s: AppState) => AppState) => void;
 
@@ -72,6 +72,15 @@ function dataActions(set: SetState, clock: Clock) {
   };
 }
 
+function shareActions(set: SetState) {
+  return {
+    setShareName: (shareName: string) => set((s) => ({ ...s, shareName })),
+    startShare: (share: ShareState) => set((s) => ({ ...s, share })),
+    updateShare: (p: Partial<Pick<ShareState, 'showStage' | 'showEta'>>) => set((s) => (s.share ? { ...s, share: { ...s.share, ...p } } : s)),
+    stopShare: () => set((s) => ({ ...s, share: null })),
+  };
+}
+
 function demoActions(set: SetState, clock: Clock) {
   return {
     startDemo: () => {
@@ -86,7 +95,7 @@ function demoActions(set: SetState, clock: Clock) {
 }
 
 export function makeActions(set: SetState, clock: Clock) {
-  return { ...sessionActions(set, clock), ...dataActions(set, clock), ...demoActions(set, clock) };
+  return { ...sessionActions(set, clock), ...dataActions(set, clock), ...shareActions(set), ...demoActions(set, clock) };
 }
 
 export type Actions = ReturnType<typeof makeActions>;

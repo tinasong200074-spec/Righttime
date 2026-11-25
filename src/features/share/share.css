@@ -1,0 +1,147 @@
+/* 동작 확인용 기본 모양. 디자인은 목업에 맞춰 다시 입힌다 */
+.share-strip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 44px;
+  padding: 8px var(--pad);
+  border: 0;
+  border-bottom: 1px solid var(--line);
+  background: var(--surface);
+  font-size: 0.875rem;
+  font-weight: 700;
+  text-align: left;
+  cursor: pointer;
+}
+
+.share-card {
+  display: grid;
+  gap: 10px;
+  padding: var(--pad);
+  background: var(--surface);
+  border-bottom: 1px solid var(--line);
+}
+.share-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.share-head h2,
+.share-title {
+  margin: 0;
+  font-size: 1.25rem;
+}
+.share-close {
+  min-height: 44px;
+  padding: 0 12px;
+  border: 0;
+  background: none;
+  color: var(--muted);
+  cursor: pointer;
+}
+.share-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.share-field {
+  display: grid;
+  gap: 4px;
+  font-size: 0.875rem;
+  font-weight: 700;
+}
+.share-field input,
+.share-url {
+  min-height: 48px;
+  padding: 0 12px;
+  border: 1.5px solid var(--empty);
+  border-radius: var(--r-input);
+  background: var(--surface);
+  width: 100%;
+}
+.share-switch {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+}
+.share-switch input {
+  width: 22px;
+  height: 22px;
+  accent-color: var(--ink);
+}
+.share-note {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.8125rem;
+}
+.ui-hero .share-note {
+  color: inherit;
+}
+
+.share-view {
+  max-width: 480px;
+  margin: 0 auto;
+  padding: var(--pad);
+  display: grid;
+  gap: var(--gap);
+}
+.share-eta-stale {
+  margin: 0;
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: var(--muted);
+}
+.share-stages {
+  list-style: none;
+  margin: 0;
+  padding: var(--pad);
+  display: grid;
+  gap: 12px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-card);
+}
+.share-stages li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--muted);
+}
+.share-dot {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 2px solid var(--empty);
+  display: grid;
+  place-items: center;
+  flex: none;
+}
+.share-stages .is-done .share-dot {
+  background: var(--ink);
+  border-color: var(--ink);
+}
+.share-stages .is-now .share-dot {
+  background: var(--accent);
+  border-color: var(--ink);
+  animation: pulse 1.8s ease-out infinite;
+}
+.share-stages .is-now {
+  color: var(--ink);
+  font-weight: 800;
+}
+.share-stages .is-done {
+  color: var(--ink);
+}
+.share-stage-name {
+  flex: 1;
+}
+.share-stage-note {
+  font-size: 0.8125rem;
+}
+.share-stages.is-stale .share-dot {
+  border-style: dashed;
+  animation: none;
+}

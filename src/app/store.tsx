@@ -5,6 +5,7 @@ import type { ChecklistItem } from '../domain/types';
 import { buildChecklist } from '../domain/weather';
 import { loadRaw, saveRaw } from '../infra/storage';
 import { makeActions, type Actions, type Clock } from './actions';
+import { useShareSync } from './shareSync';
 import { calcOf, restoreState, type AppState } from './state';
 
 export interface AppValue extends AppState {
@@ -57,6 +58,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, [clock, demo]);
 
   useEffect(() => saveRaw(state), [state]);
+  useShareSync(state, now, actions);
 
   const calc = useMemo(() => calcOf(state), [state]);
   const checklist = useMemo(
