@@ -468,3 +468,23 @@
   border: 2px solid var(--ink);
   background: var(--accent);
 }
+.fr-names {
+  padding: 4px 18px;
+}
+.fr-name-row {
+  width: 100%;
+  min-height: 64px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0;
+  border: 0;
+  border-top: 1px solid var(--line);
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.fr-name-row:first-child {
+  border-top: 0;
+}

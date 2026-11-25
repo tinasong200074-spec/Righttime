@@ -7,11 +7,12 @@ import '../today/fields.css';
 import '../today/main.css';
 import './friends.css';
 import { FriendList } from './FriendList';
+import { FriendRecord } from './FriendRecord';
 import { MemberView } from './MemberView';
 import { RoomLive } from './RoomLive';
 import { RoomSetup } from './RoomSetup';
 
-type View = { name: 'list' } | { name: 'setup' } | { name: 'live' } | { name: 'member'; id: string };
+type View = { name: 'list' } | { name: 'setup' } | { name: 'live' } | { name: 'member'; id: string } | { name: 'record'; id: string };
 
 // 친구 탭: 목록 → 친구 추가(방 만들기·들어가기, 목업 1번) → 내 화면(2번) → 친구 상태(3·4·5번)
 export function FriendsScreen() {
@@ -46,5 +47,17 @@ export function FriendsScreen() {
       return <MemberView m={m} arriveMs={roomView.arriveMs} now={now} onBack={() => setView({ name: 'live' })} onCheer={cheer} />;
     }
   }
-  return <FriendList friends={friends} room={room} onAdd={() => setView(room ? { name: 'live' } : { name: 'setup' })} onOpenRoom={() => setView({ name: 'live' })} />;
+  if (view.name === 'record') {
+    const f = friends.find((x) => x.userId === view.id);
+    if (f) return <FriendRecord friend={f} onBack={toList} />;
+  }
+  return (
+    <FriendList
+      friends={friends}
+      room={room}
+      onAdd={() => setView(room ? { name: 'live' } : { name: 'setup' })}
+      onOpenRoom={() => setView({ name: 'live' })}
+      onOpenFriend={(id) => setView({ name: 'record', id })}
+    />
+  );
 }
