@@ -5,6 +5,7 @@ import { Card } from '../../ui';
 import '../today/fields.css';
 import { NumberField } from '../today/NumberField';
 import { ConfirmButton } from './ConfirmButton';
+import { CustomTone } from './CustomTone';
 import { PlaceManager } from './PlaceManager';
 import { Switch } from './Switch';
 
@@ -42,7 +43,11 @@ function ToneSection() {
             {TONES[m].name}
           </button>
         ))}
+        <button type="button" className="f-chip" aria-pressed={tone.mode === 'custom'} onClick={() => actions.setTone({ mode: 'custom' })}>
+          내 말투
+        </button>
       </div>
+      {tone.mode === 'custom' && <CustomTone />}
       <p className="f-status">미리보기: {preview}</p>
     </Card>
   );

@@ -117,3 +117,46 @@
 .t-src {
   font-size: 0.75rem;
 }
+.t-consent {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  min-height: 44px;
+  margin: 12px 0;
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+.t-consent input {
+  width: 24px;
+  height: 24px;
+  flex: none;
+  margin: 0;
+}
+.t-check {
+  width: 100%;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: 0;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+}
+.t-box {
+  width: 24px;
+  height: 24px;
+  flex: none;
+  display: grid;
+  place-items: center;
+  border: 2px solid var(--ink);
+  border-radius: 8px;
+}
+.t-caution {
+  margin: 0;
+  padding: 10px 12px;
+  border: 1.5px solid var(--ink);
+  border-radius: var(--r-input);
+  font-weight: 700;
+  line-height: 1.5;
+}

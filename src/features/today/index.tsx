@@ -3,6 +3,7 @@ import { Card } from '../../ui';
 import { ArmBar } from './ArmBar';
 import { CarryCard } from './CarryCard';
 import './fields.css';
+import { HelperCard } from './HelperCard';
 import { MemoBar } from './MemoBar';
 import { PlanCard } from './PlanCard';
 import { ScheduleCard } from './ScheduleCard';
@@ -34,6 +35,7 @@ export function TodayScreen() {
       {session && <p className="f-sub">알람이 켜져 있는 동안은 일정을 바꿀 수 없어요. 바꾸려면 알람을 끄세요.</p>}
       <WeatherCard />
       <CarryCard />
+      <HelperCard />
       <ArmBar />
     </div>
   );

@@ -59,6 +59,11 @@ export function NotifyCard() {
             {TONES[m].name}
           </button>
         ))}
+        {tone.custom && (
+          <button type="button" className="f-chip" aria-pressed={tone.mode === 'custom'} onClick={() => actions.setTone({ mode: 'custom' })}>
+            내 말투
+          </button>
+        )}
       </div>
       {session.state === 'summary' ? (
         <Block title="도착했을 때" text={arriveMessage(tone, session.placeName, session.geo)} button="도착 문구 보내기" onSend={send} />
