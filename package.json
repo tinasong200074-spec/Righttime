@@ -19,11 +19,13 @@
   "homepage": "https://github.com/tinasong200074-spec/Righttime#readme",
   "private": true,
   "dependencies": {
+    "@anthropic-ai/sdk": "^1.14.0",
     "react": "^19.3.1",
     "react-dom": "^19.3.1"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
+    "@types/node": "^26.6.10",
     "@types/react": "^19.3.2",
     "@types/react-dom": "^19.3.0",
     "@vitejs/plugin-react": "^6.3.0",
