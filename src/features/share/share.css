@@ -1,26 +1,40 @@
-/* 동작 확인용 기본 모양. 디자인은 목업에 맞춰 다시 입힌다 */
+/* 목업 "방 만들기·동의", "내 화면·공유 중", "확인 안 됨", "공유로 받기", "링크로 보기"의 수치를 따른다 */
+
+/* ── 앱 위쪽의 공유 줄과 카드 ── */
 .share-strip {
   display: flex;
   align-items: center;
-  gap: 8px;
-  width: 100%;
-  min-height: 44px;
-  padding: 8px var(--pad);
-  border: 0;
-  border-bottom: 1px solid var(--line);
+  gap: 10px;
+  min-height: 52px;
+  margin: var(--pad) var(--pad) 0;
+  padding: 6px 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-card);
   background: var(--surface);
   font-size: 0.875rem;
   font-weight: 700;
   text-align: left;
   cursor: pointer;
 }
-
+.share-strip-text {
+  flex: 1;
+  min-width: 0;
+}
 .share-card {
   display: grid;
-  gap: 10px;
-  padding: var(--pad);
+  gap: 12px;
+  margin: var(--pad) var(--pad) 0;
+  padding: 14px 18px 16px;
   background: var(--surface);
-  border-bottom: 1px solid var(--line);
+  border: 1px solid var(--line);
+  border-radius: var(--r-card);
+}
+.share-card p {
+  margin: 0;
+}
+.share-step {
+  font-size: 0.8125rem;
+  color: var(--muted);
 }
 .share-head {
   display: flex;
@@ -28,10 +42,11 @@
   justify-content: space-between;
   gap: 8px;
 }
-.share-head h2,
-.share-title {
+.share-head h2 {
   margin: 0;
   font-size: 1.25rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
 }
 .share-close {
   min-height: 44px;
@@ -39,37 +54,95 @@
   border: 0;
   background: none;
   color: var(--muted);
+  font-size: 0.875rem;
   cursor: pointer;
 }
-.share-pills {
+
+/* 보임 / 안 보임 두 줄 */
+.share-vis {
+  margin: 0;
+}
+.share-vis > div {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 40px;
+}
+.share-vis > div + div {
+  border-top: 1px solid var(--line);
+  margin-top: 8px;
+  padding-top: 8px;
+}
+.share-vis dt {
+  width: 56px;
+  flex: none;
+  font-size: 0.8125rem;
+  font-weight: 800;
+}
+.share-vis dd {
+  margin: 0;
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
 }
+.share-vis dd span {
+  border-radius: var(--r-pill);
+  padding: 3px 12px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  background: var(--accent-soft);
+}
+.share-vis .is-hidden dt,
+.share-vis .is-hidden dd span {
+  color: var(--muted);
+}
+.share-vis .is-hidden dd span {
+  background: var(--chip);
+}
+
 .share-field {
   display: grid;
-  gap: 4px;
+  gap: 6px;
   font-size: 0.875rem;
   font-weight: 700;
 }
 .share-field input,
 .share-url {
   min-height: 48px;
-  padding: 0 12px;
+  padding: 0 14px;
   border: 1.5px solid var(--empty);
   border-radius: var(--r-input);
   background: var(--surface);
   width: 100%;
+  font-weight: 500;
+}
+.share-url {
+  color: var(--muted);
+  font-size: 0.875rem;
+}
+
+/* 상대에게 보이는 것: 줄마다 오른쪽에 스위치 */
+.share-switches {
+  display: grid;
 }
 .share-switch {
   display: flex;
   align-items: center;
-  gap: 10px;
-  min-height: 44px;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 52px;
+  border-top: 1px solid var(--line);
+  cursor: pointer;
+}
+.share-switch.is-off {
+  color: var(--muted);
+  cursor: default;
 }
 .share-switch input {
-  width: 22px;
-  height: 22px;
+  width: 26px;
+  height: 26px;
+  margin: 0;
+  flex: none;
   accent-color: var(--ink);
 }
 .share-note {
@@ -77,71 +150,247 @@
   color: var(--muted);
   font-size: 0.8125rem;
 }
-.ui-hero .share-note {
-  color: inherit;
-}
 
-.share-view {
-  max-width: 480px;
-  margin: 0 auto;
-  padding: var(--pad);
-  display: grid;
-  gap: var(--gap);
+/* 아이콘 타일 + 두 줄 글(공유받은 내용, 알림 받기) */
+.share-info {
+  display: flex;
+  align-items: center;
+  gap: 14px;
 }
-.share-eta-stale {
-  margin: 0;
-  font-size: 2.5rem;
-  font-weight: 800;
+.share-tile {
+  width: 46px;
+  height: 46px;
+  flex: none;
+  display: grid;
+  place-items: center;
+  border-radius: 14px;
+  background: var(--chip);
+}
+.share-info-text {
+  flex: 1;
+  min-width: 0;
+}
+.share-info-text strong {
+  display: block;
+  font-weight: 700;
+}
+.share-info-text span {
+  font-size: 0.8125rem;
   color: var(--muted);
 }
-.share-stages {
+
+/* ── 링크로 보기(앱 없이) ── */
+.sv {
+  max-width: 480px;
+  min-height: 100dvh;
+  margin: 0 auto;
+  padding: var(--pad);
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap);
+  line-height: 1.5;
+}
+.sv p {
+  margin: 0;
+}
+.sv-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 4px 4px 0;
+}
+.sv-title {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+.sv-hero {
+  background: var(--ink);
+  color: #fff;
+  border-radius: var(--r-hero);
+  padding: 20px;
+}
+.sv-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border-radius: var(--r-pill);
+  padding: 3px 10px;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  background: rgba(255, 255, 255, 0.12);
+}
+.sv-status::before {
+  content: '';
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent);
+}
+.sv-label {
+  margin-top: 12px !important;
+  font-size: 0.875rem;
+  color: var(--on-dark);
+}
+.sv-clock {
+  font-size: 4rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1.05;
+  color: var(--accent);
+}
+.sv-sub {
+  margin-top: 4px !important;
+  font-size: 0.875rem;
+  color: var(--on-dark);
+}
+.sv-late {
+  display: inline-block;
+  margin-top: 10px;
+  border-radius: var(--r-pill);
+  padding: 3px 10px;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  background: var(--accent);
+  color: var(--ink);
+}
+/* 확인 안 됨: 점선 테두리와 회색 숫자로 "지금 값이 아님"을 알린다 */
+.sv-hero.is-stale {
+  background: var(--surface);
+  color: var(--ink);
+  border: 2px dashed var(--empty);
+}
+.is-stale .sv-status {
+  background: var(--chip);
+  font-weight: 700;
+}
+.is-stale .sv-status::before {
+  display: none;
+}
+.sv-hero h2 {
+  margin: 12px 0 0;
+  font-size: 1.375rem;
+  line-height: 1.35;
+  font-weight: 800;
+}
+.is-stale .sv-label,
+.is-stale .sv-sub {
+  color: var(--muted);
+}
+.is-stale .sv-clock {
+  font-size: 3rem;
+  line-height: 1.1;
+  color: var(--muted);
+}
+
+.sv-stages {
   list-style: none;
   margin: 0;
-  padding: var(--pad);
-  display: grid;
-  gap: 12px;
+  padding: 14px 20px;
   background: var(--surface);
   border: 1px solid var(--line);
   border-radius: var(--r-card);
 }
-.share-stages li {
+.sv-stages li {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
+  min-height: 40px;
   color: var(--muted);
 }
-.share-dot {
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  border: 2px solid var(--empty);
+.sv-stages li + li {
+  border-top: 1px solid var(--line);
+}
+.sv-dot {
+  width: 26px;
+  height: 26px;
+  flex: none;
   display: grid;
   place-items: center;
-  flex: none;
+  border-radius: 50%;
+  border: 2px solid var(--empty);
 }
-.share-stages .is-done .share-dot {
+.sv-stages .is-done,
+.sv-stages .is-now {
+  color: var(--ink);
+}
+.sv-stages .is-done .sv-dot {
   background: var(--ink);
   border-color: var(--ink);
 }
-.share-stages .is-now .share-dot {
+.sv-stages .is-now .sv-dot {
   background: var(--accent);
   border-color: var(--ink);
   animation: pulse 1.8s ease-out infinite;
 }
-.share-stages .is-now {
-  color: var(--ink);
+.sv-stages .is-now .sv-stage-name {
   font-weight: 800;
 }
-.share-stages .is-done {
-  color: var(--ink);
-}
-.share-stage-name {
+.sv-stage-name {
   flex: 1;
 }
-.share-stage-note {
-  font-size: 0.8125rem;
+.sv-stage-note {
+  font-size: 0.875rem;
+  color: var(--muted);
 }
-.share-stages.is-stale .share-dot {
+.sv-stages.is-stale .sv-dot {
   border-style: dashed;
   animation: none;
+}
+.sv-stages.is-stale .is-now .sv-dot {
+  background: var(--surface);
+  border-width: 3px;
+}
+
+.sv-note {
+  display: flex;
+  gap: 8px;
+  padding: 0 4px;
+  color: var(--muted);
+  font-size: 0.8125rem;
+}
+.sv-note::before {
+  content: '';
+  width: 8px;
+  height: 8px;
+  margin-top: 6px;
+  flex: none;
+  border-radius: 50%;
+  background: var(--ink);
+}
+.sv-banner {
+  margin-top: auto;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-card);
+  padding: 12px 14px;
+  font-size: 0.875rem;
+}
+.sv-banner span {
+  flex: 1;
+}
+.sv-get {
+  min-height: 44px;
+  padding: 0 14px;
+  display: inline-flex;
+  align-items: center;
+  border-radius: 12px;
+  border: 1.5px solid var(--ink);
+  color: var(--ink);
+  font-weight: 700;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.sv-gap {
+  margin-top: 12px;
+}
+.push-card {
+  display: grid;
+  gap: 12px;
 }

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { clearSharedFlag, hasSharedFlag, takeShared, type SharedContent } from '../../infra/shareTarget';
-import { OutlineButton, PrimaryButton } from '../../ui';
+import { Icon, OutlineButton, PrimaryButton } from '../../ui';
 import { useHelperRun } from '../today/useHelperRun';
 import '../share/share.css';
 
@@ -24,12 +24,18 @@ export function SharedInbox() {
 
   return (
     <section className="share-card" aria-label="공유받은 내용">
-      <div className="share-head">
-        <h2>공유받은 내용을 읽을까요?</h2>
+      <span className="share-step">공유로 받기</span>
+      <div className="share-info">
+        <span className="share-tile">
+          <Icon name="share" size={26} main="var(--ink)" det="var(--chip)" />
+        </span>
+        <div className="share-info-text">
+          <strong>공유받은 내용을 읽을까요?</strong>
+          <span>
+            사진 {shared.images.length}장{shared.text ? ' · 글 있음' : ''}
+          </span>
+        </div>
       </div>
-      <p>
-        사진 {shared.images.length}장{shared.text ? ' · 글 있음' : ''}
-      </p>
       <p className="share-note">글과 사진은 AI로 전송돼요. 개인 정보가 있는 부분이 있으면 취소하고 가린 뒤 다시 보내 주세요.</p>
       <PrimaryButton onClick={read} disabled={busy}>
         읽고 정리하기

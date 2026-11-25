@@ -52,14 +52,18 @@ function ShareActive({ share }: { share: ShareState }) {
   };
   return (
     <>
-      <label className="share-switch">
-        <input type="checkbox" checked={share.showStage} onChange={(e) => actions.updateShare({ showStage: e.target.checked })} />
-        지금 단계 보여 주기
-      </label>
-      <label className="share-switch">
-        <input type="checkbox" checked={share.showEta} onChange={(e) => actions.updateShare({ showEta: e.target.checked })} />
-        도착 예정 시각 보여 주기
-      </label>
+      <div className="share-switches">
+        <label className="share-switch">
+          <span>지금 단계</span>
+          <input type="checkbox" role="switch" checked={share.showStage} onChange={(e) => actions.updateShare({ showStage: e.target.checked })} />
+        </label>
+        <label className="share-switch">
+          <span>도착 예정 시각</span>
+          <input type="checkbox" role="switch" checked={share.showEta} onChange={(e) => actions.updateShare({ showEta: e.target.checked })} />
+        </label>
+        <p className="share-switch is-off">미루기·기록 — 항상 숨김</p>
+        <p className="share-switch is-off">위치 — 보내지 않음</p>
+      </div>
       <input className="share-url" readOnly value={url} aria-label="공유 링크" onFocus={(e) => e.target.select()} />
       <PrimaryButton onClick={async () => setMsg(await sendLink(url, shareName))}>링크 보내기</PrimaryButton>
       <OutlineButton onClick={stop}>공유 끄기</OutlineButton>
@@ -67,6 +71,28 @@ function ShareActive({ share }: { share: ShareState }) {
         {msg || '끄면 상대 화면에서 바로 사라져요. 상대가 몇 번 봤는지는 알려 주지 않아요.'}
       </p>
     </>
+  );
+}
+
+function VisibleList() {
+  return (
+    <dl className="share-vis">
+      <div>
+        <dt>보임</dt>
+        <dd>
+          <span>지금 단계</span>
+          <span>도착 예정</span>
+        </dd>
+      </div>
+      <div className="is-hidden">
+        <dt>안 보임</dt>
+        <dd>
+          <span>위치</span>
+          <span>미루기</span>
+          <span>기록</span>
+        </dd>
+      </div>
+    </dl>
   );
 }
 
@@ -79,9 +105,9 @@ export function ShareBar() {
   if (!open) {
     return (
       <button type="button" className="share-strip" onClick={() => setOpen(true)} aria-expanded={false}>
-        <Icon name="share" size={20} main="var(--ink)" det="var(--surface)" />
-        {share ? '공유 중 · 상대에게 도착 예정이 보여요' : '도착 예정을 링크로 보여 주기'}
-        {share && <Pill tone="soft">공유 중</Pill>}
+        <Icon name="share" size={22} main="var(--ink)" det="var(--surface)" />
+        <span className="share-strip-text">{share ? '상대에게 도착 예정이 보여요' : '도착 예정을 링크로 보여 주기'}</span>
+        {share && <Pill tone="accent">공유 중</Pill>}
       </button>
     );
   }
@@ -89,19 +115,13 @@ export function ShareBar() {
   return (
     <section className="share-card" aria-label="준비 현황 공유">
       <div className="share-head">
-        <h2>{share ? '공유 중' : '링크로 보여 줄까요?'}</h2>
+        <h2>{share ? '상대에게 보이는 것' : '링크로 보여 줄까요?'}</h2>
         <button type="button" className="share-close" onClick={() => setOpen(false)}>
           닫기
         </button>
       </div>
-      <div className="share-pills">
-        <Pill tone="soft">보임 · 지금 단계</Pill>
-        <Pill tone="soft">보임 · 도착 예정</Pill>
-        <Pill>안 보임 · 위치</Pill>
-        <Pill>안 보임 · 알람 미루기</Pill>
-        <Pill>안 보임 · 기록</Pill>
-      </div>
-      {share ? <ShareActive share={share} /> : <ShareSetup arriveAt={session.arriveAt} />}
+      {share ? <ShareActive share={share} /> : <VisibleList />}
+      {!share && <ShareSetup arriveAt={session.arriveAt} />}
     </section>
   );
 }

@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { fmtClock } from '../../domain/format';
 import { isStale, STAGE_ROWS } from '../../domain/share';
 import { fetchShare, type SharedView } from '../../infra/share';
-import { HeroCard, Icon, Pill } from '../../ui';
+import { Icon, Pill } from '../../ui';
 import './share.css';
 
 const POLL_MS = 5000;
@@ -38,15 +38,18 @@ function agoText(ms: number): string {
 function StageList({ view, stale }: { view: SharedView; stale: boolean }) {
   const curIdx = STAGE_ROWS.findIndex((r) => r.id === view.stage);
   return (
-    <ol className={`share-stages ${stale ? 'is-stale' : ''}`}>
+    <ol className={`sv-stages ${stale ? 'is-stale' : ''}`}>
       {STAGE_ROWS.map((row, i) => {
         const status = i < curIdx ? 'done' : i === curIdx ? 'now' : 'next';
         const steps = status === 'now' && view.stepCount ? ` · ${(view.stepIdx ?? 0) + 1}/${view.stepCount}` : '';
+        // 도착 줄에는 예정 시각을, 나머지는 지금 어디인지만 적는다(단계별 시각은 공유하지 않는다)
+        const eta = row.id === 'arrived' && view.etaMs !== null ? fmtClock(view.etaMs) : '';
+        const note = status === 'done' ? '완료' : status === 'now' ? (stale ? '마지막 확인' : '지금') : eta || '—';
         return (
           <li key={row.id} className={`is-${status}`} aria-current={status === 'now' ? 'step' : undefined}>
-            <span className="share-dot">{status === 'done' && <Icon name="check" main="#fff" size={14} />}</span>
-            <span className="share-stage-name">{row.label + steps}</span>
-            <span className="share-stage-note">{status === 'done' ? '완료' : status === 'now' ? (stale ? '마지막으로 확인된 단계' : '지금') : ''}</span>
+            <span className="sv-dot">{status === 'done' && <Icon name="check" main="#fff" size={14} />}</span>
+            <span className="sv-stage-name">{row.label + steps}</span>
+            <span className="sv-stage-note">{note}</span>
           </li>
         );
       })}
@@ -54,57 +57,85 @@ function StageList({ view, stale }: { view: SharedView; stale: boolean }) {
   );
 }
 
+function AppIcon() {
+  return (
+    <svg width="40" height="40" viewBox="0 0 120 120" role="img" aria-label="제때">
+      <rect width="120" height="120" rx="27" fill="var(--ink)" />
+      <circle cx="60" cy="60" r="31" fill="none" stroke="var(--accent)" strokeWidth="9" />
+      <path d="M60 60V29A31 31 0 0 1 91 60Z" fill="var(--accent)" />
+    </svg>
+  );
+}
+
+function EtaHero({ view, stale, now }: { view: SharedView; stale: boolean; now: number }) {
+  const early = view.etaMs !== null ? Math.round((view.arriveMs - view.etaMs) / 60_000) : 0;
+  const arrived = view.stage === 'arrived';
+  return (
+    <section className={`sv-hero ${stale ? 'is-stale' : ''}`}>
+      <span className="sv-status">{stale ? '확인 안 됨' : arrived ? '도착' : '오는 중'}</span>
+      {stale && <h2>상태를 확인하지 못했어요</h2>}
+      {view.etaMs !== null ? (
+        <>
+          <p className="sv-label">{arrived ? '도착한 시각' : stale ? '마지막으로 알려 준 도착 예정' : '도착 예정'}</p>
+          <p className="sv-clock">{fmtClock(view.etaMs)}</p>
+        </>
+      ) : (
+        <p className="sv-label">도착 예정 시각은 공유하지 않았어요.</p>
+      )}
+      <p className="sv-sub">
+        {stale ? `${agoText(now - view.updatedAtMs)} · ` : ''}약속 {fmtClock(view.arriveMs)}
+        {view.etaMs !== null && !view.lateMin && early > 0 ? ` · ${early}분 일찍` : ''}
+      </p>
+      {view.lateMin ? <span className="sv-late">약속보다 {view.lateMin}분 늦어요</span> : null}
+    </section>
+  );
+}
+
+function Closed() {
+  return (
+    <main className="sv">
+      <section className="sv-hero is-stale">
+        <span className="sv-status">닫힘</span>
+        <h1 className="sv-title sv-gap">링크가 닫혔어요</h1>
+        <p className="sv-sub">약속이 끝났거나 상대가 공유를 껐어요.</p>
+      </section>
+    </main>
+  );
+}
+
 // 링크로 보기(명세 ⑫~⑭, ⑯). 보기만 할 수 있고, 위치는 어디에도 없다
 export function Viewer({ token }: { token: string }) {
   const { load, now } = useShared(token);
 
-  if (load.kind === 'loading') return <main className="share-view"><p className="share-note">불러오는 중이에요…</p></main>;
-  if (load.kind === 'closed') {
-    return (
-      <main className="share-view">
-        <HeroCard dashed>
-          <h1 className="share-title">링크가 닫혔어요</h1>
-          <p className="share-note">약속이 끝났거나 상대가 공유를 껐어요.</p>
-        </HeroCard>
-      </main>
-    );
-  }
+  if (load.kind === 'loading') return <main className="sv"><p className="sv-note">불러오는 중이에요…</p></main>;
+  if (load.kind === 'closed') return <Closed />;
 
   const { view } = load;
   const stale = isStale(view.updatedAtMs, now);
-  const early = view.etaMs !== null ? Math.round((view.arriveMs - view.etaMs) / 60_000) : 0;
 
   return (
-    <main className="share-view">
-      <header className="share-head">
-        <h1 className="share-title">{view.name}의 준비 현황</h1>
+    <main className="sv">
+      <header className="sv-head">
+        <h1 className="sv-title">{view.name}의 준비 현황</h1>
         <Pill>보기만 가능</Pill>
       </header>
 
-      <HeroCard dashed={stale}>
-        <Pill tone={stale ? 'chip' : 'dark'}>{stale ? '확인 안 됨' : view.stage === 'arrived' ? '도착' : '오는 중'}</Pill>
-        {stale && <p className="share-note">상태를 확인하지 못했어요. 앱을 닫았거나 인터넷이 끊겼을 수 있어요.</p>}
-        {view.etaMs !== null ? (
-          <>
-            <p className="ui-hero-label">{view.stage === 'arrived' ? '도착한 시각' : stale ? '마지막으로 알려 준 도착 예정' : '도착 예정'}</p>
-            <p className={stale ? 'share-eta-stale' : 'ui-hero-num'}>{fmtClock(view.etaMs)}</p>
-          </>
-        ) : (
-          <p className="ui-hero-label">도착 예정 시각은 공유하지 않았어요.</p>
-        )}
-        <p className="ui-hero-label">
-          약속 {fmtClock(view.arriveMs)}
-          {view.etaMs !== null && !view.lateMin && early > 0 ? ` · ${early}분 일찍` : ''}
-        </p>
-        {view.lateMin ? <Pill tone="accent">약속보다 {view.lateMin}분 늦어요</Pill> : null}
-      </HeroCard>
-
+      <EtaHero view={view} stale={stale} now={now} />
       {view.stage && <StageList view={view} stale={stale} />}
 
-      <p className="share-note">
-        {agoText(now - view.updatedAtMs)} · 자동으로 새로고침돼요 · 약속이 끝나면 링크가 닫혀요
-        {stale ? ' · 단계는 직접 눌러야 바뀌어요. 지금과 다를 수 있어요.' : ''}
+      <p className="sv-note">
+        {stale
+          ? '앱을 닫았거나 인터넷이 끊겼을 수 있어요. 단계는 직접 눌러야 바뀌어서 지금과 다를 수 있어요.'
+          : `${agoText(now - view.updatedAtMs)} · 자동으로 새로고침돼요 · 약속이 끝나면 링크가 닫혀요`}
       </p>
+
+      <div className="sv-banner">
+        <AppIcon />
+        <span>앱을 깔면 알림도 받아요</span>
+        <a className="sv-get" href="/">
+          앱 받기
+        </a>
+      </div>
     </main>
   );
 }

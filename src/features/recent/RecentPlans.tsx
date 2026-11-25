@@ -16,7 +16,9 @@ export function RecentPlans() {
           return (
             <li key={r.id} className="recent-item">
               <button type="button" className="recent-pick" onClick={() => actions.applyRecent(r.id)}>
-                <Icon name="clock" main="var(--muted)" det="var(--surface)" size={22} />
+                <span className="recent-tile">
+                  <Icon name="clock" main="var(--ink)" det="var(--chip)" size={22} />
+                </span>
                 <span className="recent-text">
                   <strong>{title}</strong>
                   <span>{sub}</span>

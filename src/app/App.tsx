@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { MorningFlow } from '../features/morning';
 import { PushToggle } from '../features/push/PushToggle';
-import { RecentPlans } from '../features/recent/RecentPlans';
 import { RecordsScreen } from '../features/records';
 import { FriendsScreen } from '../features/room';
 import { SettingsScreen } from '../features/settings';
@@ -57,7 +56,6 @@ function Shell() {
         <>
           <main className="app-main">
             {tab === 'today' && <TodayScreen />}
-            {tab === 'today' && <RecentPlans />}
             {tab === 'records' && <RecordsScreen />}
             {tab === 'friends' && <FriendsScreen />}
             {tab === 'settings' && <PushToggle />}
