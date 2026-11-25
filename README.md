@@ -64,7 +64,7 @@ npm run dev
 | 명령 | 하는 일 |
 |---|---|
 | `npm run dev` | 개발 서버. `api/` 서버 함수도 함께 동작합니다 |
-| `npm test` | 계산 로직 테스트 (126개) |
+| `npm test` | 계산 로직 테스트 (128개) |
 | `npm run typecheck` | 타입 검사 |
 | `npm run lint` | 린트 (파일 300줄, 함수 50줄 규칙 포함) |
 | `npm run build` | 타입 검사 후 빌드 |
