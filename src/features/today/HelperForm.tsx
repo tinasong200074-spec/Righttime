@@ -25,7 +25,7 @@ function NotesField(p: { notes: string; onNotes: (v: string) => void; onPaste: (
   return (
     <>
       <label className="f-label" htmlFor="h-notes">
-        안내문 붙여넣기 (선택)
+        링크나 텍스트 (선택)
       </label>
       <textarea
         id="h-notes"
@@ -33,7 +33,7 @@ function NotesField(p: { notes: string; onNotes: (v: string) => void; onPaste: (
         style={{ padding: 12 }}
         rows={5}
         maxLength={2000}
-        placeholder="면접 안내 문자, 메일, 공고 문구를 붙여넣어 주세요"
+        placeholder="안내 문자·메일·공고 글이나, 공고 페이지 링크(https://…)를 넣어 주세요"
         value={p.notes}
         onChange={(e) => p.onNotes(e.target.value)}
         onPaste={p.onPaste}
@@ -79,7 +79,7 @@ function Tiles(p: { count: number; showText: boolean; onAdd: (f: File[]) => void
             <rect x="7" y="13" width="10" height="3" rx="1.5" fill="var(--ink)" />
           </svg>
         </span>
-        <span>글 붙여넣기</span>
+        <span>링크나 텍스트</span>
       </button>
     </div>
   );
@@ -125,7 +125,7 @@ export function HelperForm() {
       <div className="m-spacer" />
       <label className="t-consent">
         <input type="checkbox" checked={agree} onChange={(e) => setAgree(e.target.checked)} />
-        <span>글과 사진은 AI로 전송돼요. 개인 정보가 있는 부분은 빼고 올려 주세요.</span>
+        <span>글·링크와 사진은 AI로 전송돼요. 링크는 AI가 그 페이지를 열어 읽어요. 개인 정보가 있는 부분은 빼고 올려 주세요.</span>
       </label>
       <button type="button" className="m-ghost" disabled={!ready} onClick={submit}>
         {busy ? '읽는 중이에요…' : '읽고 정리하기'}

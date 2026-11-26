@@ -1,5 +1,5 @@
 import Anthropic from '@anthropic-ai/sdk';
-import { extractJson, helperPrompt, memoPrompt, normalizeHelper, normalizeMemo, normalizeTone, tonePrompt, type HelperInput } from '../src/domain/ai.js';
+import { extractJson, hasLink, helperPrompt, memoPrompt, normalizeHelper, normalizeMemo, normalizeTone, tonePrompt, type HelperInput } from '../src/domain/ai.js';
 
 // Claude 프록시(서버 전용). 키는 환경 변수에만 있고 브라우저로 나가지 않는다.
 // 받은 글과 사진은 저장하지 않고, 호출이 끝나면 버린다.
@@ -54,19 +54,37 @@ function helperInput(v: unknown): HelperInput {
 
 type Effort = 'low' | 'medium';
 
-async function ask(client: Anthropic, content: Anthropic.Beta.BetaContentBlockParam[], effort: Effort): Promise<unknown> {
-  const res = await client.beta.messages.create({
-    model: process.env.ANTHROPIC_MODEL || 'claude-opus-5-5',
-    max_tokens: 16000,
-    output_config: { effort },
-    // 안전 분류기가 거절하면 서버가 알아서 대체 모델로 다시 시도한다
-    betas: ['server-side-fallback-2026-07-01'],
-    fallbacks: 'default',
-    messages: [{ role: 'user', content }],
-  });
-  if (res.stop_reason === 'refusal') throw new Reject(422, 'refused');
-  const out = res.content.map((b) => (b.type === 'text' ? b.text : '')).join('');
-  return extractJson(out);
+const MAX_RESUMES = 3;
+// 사용자가 넣은 링크만 읽게 한다(서버 도구라 페이지는 Anthropic 쪽에서 읽고, 우리 서버는 주소로 나가지 않는다)
+const FETCH_TOOL = [{ type: 'web_fetch_20260209', name: 'web_fetch', max_uses: 2 }] as unknown as Anthropic.Beta.BetaToolUnion[];
+
+// 마지막 도구 블록 뒤의 글만 답으로 본다(도구를 쓰기 전에 한 말은 버린다)
+function finalText(blocks: Anthropic.Beta.BetaContentBlock[]): string {
+  const lastTool = blocks.map((b) => b.type !== 'text').lastIndexOf(true);
+  return blocks.slice(lastTool + 1).map((b) => (b.type === 'text' ? b.text : '')).join('');
+}
+
+async function ask(client: Anthropic, content: Anthropic.Beta.BetaContentBlockParam[], effort: Effort, readLinks = false): Promise<unknown> {
+  const messages: Anthropic.Beta.BetaMessageParam[] = [{ role: 'user', content }];
+  for (let i = 0; ; i++) {
+    const res = await client.beta.messages.create({
+      model: process.env.ANTHROPIC_MODEL || 'claude-opus-5-5',
+      max_tokens: 16000,
+      output_config: { effort },
+      // 안전 분류기가 거절하면 서버가 알아서 대체 모델로 다시 시도한다
+      betas: ['server-side-fallback-2026-07-01'],
+      fallbacks: 'default',
+      ...(readLinks ? { tools: FETCH_TOOL } : {}),
+      messages,
+    });
+    if (res.stop_reason === 'refusal') throw new Reject(422, 'refused');
+    // 페이지를 읽느라 길어지면 서버가 잠깐 멈춘 채 돌려준다. 그대로 이어 보내면 계속한다
+    if (res.stop_reason === 'pause_turn' && i < MAX_RESUMES) {
+      messages.push({ role: 'assistant', content: res.content as Anthropic.Beta.BetaContentBlockParam[] });
+      continue;
+    }
+    return extractJson(finalText(res.content));
+  }
 }
 
 async function run(client: Anthropic, body: Record<string, unknown>): Promise<unknown> {
@@ -77,8 +95,9 @@ async function run(client: Anthropic, body: Record<string, unknown>): Promise<un
     return normalizeTone(await ask(client, [{ type: 'text', text: tonePrompt(text(body.samples, TONE_SAMPLES_MAX)) }], 'low'));
   }
   if (body.task === 'helper') {
-    const content = [...images(body.images), { type: 'text' as const, text: helperPrompt(helperInput(body.input)) }];
-    return normalizeHelper(await ask(client, content, 'medium'), Date.now());
+    const input = helperInput(body.input);
+    const content = [...images(body.images), { type: 'text' as const, text: helperPrompt(input) }];
+    return normalizeHelper(await ask(client, content, 'medium', hasLink(input.notes)), Date.now());
   }
   throw new Reject(400, 'bad_request');
 }
