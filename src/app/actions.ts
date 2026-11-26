@@ -3,6 +3,7 @@ import * as S from '../domain/session';
 import { addTransitLog } from '../domain/transitLog';
 import type { Arrival, GeoResult, MemoItem, Place, Plan, RainChoice, Settings, Tone, WeatherResult } from '../domain/types';
 import type { AskItem, HelperResult } from '../domain/ai';
+import { endDraftState, removeParkedState, startNewPlanState } from './queueState';
 import { addMemoItemsState, addMemosState, applyRecentState, armState, defaultState, endDemoState, loadSampleState, saveRecordState, startDemoState, type AppState, type RoomState, type ShareState } from './state';
 
 type SetState = (fn: (s: AppState) => AppState) => void;
@@ -20,7 +21,12 @@ const onSession = (set: SetState, fn: (x: NonNullable<AppState['session']>) => A
 
 function sessionActions(set: SetState, clock: Clock) {
   return {
-    arm: () => set((s) => armState(s, clock.now(), false)),
+    // 알람을 켜면 대기 목록과 함께 다시 줄을 세운다(가장 이른 약속이 맨 앞)
+    arm: () =>
+      set((s) => {
+        const next = armState(s, clock.now(), false);
+        return next.session ? endDraftState(next) : next;
+      }),
     snooze: () => set((s) => (s.session ? { ...s, session: S.snooze(s.session, clock.now(), s.settings.snooze) } : s)),
     startPrep: () => onSession(set, (x) => S.startPrep(x, clock.now())),
     completeStep: () => onSession(set, (x) => S.completeStep(x, clock.now())),
@@ -32,11 +38,14 @@ function sessionActions(set: SetState, clock: Clock) {
     skipArrival: (arrival: Arrival) => onSession(set, (x) => S.skipArrival(x, arrival)),
     applyTransit: (rideMin: number | null, checked: number) => onSession(set, (x) => S.applyTransitCheck(x, rideMin, checked)),
     toggleCheck: (key: string) => onSession(set, (x) => ({ ...x, checked: { ...x.checked, [key]: !x.checked[key] } })),
-    cancelSession: () => set((s) => ({ ...s, session: null })),
+    cancelSession: () => set((s) => endDraftState({ ...s, session: null })),
+    startNewPlan: () => set((s) => startNewPlanState(s, clock.now())),
+    cancelDraft: () => set(endDraftState),
+    removeParked: (id: string) => set((s) => removeParkedState(s, id)),
     saveRecord: (excluded: boolean) =>
       set((s) => {
         if (s.session?.demo) clock.setSpeed(1);
-        return saveRecordState(s, clock.now(), excluded);
+        return endDraftState(saveRecordState(s, clock.now(), excluded));
       }),
   };
 }
@@ -101,7 +110,7 @@ function demoActions(set: SetState, clock: Clock) {
     },
     endDemo: () => {
       clock.setSpeed(1);
-      set((s) => endDemoState(s, clock.now()));
+      set((s) => endDraftState(endDemoState(s, clock.now())));
     },
   };
 }

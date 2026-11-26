@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { MorningFlow } from '../features/morning';
 import { AlarmHint } from '../features/push/AlarmHint';
 import { PushToggle } from '../features/push/PushToggle';
+import { NextPlans } from '../features/queue/NextPlans';
 import { RecordsScreen } from '../features/records';
 import { FriendsScreen } from '../features/room';
 import { SettingsScreen } from '../features/settings';
@@ -59,6 +60,7 @@ function Shell() {
         <>
           <main className="app-main">
             {tab === 'today' && <TodayScreen onEdit={() => setTab('new')} />}
+            {tab === 'today' && <NextPlans />}
             {tab === 'new' && <NewPlanScreen onDone={() => setTab('today')} />}
             {tab === 'records' && <RecordsScreen />}
             {tab === 'friends' && <FriendsScreen />}

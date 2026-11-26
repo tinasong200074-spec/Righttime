@@ -5,6 +5,7 @@ import { splitMemoText } from '../domain/weather';
 import type { AskItem, HelperResult } from '../domain/ai';
 import { addRecent, applyRecent, freshPlan, toRecent, type RecentPlan } from '../domain/recent';
 import { minuteOfDay, nextRepeatArrive } from '../domain/repeat';
+import type { Booked } from '../domain/queue';
 import type { TransitLogEntry } from '../domain/transitLog';
 import {
   DEFAULT_SETTINGS, MIN,
@@ -33,6 +34,8 @@ export interface AppState {
   shareName: string; // 상대에게 보일 내 이름
   helper: HelperResult | null; // 일정 준비 도우미가 읽은 결과(사진·글 원본은 저장하지 않는다)
   helperDone: Record<string, boolean>; // 준비할 것·전날 할 일 체크
+  parked: Booked[]; // 알람을 켜 둔 다른 약속(대기 목록). 맨 앞 약속이 끝나면 차례로 올라온다
+  drafting: boolean; // 대기 목록을 둔 채 새 약속을 적는 중
 }
 
 export interface ShareState {
@@ -95,6 +98,8 @@ export function defaultState(now: number): AppState {
     shareName: '',
     helper: null,
     helperDone: {},
+    parked: [],
+    drafting: false,
   };
 }
 
@@ -104,6 +109,7 @@ export function restoreState(raw: unknown, now: number): AppState {
   if (!raw || typeof raw !== 'object') return base;
   const saved = raw as Partial<AppState>;
   let s: AppState = { ...base, ...saved, settings: { ...base.settings, ...saved.settings }, plan: { ...base.plan, ...saved.plan } };
+  s = { ...s, drafting: false }; // 적다 만 새 약속은 이어 가지 않는다
   if (s.session?.demo) s = { ...s, session: null, plan: s.planBackup ?? s.plan, planBackup: null };
   // 진행 중인 알람이 없으면 일정 입력을 비운다. 지난 일정은 최근 일정 목록에서 다시 고른다
   if (!s.session) s = { ...s, plan: freshPlan(s.plan, now), rain: 'auto', weather: null, weatherCoord: null, helper: null, helperDone: {} };

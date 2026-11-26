@@ -6,6 +6,7 @@ import { buildChecklist } from '../domain/weather';
 import { loadRaw, saveRaw } from '../infra/storage';
 import { makeActions, type Actions, type Clock } from './actions';
 import { useNativeAlarmSync } from './nativeAlarmSync';
+import { endDraftState, tickQueueState } from './queueState';
 import { usePushSync } from './pushSync';
 import { useRoomSync } from './roomSync';
 import { useShareSync } from './shareSync';
@@ -42,7 +43,7 @@ function useClock(): Clock & { speed: () => number } {
 
 export function AppProvider({ children }: { children: ReactNode }) {
   const clock = useClock();
-  const [state, setState] = useState<AppState>(() => restoreState(loadRaw(), Date.now()));
+  const [state, setState] = useState<AppState>(() => endDraftState(restoreState(loadRaw(), Date.now())));
   const [now, setNow] = useState(() => clock.now());
   const [demo, setDemo] = useState(false);
   const actions = useMemo(() => makeActions(setState, clock), [clock]);
@@ -54,7 +55,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
       setDemo(clock.speed() !== 1);
       setState((s) => {
         const next = s.session ? tickSession(s.session, t) : null;
-        return next === s.session ? s : { ...s, session: next };
+        const ticked = next === s.session ? s : { ...s, session: next };
+        // 시연 시계(60배)로는 대기 중인 실제 약속을 건드리지 않는다
+        return clock.speed() === 1 ? tickQueueState(ticked, t) : ticked;
       });
     };
     const id = setInterval(tick, demo ? DEMO_TICK_MS : TICK_MS);
