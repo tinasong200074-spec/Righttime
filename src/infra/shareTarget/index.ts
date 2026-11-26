@@ -1,4 +1,6 @@
-// 공유창으로 받은 사진·글을 꺼낸다(public/share-sw.js가 잠깐 보관해 둔 것).
+import { Capacitor, registerPlugin } from '@capacitor/core';
+
+// 공유창으로 받은 사진·글을 꺼낸다(웹은 public/share-sw.js가 잠깐 보관해 둔 것, 안드로이드 설치 앱은 SharedImagesPlugin이 넘겨 준 것).
 const SHARE_CACHE = 'jette-shared-v1';
 const MAX_IMAGES = 3;
 
@@ -30,4 +32,49 @@ export async function takeShared(): Promise<SharedContent | null> {
   } catch {
     return null;
   }
+}
+
+// ---- 안드로이드 설치 앱: 갤러리·메신저 공유창의 "제때"로 온 내용 ----
+interface NativeShared {
+  images: Array<{ type: string; data: string }>;
+  text: string;
+}
+interface SharedImagesApi {
+  take(): Promise<NativeShared>;
+  addListener(event: 'shared', cb: () => void): Promise<{ remove: () => Promise<void> }>;
+}
+const Native = registerPlugin<SharedImagesApi>('SharedImages');
+
+// 예전에 만든 설치 파일에는 이 플러그인이 없을 수 있어서 있는지 먼저 본다
+export const hasNativeShare = () => Capacitor.isNativePlatform() && Capacitor.isPluginAvailable('SharedImages');
+
+function toFile(img: { type: string; data: string }, i: number): File {
+  const bin = atob(img.data);
+  const bytes = new Uint8Array(bin.length);
+  for (let k = 0; k < bin.length; k++) bytes[k] = bin.charCodeAt(k);
+  return new File([bytes], `shared-${i}`, { type: img.type });
+}
+
+export async function takeNativeShared(): Promise<SharedContent | null> {
+  try {
+    const got = await Native.take();
+    const images = got.images.slice(0, MAX_IMAGES).map(toFile);
+    return images.length > 0 || got.text ? { images, text: got.text } : null;
+  } catch {
+    return null;
+  }
+}
+
+// 앱이 이미 켜져 있을 때 공유가 오면 알려 준다. 돌려주는 함수를 부르면 구독이 끝난다
+export function onNativeShared(cb: () => void): () => void {
+  let handle: { remove: () => Promise<void> } | null = null;
+  let closed = false;
+  void Native.addListener('shared', cb).then((h) => {
+    if (closed) void h.remove();
+    else handle = h;
+  });
+  return () => {
+    closed = true;
+    void handle?.remove();
+  };
 }

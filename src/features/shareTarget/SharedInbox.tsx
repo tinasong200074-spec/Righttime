@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { clearSharedFlag, hasSharedFlag, takeShared, type SharedContent } from '../../infra/shareTarget';
+import { clearSharedFlag, hasNativeShare, hasSharedFlag, onNativeShared, takeNativeShared, takeShared, type SharedContent } from '../../infra/shareTarget';
 import { Icon, OutlineButton, PrimaryButton } from '../../ui';
 import { useHelperRun } from '../today/useHelperRun';
 import '../share/share.css';
@@ -11,6 +11,12 @@ export function SharedInbox() {
   const { busy, msg, run } = useHelperRun();
 
   useEffect(() => {
+    if (hasNativeShare()) {
+      // 안드로이드 설치 앱: 처음 켜질 때 한 번 꺼내고, 켜져 있는 동안 오는 공유도 받는다
+      const take = () => void takeNativeShared().then((c) => c && setShared(c));
+      take();
+      return onNativeShared(take);
+    }
     if (!hasSharedFlag()) return;
     clearSharedFlag();
     void takeShared().then(setShared);
