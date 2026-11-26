@@ -185,3 +185,13 @@
   background: var(--accent-soft);
   font-size: 0.875rem;
 }
+/* 도착 시각을 넘길 때: 굵은 테두리와 글로 알린다(색만으로 알리지 않는다) */
+.ps-over {
+  margin: 0;
+  padding: 10px 14px;
+  border: 2px solid var(--ink);
+  border-radius: var(--r-input);
+  background: var(--surface);
+  font-size: 0.9375rem;
+  font-weight: 700;
+}

@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useApp } from '../../app/store';
+import { overBy } from '../../domain/schedule';
 import { RecentPlans } from '../recent/RecentPlans';
 import './fields.css';
 import './main.css';
@@ -82,6 +83,7 @@ export function NewPlanScreen({ onDone }: { onDone: () => void }) {
   useKeepAdding(armedHere);
   const locked = session !== null && !armedHere;
   const padded = calc && calc.ride.n === 0 && calc.ride.basis !== '내 입력값';
+  const over = calc ? overBy(calc, now) : 0; // 지금 시작해도 도착 시각을 넘기면 알람을 켜지 못하게 한다
 
   const arm = () => {
     setArmedHere(true);
@@ -106,10 +108,15 @@ export function NewPlanScreen({ onDone }: { onDone: () => void }) {
         <PrepField />
       </fieldset>
       {!locked && <PlanSummary />}
-      <button type="button" className="m-cta" disabled={locked || !calc || calc.arriveAt <= now} onClick={arm}>
+      <button type="button" className="m-cta" disabled={locked || !calc || calc.arriveAt <= now || over > 0} onClick={arm}>
         {editing ? '고친 대로 알람 켜기' : '알람 켜기'}
       </button>
-      {calc && calc.alarmAt <= now && !locked && <p className="m-note">알람 시각이 이미 지났어요. 도착 시각을 확인해 주세요.</p>}
+      {over > 0 && !locked && (
+        <p className="ps-over" role="alert">
+          도착 시각보다 {over}분 넘어요. 준비 시간과 이동 시간을 더하면 지금 시작해도 늦어요. 도착 시각을 늦추거나 시간을 줄여 주세요.
+        </p>
+      )}
+      {calc && calc.alarmAt <= now && over <= 0 && !locked && <p className="m-note">알람 시각이 이미 지났어요. 지금 바로 시작하면 맞출 수 있어요.</p>}
       {padded && !locked && <p className="m-note">처음 가는 시간대라 이동 시간을 넉넉하게 잡았어요({calc.ride.basis}). 알람이 울린 뒤 앱을 열면 다시 조회해요.</p>}
     </div>
   );

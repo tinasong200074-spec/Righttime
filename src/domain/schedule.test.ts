@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { fmtClock } from './format';
 import { judgeArrival, rec } from './recommend';
-import { calcPlan, computeSchedule, rollForward, scaleSteps } from './schedule';
+import { calcPlan, computeSchedule, rollForward, scaleSteps, overBy } from './schedule';
 import { applyTransitCheck, arrive, completeStep, createSession, depart, isGlowOn, snooze, startPrep, tickSession, toRecord, transitChecksDue } from './session';
 import { DAY, DEFAULT_SETTINGS, MIN, type Plan, type RecordRow } from './types';
 
@@ -177,5 +177,15 @@ describe('이동 시간 재확인', () => {
     const failed = applyTransitCheck(prep, null, 2);
     expect(failed.transitChecked).toBe(2);
     expect(failed.leaveAt).toBe(prep.leaveAt);
+  });
+});
+
+describe('overBy', () => {
+  const t0 = new Date(2026, 10, 27, 8, 0).getTime();
+  const c = (arriveMin: number) => ({ arriveAt: t0 + arriveMin * 60_000, prep: { val: 40, n: 0, basis: '' }, ride: { val: 30, n: 0, basis: '' }, waitMin: 0 });
+  it('준비와 이동을 더해 도착 시각을 넘기면 넘는 분을 돌려준다', () => {
+    expect(overBy(c(60), t0)).toBe(10); // 70분이 필요한데 60분 남음
+    expect(overBy(c(70), t0)).toBe(0); // 딱 맞음
+    expect(overBy(c(120), t0)).toBeLessThan(0); // 여유 있음
   });
 });

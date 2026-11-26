@@ -99,3 +99,8 @@ export function calcPlan(
     place,
   };
 }
+
+// 지금 바로 준비를 시작해도 도착 시각을 몇 분 넘기는지(준비 + 이동 기준). 0 이하면 맞출 수 있다
+export function overBy(c: Pick<PlanCalc, 'arriveAt' | 'prep' | 'ride' | 'waitMin'>, now: number): number {
+  return Math.ceil((now + (c.prep.val + c.ride.val + c.waitMin) * MIN - c.arriveAt) / MIN);
+}

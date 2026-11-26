@@ -70,7 +70,7 @@ npm run dev
 | 명령 | 하는 일 |
 |---|---|
 | `npm run dev` | 개발 서버. `api/` 서버 함수도 함께 동작합니다 |
-| `npm test` | 계산 로직 테스트 (157개) |
+| `npm test` | 계산 로직 테스트 (158개) |
 | `npm run demo:cases` | 시연용 정상·예외 사례를 실제 계산 함수로 실행해 결과를 찍습니다 |
 | `npm run demo:api` | 배포된 AI 서버에 정상·예외 요청을 보냅니다(Claude 호출 2회) |
 | `npm run typecheck` | 타입 검사 |
