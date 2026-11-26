@@ -2,7 +2,7 @@ import { useState } from 'react';
 import type { RoomState } from '../../app/state';
 import { useApp } from '../../app/store';
 import { fmtClock } from '../../domain/format';
-import { lateMessage } from '../../domain/message';
+import { lateInfo, lateMessage, projArrive } from '../../domain/message';
 import { memberLine, type RoomMember, type RoomView } from '../../domain/room';
 import { buildShareStatus, STAGE_ROWS } from '../../domain/share';
 import { roomUrl, sayInRoom, setRoomSharing } from '../../infra/rooms';
@@ -98,6 +98,8 @@ interface Props {
 export function RoomLive({ room, view, onBack, onOpen }: Props) {
   const { session, tone, now, shareName, actions } = useApp();
   const [msg, setMsg] = useState('');
+  // 늦는다고 알리기는 출발 시각이 지났고 늦을 것 같을 때만 보여 준다(알리기 화면의 문구와 같은 기준)
+  const canSay = !!session && room.sharing && now > session.leaveAt && lateInfo(projArrive(session, now), session.arriveAt).isLate;
   const server = view?.members.find((m) => m.isMe);
   // 서버에서 돌아오기(최대 5초)를 기다리지 않고, 이 기기가 아는 내 상태를 바로 보여 준다
   const local = session && room.sharing ? buildShareStatus(session, now, { name: shareName, showStage: true, showEta: true }) : null;
@@ -117,7 +119,7 @@ export function RoomLive({ room, view, onBack, onOpen }: Props) {
   return (
     <div className="m-screen">
       <TopBar title={view?.title ? `${view.title}` : '친구와 약속'} onBack={onBack} tag={<span className={`fr-tag ${room.sharing ? 'is-accent' : ''}`}>{room.sharing ? '공유 중' : '공유 꺼짐'}</span>} />
-      <MyHero me={me} canSay={!!session && room.sharing} onSay={say} />
+      <MyHero me={me} canSay={canSay} onSay={say} />
       <section className="m-card">
         <h2 className="m-sec-title" style={{ borderBottom: '1px solid var(--line)', paddingBottom: 6 }}>친구에게 보이는 것</h2>
         <Shown label="지금 단계" on={room.sharing} />

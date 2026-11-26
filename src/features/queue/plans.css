@@ -150,3 +150,41 @@
   width: 100%;
   margin-top: 8px;
 }
+
+/* 가장 급한 일정 아래에 작게 나열하는 나머지 약속 */
+.np-rest {
+  list-style: none;
+  margin: 0;
+  padding: 2px 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-card);
+  background: var(--surface);
+}
+.np-rest li {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  column-gap: 8px;
+  padding: 8px 0;
+  border-top: 1px solid var(--line);
+}
+.np-rest li:first-child {
+  border-top: 0;
+}
+.np-rest-name {
+  font-size: 0.875rem;
+  font-weight: 700;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.np-rest-time {
+  grid-column: 1;
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+.np-rest .np-del {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  background: none;
+}
