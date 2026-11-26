@@ -1,25 +1,17 @@
 import { useApp } from '../../app/store';
 import { roundCoord } from '../../domain/geo';
-import type { RainChoice } from '../../domain/types';
 import { Card, Icon, Pill } from '../../ui';
 import { WEATHER_CREDIT } from '../../infra/weather';
 import { readPositionOnce } from '../../infra/geo';
 import { useWeather, useWeatherBasis, type WeatherMode } from './useWeather';
 
-const CHOICES: Array<{ id: RainChoice; label: string }> = [
-  { id: 'auto', label: '자동' },
-  { id: 'none', label: '비 없음' },
-  { id: 'maybe', label: '비 올 수도' },
-  { id: 'yes', label: '비 와요' },
-];
-
 const NOTES: Partial<Record<WeatherMode, string>> = {
-  demo: '시연 모드에서는 날씨를 불러오지 않아요. 아래에서 직접 골라 볼 수 있어요.',
-  manual: '직접 고른 값을 쓰고 있어요. 자동 추천을 보려면 “자동”을 골라 주세요.',
+  demo: '시연 모드에서는 날씨를 불러오지 않아요.',
+  manual: '직접 고른 값을 쓰고 있어요.',
   off: '날씨 자동 추천이 꺼져 있어요. 설정에서 켤 수 있어요.',
   'too-far': '날씨 예보는 15일 이내 일정만 볼 수 있어요.',
   loading: '날씨를 불러오는 중이에요…',
-  error: '날씨를 불러오지 못했어요. 아래에서 직접 골라 주세요.',
+  error: '날씨를 불러오지 못했어요. 잠시 뒤 다시 열어 주세요.',
 };
 
 function LocationButton() {
@@ -57,10 +49,7 @@ function BasisRow() {
       {basis.kind === 'mine' && (
         <div className="f-chips">
           <button type="button" className="f-btn" onClick={reread}>
-            내 위치 다시 읽기
-          </button>
-          <button type="button" className="f-btn" onClick={() => actions.setWeatherCoord(null)}>
-            위치 지우기
+            새로고침
           </button>
         </div>
       )}
@@ -101,7 +90,7 @@ function ManualItems() {
 }
 
 export function WeatherCard() {
-  const { rain, weather, actions } = useApp();
+  const { rain, weather } = useApp();
   const mode = useWeather();
   const wet = mode === 'ok' ? weather?.rain : rain === 'yes' || rain === 'maybe';
 
@@ -116,13 +105,6 @@ export function WeatherCard() {
       {mode === 'need-location' && <LocationButton />}
       {mode === 'manual' && <ManualItems />}
       {NOTES[mode] && <p className="f-sub" aria-live="polite">{NOTES[mode]}</p>}
-      <div className="f-chips" role="group" aria-label="비 올지 직접 고르기">
-        {CHOICES.map((c) => (
-          <button key={c.id} type="button" className="f-chip" aria-pressed={rain === c.id} onClick={() => actions.setRain(c.id)}>
-            {c.label}
-          </button>
-        ))}
-      </div>
       <p className="f-credit">{WEATHER_CREDIT}</p>
     </Card>
   );
