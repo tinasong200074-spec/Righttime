@@ -121,3 +121,104 @@
   border-radius: 12px;
   background: var(--chip);
 }
+
+/* 문장 분석 */
+.r-h2 {
+  margin: 0 0 8px;
+  font-size: 1rem;
+  font-weight: 800;
+}
+.r-insights {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.r-insights li {
+  padding: 8px 0;
+  border-top: 1px solid var(--line);
+  font-size: 0.9375rem;
+}
+.r-insights li:first-child {
+  border-top: 0;
+  font-weight: 700;
+}
+
+/* 달력 */
+.r-cal-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.r-cal-head h2 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 800;
+}
+.r-cal-nav {
+  width: 44px;
+  height: 44px;
+  border: 0;
+  background: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+}
+.r-cal {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 2px;
+}
+.r-cal-week {
+  text-align: center;
+  font-size: 0.75rem;
+  color: var(--muted);
+  padding: 4px 0;
+}
+.r-cal-day {
+  min-height: 48px;
+  display: grid;
+  justify-items: center;
+  align-content: center;
+  border: 1.5px solid transparent;
+  border-radius: 12px;
+  background: none;
+  font-size: 0.875rem;
+  cursor: pointer;
+}
+.r-cal-day[aria-pressed='true'] {
+  border-color: var(--ink);
+  background: var(--accent-soft);
+  font-weight: 800;
+}
+.r-cal-mark {
+  min-height: 1rem;
+  font-size: 0.75rem;
+  line-height: 1;
+}
+.r-cal-legend {
+  margin: 8px 0 0;
+  font-size: 0.8125rem;
+}
+.r-detail {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--line);
+}
+.r-detail h3 {
+  margin: 0 0 6px;
+  font-size: 0.9375rem;
+  font-weight: 800;
+}
+.r-detail p {
+  margin: 0;
+}
+.r-detail-row {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  padding: 6px 0;
+}
+.r-detail-mark {
+  width: 24px;
+  text-align: center;
+  flex: none;
+}

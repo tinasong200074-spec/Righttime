@@ -3,14 +3,15 @@ import { fmtClock, fmtMin } from '../../domain/format';
 import { Icon } from '../../ui';
 import '../today/fields.css';
 import '../today/main.css';
-import { alarmCompare, averages, lastDays, placeStats } from './model';
+import { alarmCompare, averages, insights, lastDays, placeStats } from './model';
+import { RecordCalendar } from './RecordCalendar';
 import './records.css';
 
 function AlarmCard() {
   const { calc, plan, settings } = useApp();
   if (!calc) return null;
   const { before, after, diffMin } = alarmCompare(calc, plan, settings);
-  const change = diffMin > 0 ? `알람이 ${diffMin}분 앞당겨져요` : diffMin < 0 ? `알람이 ${-diffMin}분 늦춰져요` : '알람 시각이 그대로예요';
+  const change = diffMin > 0 ? `알람이 ${diffMin}분 빨라요` : diffMin < 0 ? `알람이 ${-diffMin}분 늦어요` : '알람 시각이 그대로예요';
   return (
     <section className="r-hero">
       <div className="r-hero-label">기록을 반영하면</div>
@@ -41,9 +42,26 @@ function Averages() {
   const a = averages(records);
   return (
     <section className="m-card r-stats">
-      <Stat value={fmtMin(a.wake)} label="시작시간" />
-      <Stat value={fmtMin(a.prep)} label="준비" />
-      <Stat value={signed(a.leave)} label="출발 시각" />
+      <Stat value={fmtMin(a.wake)} label="시작시간 평균" />
+      <Stat value={fmtMin(a.prep)} label="준비 평균" />
+      <Stat value={signed(a.leave)} label="출발 평균(계획 대비)" />
+    </section>
+  );
+}
+
+// 숫자를 문장으로 풀어 준다
+function Insights() {
+  const { records } = useApp();
+  const lines = insights(records);
+  if (lines.length === 0) return null;
+  return (
+    <section className="m-card">
+      <h2 className="r-h2">내 기록을 보면</h2>
+      <ul className="r-insights">
+        {lines.map((t) => (
+          <li key={t}>{t}</li>
+        ))}
+      </ul>
     </section>
   );
 }
@@ -119,7 +137,9 @@ export function RecordsScreen() {
       <AlarmCard />
       {hasData ? (
         <>
+          <Insights />
           <Averages />
+          <RecordCalendar />
           <PrepChart />
           <PlaceList />
         </>
