@@ -7,9 +7,10 @@
 - **종류·크기:** 중간 규모 웹앱. TypeScript, 3층 구조(`domain` ← `features` ← `data`/`infra`)를 전역 규칙 그대로 쓴다.
 - **줄 수:** 파일 300줄 권장·500줄 상한, 함수 50줄. 전역 기준 그대로.
 - **디자인:** 사용자가 준 목업(`docs/reference/제때 · 실시간 준비 현황 공유 목업.html`)이 기준이다. 색·아이콘·금지 사항은 명세 8장과 16장(포인트 색은 라임 하나, 빨강은 붉은 조명에만, 이모지·줄무늬 막대 금지). 색 값은 `src/app/tokens.css`의 변수만 쓴다.
-- **데이터 저장(ERD):** 기기 저장이 기본이고 서버 표는 `shares`, `push_jobs` 둘뿐이라 ERD 문서는 생략한다(PRD 7.3). 설계는 `supabase/migrations/`에 있다.
+- **데이터 저장(ERD):** 기기 저장이 기본이고 서버 표는 `shares`, `push_jobs`, `rooms`, `room_members` 넷이고 관계가 하나뿐이라 ERD 문서는 생략한다(PRD 7.3). 설계는 `supabase/migrations/`에 있다.
 - **QA 기록:** `docs/qa/` 폴더에 마크다운으로 남긴다.
 - **push·배포:** GitHub `https://github.com/tinasong200074-spec/Righttime.git` (`main`). `main`에 push하면 Vercel(`righttime` 프로젝트)이 자동 배포한다. push는 요청할 때만 한다.
+- **안드로이드 설치 앱:** `android/`(Capacitor)는 배포된 웹앱을 띄우는 껍데기다. 웹 코드만 바꿨으면 push로 끝나고, `android/`를 바꿨을 때만 APK를 다시 만들어 `apk/jette.apk`를 바꾼다.
 - **금지·제약:** 없음.
 
 # 전역 하네스 (모든 프로젝트 공통)
