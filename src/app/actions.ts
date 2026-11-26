@@ -4,7 +4,7 @@ import { setHome, toggleFav, touchSpot, type Spot } from '../domain/spots';
 import { addTransitLog } from '../domain/transitLog';
 import type { Arrival, GeoResult, MemoItem, Place, Plan, RainChoice, Settings, Tone, WeatherResult } from '../domain/types';
 import type { AskItem, HelperResult } from '../domain/ai';
-import { endDraftState, removeParkedState, startNewPlanState } from './queueState';
+import { endDraftState, removeParkedState, startEditState, startNewPlanState } from './queueState';
 import { addMemoItemsState, addMemosState, applyRecentState, armState, defaultState, endDemoState, loadSampleState, saveRecordState, startDemoState, type AppState, type RoomState, type ShareState } from './state';
 
 type SetState = (fn: (s: AppState) => AppState) => void;
@@ -42,6 +42,7 @@ function sessionActions(set: SetState, clock: Clock) {
     cancelSession: () => set((s) => endDraftState({ ...s, session: null })),
     startNewPlan: () => set((s) => startNewPlanState(s, clock.now())),
     cancelDraft: () => set(endDraftState),
+    startEdit: (id?: string) => set((s) => startEditState(s, id)),
     removeParked: (id: string) => set((s) => removeParkedState(s, id)),
     saveRecord: (excluded: boolean) =>
       set((s) => {

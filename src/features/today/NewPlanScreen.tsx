@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useApp } from '../../app/store';
 import { RecentPlans } from '../recent/RecentPlans';
 import './fields.css';
@@ -16,12 +16,19 @@ function useKeepAdding(armedHere: boolean) {
   useEffect(() => {
     if (canPark && !drafting && !armedHere) actions.startNewPlan();
   }, [canPark, drafting, armedHere, actions]);
-  useEffect(() => () => actions.cancelDraft(), [actions]);
+  // 탭을 나갈 때 정리한다. 개발 모드는 화면을 한 번 떼었다 다시 붙이므로, 바로 하지 않고 다시 붙으면 취소한다
+  const leaving = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  useEffect(() => {
+    clearTimeout(leaving.current);
+    return () => {
+      leaving.current = setTimeout(actions.cancelDraft, 0);
+    };
+  }, [actions]);
 }
 
 // 맨 위 안내: 이미 잡아 둔 약속 수, 최근 일정에서 고르기. 진행 중이거나 시연 중이면 잠근다
 function TopNotice({ locked }: { locked: boolean }) {
-  const { drafting, parked, recentPlans } = useApp();
+  const { drafting, editing, parked, recentPlans } = useApp();
   if (locked) {
     return (
       <section className="m-card">
@@ -31,7 +38,8 @@ function TopNotice({ locked }: { locked: boolean }) {
   }
   return (
     <>
-      {drafting && parked.length > 0 && <p className="m-note" style={{ margin: 0, textAlign: 'left' }}>잡아 둔 약속 {parked.length}개는 그대로 있어요. 새 약속을 더 잡을 수 있어요.</p>}
+      {editing && <p className="m-note" style={{ margin: 0, textAlign: 'left' }}>잡아 둔 약속을 고치는 중이에요. 고친 뒤 아래 버튼을 눌러야 바뀌고, 그냥 나가면 원래대로 남아요.</p>}
+      {!editing && drafting && parked.length > 0 && <p className="m-note" style={{ margin: 0, textAlign: 'left' }}>잡아 둔 약속 {parked.length}개는 그대로 있어요. 새 약속을 더 잡을 수 있어요.</p>}
       {recentPlans.length > 0 && (
         <section className="m-card">
           <RecentPlans />
@@ -54,7 +62,7 @@ function PrepField() {
 
 // 새 약속: 일정 이름, 시각(날짜·시각·요일 반복), 출발·도착, 준비 시간을 정하고 알람을 켠다
 export function NewPlanScreen({ onDone }: { onDone: () => void }) {
-  const { session, calc, now, actions } = useApp();
+  const { session, calc, now, editing, actions } = useApp();
   const [armedHere, setArmedHere] = useState(false);
   useKeepAdding(armedHere);
   const locked = session !== null && !armedHere;
@@ -83,7 +91,7 @@ export function NewPlanScreen({ onDone }: { onDone: () => void }) {
         <PrepField />
       </fieldset>
       <button type="button" className="m-cta" disabled={locked || !calc || calc.arriveAt <= now} onClick={arm}>
-        알람 켜기
+        {editing ? '고친 대로 알람 켜기' : '알람 켜기'}
       </button>
       {calc && calc.alarmAt <= now && !locked && <p className="m-note">알람 시각이 이미 지났어요. 도착 시각을 확인해 주세요.</p>}
       {padded && !locked && <p className="m-note">처음 가는 시간대라 이동 시간을 넉넉하게 잡았어요({calc.ride.basis}). 알람이 울린 뒤 앱을 열면 다시 조회해요.</p>}

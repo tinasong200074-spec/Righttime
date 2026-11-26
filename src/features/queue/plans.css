@@ -188,3 +188,29 @@
   grid-row: 1 / span 2;
   background: none;
 }
+
+/* 수정·삭제 작은 버튼 묶음 */
+.np-acts {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex: none;
+}
+.np-edit {
+  min-height: 24px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: var(--r-pill);
+  background: #fff;
+  color: var(--ink);
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+.np-rest .np-acts {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+}
+.np-rest .np-edit {
+  background: var(--chip);
+}

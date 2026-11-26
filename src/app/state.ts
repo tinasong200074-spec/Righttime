@@ -37,6 +37,7 @@ export interface AppState {
   helperDone: Record<string, boolean>; // 준비할 것·전날 할 일 체크
   parked: Booked[]; // 알람을 켜 둔 다른 약속(대기 목록). 맨 앞 약속이 끝나면 차례로 올라온다
   drafting: boolean; // 대기 목록을 둔 채 새 약속을 적는 중
+  editing: Booked | null; // 고치는 중인 약속의 원래 모습. 고치다 그만두면 이것으로 되돌린다
   hiddenChecks: string[]; // 체크리스트에서 지운 날씨 항목(내가 적은 것은 메모 자체를 지운다). 약속이 끝나면 비운다
   spots: Spot[]; // 출발·도착 칸에서 찾아 쓴 장소(검색 기록, 즐겨찾기, 집). 기기에만 둔다
 }
@@ -103,6 +104,7 @@ export function defaultState(now: number): AppState {
     helperDone: {},
     parked: [],
     drafting: false,
+    editing: null,
     spots: [],
     hiddenChecks: [],
   };
