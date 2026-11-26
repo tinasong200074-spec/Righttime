@@ -4,7 +4,7 @@ import type { RoomState } from '../../app/state';
 import type { CheerKey } from '../../domain/cheer';
 import { hostOf, type Friend, type RoomView } from '../../domain/room';
 import { accountAvailable, callRpc, hasAccount } from '../../infra/account';
-import { cheerInRoom, setRoomSharing } from '../../infra/rooms';
+import { cheerInRoom } from '../../infra/rooms';
 import { useFriends, useRoomView } from '../room/useRoomView';
 import '../today/fields.css';
 import '../today/main.css';
@@ -51,23 +51,14 @@ function Waiting({ onBack, onLeave }: { onBack: () => void; onLeave: () => void 
 }
 
 // 링크나 코드로 들어온 사람, 친구가 골라서 초대한 사람은 보낸 친구의 준비 단계 화면만 본다.
-// 내 상태는 "나도 공유하기"를 눌러야 올라간다
+// 들어온 쪽은 보기만 한다(내 준비 현황을 올리는 버튼은 두지 않는다)
 function JoinedRoute({ room, view, now, toList, refresh }: { room: RoomState; view: RoomView | null; now: number; toList: () => void; refresh: () => void }) {
   const { actions } = useApp();
   const leave = () => actions.setRoom(null);
   const host = view ? hostOf(view.members) : null;
   if (!host || !view) return <Waiting onBack={toList} onLeave={leave} />;
   const cheer = (key: CheerKey) => cheerInRoom(room.roomId, host.userId, key).finally(refresh);
-  const toggle = () => {
-    void setRoomSharing(room.roomId, !room.sharing);
-    actions.setRoom({ ...room, sharing: !room.sharing });
-  };
-  const footer = (
-    <button type="button" className="fr-ghost" onClick={toggle}>
-      {room.sharing ? '내 준비 현황 공유 끄기' : '나도 내 준비 현황 공유하기'}
-    </button>
-  );
-  return <MemberView m={host} arriveMs={view.arriveMs} now={now} onBack={toList} onCheer={cheer} onLeave={leave} footer={footer} />;
+  return <MemberView m={host} arriveMs={view.arriveMs} now={now} onBack={toList} onCheer={cheer} onLeave={leave} />;
 }
 
 // 친구 탭: 목록 → 친구 추가(방 만들기·들어가기, 목업 1번) → 내 화면(2번) → 친구 상태(3·4·5번)
