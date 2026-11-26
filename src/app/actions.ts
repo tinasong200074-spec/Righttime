@@ -4,7 +4,7 @@ import { setHome, toggleFav, touchSpot, type Spot } from '../domain/spots';
 import { addTransitLog } from '../domain/transitLog';
 import type { Arrival, GeoResult, MemoItem, Place, Plan, RainChoice, Settings, Tone, WeatherResult } from '../domain/types';
 import type { AskItem, HelperResult } from '../domain/ai';
-import { endDraftState, removeParkedState, startEditState, startNewPlanState } from './queueState';
+import { endDraftState, planFromEventState, removeParkedState, startEditState, startNewPlanState } from './queueState';
 import { addMemoItemsState, addMemosState, applyRecentState, armState, defaultState, endDemoState, loadSampleState, saveRecordState, startDemoState, type AppState, type RoomState, type ShareState } from './state';
 
 type SetState = (fn: (s: AppState) => AppState) => void;
@@ -41,6 +41,7 @@ function sessionActions(set: SetState, clock: Clock) {
     toggleCheck: (key: string) => onSession(set, (x) => ({ ...x, checked: { ...x.checked, [key]: !x.checked[key] } })),
     cancelSession: () => set((s) => endDraftState({ ...s, session: null })),
     startNewPlan: () => set((s) => startNewPlanState(s, clock.now())),
+    planFromEvent: (e: { ms: number; title?: string }) => set((s) => planFromEventState(s, clock.now(), e)),
     cancelDraft: () => set(endDraftState),
     startEdit: (id?: string) => set((s) => startEditState(s, id)),
     removeParked: (id: string) => set((s) => removeParkedState(s, id)),

@@ -27,11 +27,11 @@ function CarryScreen({ go }: { go: (v: View) => void }) {
 }
 
 // 보조 화면: 오늘 화면에서 탭한 칸을 고치는 곳
-function Sub({ view, go, back }: { view: Exclude<View, 'main'>; go: (v: View) => void; back: () => void }) {
+function Sub({ view, go, back, onPlan }: { view: Exclude<View, 'main'>; go: (v: View) => void; back: () => void; onPlan: () => void }) {
   const body: Record<Exclude<View, 'main'>, { title: string; badge?: string; node: ReactNode }> = {
     weather: { title: '날씨', node: <WeatherCard /> },
     carry: { title: '챙길 것', node: <CarryScreen go={go} /> },
-    helper: { title: '일정 준비 도우미', badge: '초안', node: <><HelperForm /><HelperResult /></> },
+    helper: { title: '일정 준비 도우미', badge: '초안', node: <><HelperForm /><HelperResult onPlan={onPlan} /></> },
   };
   const b = body[view];
   return (
@@ -51,7 +51,8 @@ export function TodayScreen({ onEdit }: { onEdit?: () => void }) {
   }, [plan.waitMin, session, actions]);
   const go = (v: View) => nav.push(v);
   const back = () => nav.back(nav.view === 'helper' ? 'carry' : 'main');
-  return nav.view === 'main' ? <TodayMain go={go} edit={onEdit ?? (() => undefined)} /> : <Sub view={nav.view} go={go} back={back} />;
+  const edit = onEdit ?? (() => undefined);
+  return nav.view === 'main' ? <TodayMain go={go} edit={edit} /> : <Sub view={nav.view} go={go} back={back} onPlan={edit} />;
 }
 
 export { NewPlanScreen } from './NewPlanScreen';

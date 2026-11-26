@@ -64,10 +64,14 @@ function CarryItems({ notice, general }: { notice: AskItem[]; general: AskItem[]
   );
 }
 
-function EventRow({ event }: { event: NonNullable<Result['event']> }) {
+function EventRow({ event, onPlan }: { event: NonNullable<Result['event']>; onPlan: () => void }) {
   const { actions } = useApp();
   const when = `${fmtDay(event.ms)} ${fmtClock(event.ms)}`;
-  const apply = () => actions.updatePlan({ arriveAt: event.ms, ...(event.title ? { title: event.title } : {}) });
+  // 새 약속 화면으로 넘어가야 넣은 시각이 눈에 보인다
+  const apply = () => {
+    actions.planFromEvent(event);
+    onPlan();
+  };
   return (
     <Section icon="clock" title="읽은 일정">
       <p style={{ margin: '0 0 8px' }}>{[event.title, when, event.place].filter(Boolean).join(' · ')}</p>
@@ -80,7 +84,7 @@ function EventRow({ event }: { event: NonNullable<Result['event']> }) {
 }
 
 // 도우미가 읽은 결과를 목업 10번처럼 "챙길 것 / 준비해야 할 것" 카드로 보여 준다
-export function HelperResult() {
+export function HelperResult({ onPlan }: { onPlan: () => void }) {
   const { helper, settings, actions } = useApp();
   if (!helper) return null;
   const hasCarry = helper.notice.length + helper.general.length > 0;
@@ -98,7 +102,7 @@ export function HelperResult() {
       <Section icon="clock" title={`전날 할 일 · 전날 ${settings.eveHour}시쯤`}>
         <Tasks prefix="eve" items={helper.eve} />
       </Section>
-      {helper.event && <EventRow event={helper.event} />}
+      {helper.event && <EventRow event={helper.event} onPlan={onPlan} />}
       <p className="f-sub">AI가 만든 제안이라 틀릴 수 있어요. 공식 안내를 먼저 확인하세요.</p>
       <button type="button" className="m-ghost" onClick={() => actions.setHelper(null)}>
         결과 지우기

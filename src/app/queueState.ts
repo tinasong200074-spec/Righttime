@@ -26,6 +26,15 @@ export function startNewPlanState(s: AppState, now: number): AppState {
   return { ...s, parked, session: null, plan: freshPlan(s.plan, now), drafting: true, weather: null, helper: null, helperDone: {} };
 }
 
+// 도우미가 읽은 일정을 새 약속의 도착 시각으로 넣는다. 알람을 켜 둔 약속이 있으면 그 약속을 덮어쓰지 않고
+// 대기 목록으로 옮긴 뒤 새로 적는다. 도우미 결과는 이 새 약속의 것이라 지우지 않는다
+export function planFromEventState(s: AppState, now: number, e: { ms: number; title?: string }): AppState {
+  const base = s.session ? startNewPlanState(s, now) : s;
+  if (base.session) return s; // 진행 중이거나 시연 중이면 건드리지 않는다
+  const plan = { ...base.plan, arriveAt: e.ms, ...(e.title ? { title: e.title } : {}) };
+  return { ...base, plan, helper: s.helper, helperDone: s.helperDone };
+}
+
 // 잡아 둔 약속을 고치기 시작한다. 원래 모습을 따로 두고, 그 약속의 내용을 새 약속 화면에 채운다.
 // id가 없으면 맨 앞 약속, 있으면 대기 중인 약속을 고친다
 export function startEditState(s: AppState, id?: string): AppState {
