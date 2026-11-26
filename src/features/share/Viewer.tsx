@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react';
 import { fmtClock } from '../../domain/format';
+import { CHEER_EMOJI, CHEER_TEXT, LINK_CHEERS, type CheerEmojiKey, type CheerKey } from '../../domain/cheer';
 import { isStale, STAGE_ROWS } from '../../domain/share';
-import { fetchShare, type SharedView } from '../../infra/share';
+import { cheerShare, fetchShare, type SharedView } from '../../infra/share';
 import { Icon, Pill } from '../../ui';
+import '../friends/cheer.css';
 import './share.css';
 
 const POLL_MS = 5000;
@@ -54,6 +56,36 @@ function StageList({ view, stale }: { view: SharedView; stale: boolean }) {
         );
       })}
     </ol>
+  );
+}
+
+// 보는 사람이 보낼 수 있는 한마디 두 개와 이모티콘 일곱 개. 누르면 공유한 사람 화면 맨 위에 5초 동안 뜬다
+function SendBox({ token }: { token: string }) {
+  const [sent, setSent] = useState('');
+  const send = async (key: CheerKey, label: string) => {
+    setSent('보내는 중…');
+    setSent((await cheerShare(token, key)) ? `“${label}” 보냈어요` : '보내지 못했어요. 잠시 뒤 다시 눌러 주세요.');
+  };
+  return (
+    <section className="sv-send" aria-label="한마디 보내기">
+      <div className="cheer-row">
+        {LINK_CHEERS.map((k) => (
+          <button key={k} type="button" className="sv-say" onClick={() => send(k, CHEER_TEXT[k])}>
+            {CHEER_TEXT[k]}
+          </button>
+        ))}
+      </div>
+      <div className="cheer-emojis" role="group" aria-label="이모티콘 보내기">
+        {(Object.keys(CHEER_EMOJI) as CheerEmojiKey[]).map((k) => (
+          <button key={k} type="button" className="cheer-emoji" aria-label={`${CHEER_EMOJI[k].label} 보내기`} onClick={() => send(k, CHEER_EMOJI[k].icon)}>
+            {CHEER_EMOJI[k].icon}
+          </button>
+        ))}
+      </div>
+      <p className="cheer-sent" role="status">
+        {sent}
+      </p>
+    </section>
   );
 }
 
@@ -122,6 +154,7 @@ export function Viewer({ token }: { token: string }) {
 
       <EtaHero view={view} stale={stale} now={now} />
       {view.stage && <StageList view={view} stale={stale} />}
+      <SendBox token={token} />
 
       <p className="sv-note">
         {stale

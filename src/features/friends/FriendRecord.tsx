@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
+import { useApp } from '../../app/store';
 import type { Friend } from '../../domain/room';
 import { ActiveMark } from './ActiveMark';
+import { FriendCalendar } from './FriendCalendar';
 import { TopBar } from './TopBar';
 
 // 목업 15번의 ✅·⏰ 표시는 목업과 명세 7.3에 그대로 적힌 것이라 글자 그대로 쓴다(줄 늘어놓기는 하지 않는다)
@@ -13,9 +15,9 @@ function Count({ icon, n, label }: { icon: string; n: number; label: string }) {
   );
 }
 
-function Row({ who, kept, late }: { who: string; kept: number; late: number }) {
+function Row({ who, kept, late, tone }: { who: string; kept: number; late: number; tone: 'me' | 'friend' }) {
   return (
-    <div className="fr-tally-row">
+    <div className={`fr-tally-row is-${tone}`}>
       <span className="m-muted" style={{ fontSize: '0.9375rem' }}>
         {who}
       </span>
@@ -55,8 +57,9 @@ function CutButton({ name, onCut }: { name: string; onCut: () => Promise<boolean
   );
 }
 
-// 친구 한 명의 약속 기록: 함께한 약속 수와 지켰어요/늦었어요 누적(나, 친구)
+// 친구 한 명의 약속 기록: 함께한 약속 수, 지켰어요/늦었어요 누적, 날짜별 달력(나는 빨강 테두리, 친구는 파랑 테두리)
 export function FriendRecord({ friend: f, onBack, onCut }: { friend: Friend; onBack: () => void; onCut: () => Promise<boolean> }) {
+  const { now } = useApp();
   return (
     <div className="m-screen">
       <TopBar title={f.name} onBack={onBack} />
@@ -72,10 +75,11 @@ export function FriendRecord({ friend: f, onBack, onCut }: { friend: Friend; onB
           </span>
         </div>
         <div className="fr-tally">
-          <Row who="나" kept={f.myKept} late={f.myLate} />
-          <Row who={f.name} kept={f.theirKept} late={f.theirLate} />
+          <Row who="나" kept={f.myKept} late={f.myLate} tone="me" />
+          <Row who={f.name} kept={f.theirKept} late={f.theirLate} tone="friend" />
         </div>
       </section>
+      <FriendCalendar friendId={f.userId} name={f.name} now={now} />
       <div className="fr-legend">
         <span>✅ 지켰어요</span>
         <span>⏰ 늦었어요</span>

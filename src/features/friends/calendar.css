@@ -1,0 +1,82 @@
+/* 친구와 함께한 약속 달력. 테두리 색으로 누구의 결과인지 가른다: 빨강 = 나, 파랑 = 친구 */
+
+.fc-day {
+  min-height: 56px;
+}
+.fc-marks {
+  min-height: 22px;
+  display: grid;
+  place-items: center;
+}
+.fc-pair {
+  display: inline-flex;
+  gap: 2px;
+}
+.fc-mark {
+  width: 20px;
+  height: 20px;
+  display: grid;
+  place-items: center;
+  border: 2px solid var(--empty);
+  border-radius: 6px;
+  background: var(--surface);
+  font-size: 0.625rem;
+  line-height: 1;
+}
+.fc-mark.is-me,
+.fc-who.is-me {
+  border-color: var(--danger);
+}
+.fc-mark.is-friend,
+.fc-who.is-friend {
+  border-color: var(--friend);
+}
+.fc-who {
+  display: inline-block;
+  padding: 1px 8px;
+  border: 2px solid var(--empty);
+  border-radius: var(--r-pill);
+  font-size: 0.8125rem;
+  font-weight: 700;
+}
+.fc-legend {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin: 8px 0 0;
+  font-size: 0.8125rem;
+  color: var(--muted);
+}
+.fc-legend .fc-who {
+  color: var(--ink);
+}
+.fc-detail {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--line);
+}
+.fc-detail h3 {
+  margin: 0 0 6px;
+  font-size: 0.9375rem;
+  font-weight: 800;
+}
+.fc-detail p {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin: 0 0 6px;
+}
+
+/* 누적 횟수 줄도 같은 색 테두리로 감싼다 */
+.fr-tally-row.is-me,
+.fr-tally-row.is-friend {
+  padding: 6px 10px;
+  border: 2px solid var(--danger);
+  border-radius: 12px;
+}
+.fr-tally-row.is-friend {
+  border-color: var(--friend);
+  margin-top: 6px;
+}

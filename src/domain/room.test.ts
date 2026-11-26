@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { cleanCode, codeFromHash, hostOf, memberLine, resultOf, roomOver, stageChanges, stageNews, type RoomMember } from './room';
+import { cleanCode, codeFromHash, daysWith, hostOf, memberLine, resultOf, roomOver, stageChanges, stageNews, type RoomMember } from './room';
 
 describe('resultOf', () => {
   it('늦지 않았으면 지킨 것, 도착 기록이 없으면 집계하지 않는다', () => {
@@ -80,5 +80,15 @@ describe('hostOf, roomOver', () => {
     expect(roomOver([me, done, m('idle')])).toBe(true);
     expect(roomOver([me, done, m('going', { stage: 'travel' })])).toBe(false); // 아직 오는 사람이 있다
     expect(roomOver([me, m('idle')])).toBe(false); // 아무도 결과를 남기지 않았다
+  });
+});
+
+describe('daysWith', () => {
+  const at = (mo: number, d: number, h: number) => new Date(2026, mo, d, h).getTime();
+  const row = (arriveMs: number, title: string) => ({ arriveMs, title, mine: 'kept' as const, theirs: 'late' as const });
+  it('그 달의 약속만 날짜별로, 시각 순으로 모은다', () => {
+    const out = daysWith([row(at(10, 20, 19), '저녁'), row(at(10, 20, 9), '아침'), row(at(11, 1, 9), '다음 달')], 2026, 10);
+    expect(Object.keys(out)).toEqual(['20']);
+    expect(out[20].map((r) => r.title)).toEqual(['아침', '저녁']);
   });
 });

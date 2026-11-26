@@ -11,6 +11,7 @@ export const CHEER_TEXT = {
   soon: '곧 봐요',
   waiting: '기다리고 있어요',
   here: '먼저 도착했어요',
+  tardy: '좀 늦네요',
 } as const;
 
 export const CHEER_EMOJI = {
@@ -26,6 +27,9 @@ export const CHEER_EMOJI = {
 export type CheerTextKey = keyof typeof CHEER_TEXT;
 export type CheerEmojiKey = keyof typeof CHEER_EMOJI;
 export type CheerKey = CheerTextKey | CheerEmojiKey;
+
+// 링크로 보는 사람(앱 없이 보는 약속 상대)에게 보여 주는 한마디
+export const LINK_CHEERS: CheerTextKey[] = ['slow', 'tardy'];
 
 const SOON_MIN = 30;
 

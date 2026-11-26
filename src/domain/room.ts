@@ -108,3 +108,22 @@ export function roomOver(members: RoomMember[]): boolean {
   const others = members.filter((m) => !m.isMe);
   return others.some((m) => m.result !== null) && !others.some(isActive);
 }
+
+// 친구와 함께한 약속 하나의 결과(달력용)
+export interface FriendDay {
+  arriveMs: number;
+  title: string;
+  mine: 'kept' | 'late' | null;
+  theirs: 'kept' | 'late' | null;
+}
+
+// 그 달의 날짜별로 모은다(약속 시각 순)
+export function daysWith(history: FriendDay[], year: number, month: number): Record<number, FriendDay[]> {
+  const out: Record<number, FriendDay[]> = {};
+  for (const h of [...history].sort((a, b) => a.arriveMs - b.arriveMs)) {
+    const d = new Date(h.arriveMs);
+    if (d.getFullYear() !== year || d.getMonth() !== month) continue;
+    (out[d.getDate()] ??= []).push(h);
+  }
+  return out;
+}

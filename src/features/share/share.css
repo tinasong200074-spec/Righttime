@@ -430,3 +430,18 @@
 .share-two .share-ok {
   flex: 1;
 }
+
+/* 링크로 보는 화면의 한마디 보내기 */
+.sv-send {
+  display: grid;
+  gap: 8px;
+}
+.sv-say {
+  min-height: 48px;
+  border: 1.5px solid var(--ink);
+  border-radius: var(--r-btn);
+  background: var(--surface);
+  font-size: 0.9375rem;
+  font-weight: 700;
+  cursor: pointer;
+}

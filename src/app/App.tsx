@@ -8,6 +8,7 @@ import { RecordsScreen } from '../features/records';
 import { FriendsScreen } from '../features/room';
 import { SettingsScreen } from '../features/settings';
 import { ShareBar } from '../features/share/ShareBar';
+import { ShareToast } from '../features/share/ShareToast';
 import { SharedInbox } from '../features/shareTarget/SharedInbox';
 import { NewPlanScreen, TodayScreen } from '../features/today';
 import { Icon, type IconName } from '../ui';
@@ -46,6 +47,7 @@ function Shell() {
     <div className="app">
       <DemoBadge />
       <CheerToast />
+      <ShareToast />
       {!inMorning && <InviteBanner onOpen={() => setTab('friends')} />}
       <AlarmHint />
       <ShareBar />

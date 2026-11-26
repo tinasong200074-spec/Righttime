@@ -1,3 +1,4 @@
+import type { CheerKey } from '../../domain/cheer';
 import type { ShareStatus } from '../../domain/share';
 
 // Supabase 함수(RPC)를 직접 부른다. 주소와 anon 키는 공개돼도 되는 값이고,
@@ -50,6 +51,13 @@ export interface SharedView extends ShareStatus {
 
 // 없거나 닫힌 링크면 null
 export const fetchShare = (token: string) => rpc<SharedView | null>('share_get', { p_token: token });
+
+// 링크로 보는 사람이 한마디·이모티콘을 보낸다(정해 둔 것만)
+export const cheerShare = (token: string, kind: CheerKey) => rpc<boolean>('share_cheer', { p_token: token, p_kind: kind });
+
+// 공유한 기기만 읽는다: 링크로 보는 사람이 마지막으로 보낸 것
+export const fetchShareInbox = (c: ShareCreds) =>
+  rpc<{ cheer: string | null; cheerAtMs: number | null } | null>('share_inbox', { p_token: c.token, p_write_key: c.writeKey });
 
 export const shareUrl = (token: string) => `${location.origin}/#s=${token}`;
 

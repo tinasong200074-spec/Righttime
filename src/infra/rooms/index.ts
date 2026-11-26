@@ -1,4 +1,4 @@
-import type { Friend, Invite, RoomView } from '../../domain/room';
+import type { Friend, FriendDay, Invite, RoomView } from '../../domain/room';
 import type { ShareStatus } from '../../domain/share';
 import { callRpc } from '../account';
 import type { CheerKey } from '../../domain/cheer';
@@ -46,3 +46,6 @@ export const fetchInvites = async () => (await callRpc<Invite[]>('my_rooms', {})
 export const fetchFriends = async () => (await callRpc<Friend[]>('my_friends', {})) ?? [];
 
 export const roomUrl = (code: string) => `${location.origin}/#r=${code}`;
+
+// 그 친구와 함께한 약속의 날짜별 결과
+export const fetchFriendHistory = async (friendId: string) => (await callRpc<FriendDay[]>('friend_history', { p_other: friendId })) ?? [];
