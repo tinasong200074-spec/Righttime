@@ -1,6 +1,7 @@
 import type { Friend, RoomView } from '../../domain/room';
 import type { ShareStatus } from '../../domain/share';
 import { callRpc } from '../account';
+import type { CheerKey } from '../../domain/cheer';
 
 // 친구 약속 방 호출부. 모두 기기 계정으로 로그인한 상태에서 DB 함수를 부른다.
 
@@ -29,7 +30,7 @@ export const pushRoomStatus = (roomId: string, st: ShareStatus) =>
 
 export const sayInRoom = (roomId: string, message: string) => callRpc<boolean>('room_say', { p_room: roomId, p_message: message });
 
-export const cheerInRoom = (roomId: string, toUserId: string, kind: 'slow' | 'ok') =>
+export const cheerInRoom = (roomId: string, toUserId: string, kind: CheerKey) =>
   callRpc<boolean>('room_cheer', { p_room: roomId, p_to: toUserId, p_kind: kind });
 
 export const setRoomSharing = (roomId: string, on: boolean) => callRpc<boolean>('room_sharing', { p_room: roomId, p_on: on });

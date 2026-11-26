@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useApp } from '../../app/store';
 import type { RoomState } from '../../app/state';
+import type { CheerKey } from '../../domain/cheer';
 import type { Friend, RoomView } from '../../domain/room';
 import { accountAvailable, callRpc, hasAccount } from '../../infra/account';
 import { cheerInRoom } from '../../infra/rooms';
@@ -55,7 +56,7 @@ function JoinedRoute({ room, view, now, toList, refresh }: { room: RoomState; vi
   const leave = () => actions.setRoom(null);
   const host = view?.members.find((x) => !x.isMe);
   if (!host || !view) return <Waiting onBack={toList} onLeave={leave} />;
-  const cheer = () => void cheerInRoom(room.roomId, host.userId, host.lateMin ? 'ok' : 'slow').then(refresh);
+  const cheer = (key: CheerKey) => cheerInRoom(room.roomId, host.userId, key).finally(refresh);
   return <MemberView m={host} arriveMs={view.arriveMs} now={now} onBack={toList} onCheer={cheer} onLeave={leave} />;
 }
 
@@ -92,7 +93,7 @@ export function FriendsScreen() {
   if (view.name === 'member' && room && roomView) {
     const m = roomView.members.find((x) => x.userId === view.id);
     if (m) {
-      const cheer = () => void cheerInRoom(room.roomId, m.userId, m.lateMin ? 'ok' : 'slow').then(refresh);
+      const cheer = (key: CheerKey) => cheerInRoom(room.roomId, m.userId, key).finally(refresh);
       return <MemberView m={m} arriveMs={roomView.arriveMs} now={now} onBack={() => nav.back({ name: 'live' })} onCheer={cheer} />;
     }
   }

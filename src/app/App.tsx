@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { CheerToast } from '../features/friends/CheerToast';
 import { MorningFlow } from '../features/morning';
 import { AlarmHint } from '../features/push/AlarmHint';
 import { PushToggle } from '../features/push/PushToggle';
@@ -43,6 +44,7 @@ function Shell() {
   return (
     <div className="app">
       <DemoBadge />
+      <CheerToast />
       <AlarmHint />
       <ShareBar />
       <SharedInbox />

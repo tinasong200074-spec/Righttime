@@ -16,6 +16,7 @@ export interface RoomMember {
   message: string | null;
   cheer: string | null; // 나에게 온 안심 메시지(내 행에만 온다)
   cheerFrom: string | null;
+  cheerAtMs?: number | null; // 받은 시각(같은 말을 다시 받아도 알 수 있게)
   result: 'kept' | 'late' | null;
   updatedAtMs: number;
 }

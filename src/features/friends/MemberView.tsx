@@ -1,15 +1,18 @@
+import { useState } from 'react';
 import { fmtClock } from '../../domain/format';
 import type { RoomMember } from '../../domain/room';
 import { moodOf, sceneOf, type Mood } from './memberScene';
 import { Timeline } from './Timeline';
 import { TopBar } from './TopBar';
+import { CHEER_EMOJI, CHEER_TEXT, cheerOptions, type CheerEmojiKey, type CheerKey } from '../../domain/cheer';
+import './cheer.css';
 
 interface Props {
   m: RoomMember;
   arriveMs: number;
   now: number;
   onBack: () => void;
-  onCheer: () => void;
+  onCheer: (key: CheerKey) => Promise<boolean | null>;
   onLeave?: () => void; // 링크로 들어온 사람에게만: 이 화면에서 바로 방을 나간다
 }
 
@@ -58,6 +61,36 @@ const subject = (name: string) => {
   return code >= 0 && code % 28 !== 0 ? '이가' : '가';
 };
 
+// 한마디 두 개(시간에 따라 달라진다)와 이모티콘 일곱 개. 누르면 바로 보낸다
+function CheerBox({ m, arriveMs, now, onCheer }: Pick<Props, 'm' | 'arriveMs' | 'now' | 'onCheer'>) {
+  const [sent, setSent] = useState('');
+  const send = async (key: CheerKey, label: string) => {
+    setSent('보내는 중…');
+    setSent((await onCheer(key)) ? `“${label}” 보냈어요` : '보내지 못했어요. 잠시 뒤 다시 눌러 주세요.');
+  };
+  return (
+    <>
+      <div className="cheer-row">
+        {cheerOptions({ arriveMs, now, lateMin: m.lateMin }).map((k) => (
+          <button key={k} type="button" className="fr-ghost" onClick={() => send(k, CHEER_TEXT[k])}>
+            {CHEER_TEXT[k]}
+          </button>
+        ))}
+      </div>
+      <div className="cheer-emojis" role="group" aria-label="이모티콘 보내기">
+        {(Object.keys(CHEER_EMOJI) as CheerEmojiKey[]).map((k) => (
+          <button key={k} type="button" className="cheer-emoji" aria-label={`${CHEER_EMOJI[k].label} 보내기`} onClick={() => send(k, CHEER_EMOJI[k].icon)}>
+            {CHEER_EMOJI[k].icon}
+          </button>
+        ))}
+      </div>
+      <p className="cheer-sent" role="status">
+        {sent}
+      </p>
+    </>
+  );
+}
+
 // 친구 한 명의 상태 화면: 준비 중 / 늦을 것 같을 때 / 확인 안 됨(목업 3·4·5번). 재촉 없이 안심 메시지만 보낸다
 export function MemberView({ m, arriveMs, now, onBack, onCheer, onLeave }: Props) {
   const mood = moodOf(m, now);
@@ -81,11 +114,7 @@ export function MemberView({ m, arriveMs, now, onBack, onCheer, onLeave }: Props
         {mood === 'stale' ? '단계는 직접 눌러야 바뀌어요. 지금과 다를 수 있어요.' : '이 약속에서만 공유돼요. 몇 번 봤는지는 알려 주지 않아요.'}
       </p>
       <div className="m-spacer" />
-      {!m.result && m.sharing && (
-        <button type="button" className="fr-ghost" onClick={onCheer}>
-          {m.lateMin ? '‘괜찮아요, 천천히 와요’ 보내기' : '‘천천히 와요’ 보내기'}
-        </button>
-      )}
+      {!m.result && m.sharing && <CheerBox m={m} arriveMs={arriveMs} now={now} onCheer={onCheer} />}
       {onLeave && (
         <button type="button" className="fr-exit" style={{ alignSelf: 'center' }} onClick={onLeave}>
           방에서 나가기
