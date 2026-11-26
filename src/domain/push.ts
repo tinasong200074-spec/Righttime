@@ -16,7 +16,7 @@ export function buildPushSchedule(s: Session | null, now: number, preLeave: numb
   if (!s || s.demo) return [];
   const out: PushEntry[] = [];
   const wakeAt = s.state === 'snoozed' ? s.nextRingAt : s.state === 'armed' ? s.alarmAt : undefined;
-  if (wakeAt !== undefined) out.push({ at: wakeAt, title: '일어날 시간이에요', body: '앱을 열어 알람을 끄고 준비를 시작해요.' });
+  if (wakeAt !== undefined) out.push({ at: wakeAt, title: '시작할 시간이에요', body: '앱을 열어 알람을 끄고 준비를 시작해요.' });
   const beforeLeave = s.state !== 'travel' && s.state !== 'summary';
   if (beforeLeave) {
     out.push({ at: s.leaveAt - preLeave * MIN, title: `출발 ${preLeave}분 전이에요`, body: '챙길 것을 확인해요.' });

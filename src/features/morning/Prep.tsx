@@ -8,7 +8,7 @@ function Stats({ s, now }: { s: Session; now: number }) {
   return (
     <dl className="morning-stats">
       <div>
-        <dt>기상</dt>
+        <dt>시작시간</dt>
         <dd>{fmtMin(s.latency ?? 0)}</dd>
       </div>
       <div>
@@ -45,7 +45,7 @@ export function Prep() {
           {fmtTimer(prepElapsedMs(s, now))}
         </p>
         <p className="ui-hero-label">준비한 시간</p>
-        <FillBar segments={bar.segments} progress={bar.progress} label="기상과 준비로 지난 시간" />
+        <FillBar segments={bar.segments} progress={bar.progress} label="시작시간과 준비로 지난 시간" />
         <div className="morning-axis">
           <span>{fmtClock(wakeStartAt(s))}</span>
           <span>{fmtClock(s.prepStartAt ?? now)}</span>

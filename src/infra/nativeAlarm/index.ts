@@ -18,7 +18,7 @@ function prepare(): Promise<boolean> {
   ready ??= (async () => {
     const perm = await LocalNotifications.requestPermissions();
     if (perm.display !== 'granted') return false;
-    await LocalNotifications.createChannel({ id: CHANNEL, name: '알람', description: '기상·출발 알람', importance: 5, sound: SOUND, vibration: true, visibility: 1 });
+    await LocalNotifications.createChannel({ id: CHANNEL, name: '알람', description: '시작시간·출발 알람', importance: 5, sound: SOUND, vibration: true, visibility: 1 });
     return true;
   })().catch(() => false);
   return ready;

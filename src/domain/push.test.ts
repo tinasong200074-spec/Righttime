@@ -17,14 +17,14 @@ const armed = createSession(c, '', at(6, 0), false);
 const times = (list: Array<{ at: number }>) => list.map((e) => e.at);
 
 describe('buildPushSchedule', () => {
-  it('알람을 켜면 기상, 출발 5분 전, 출발 세 번', () => {
+  it('알람을 켜면 시작시간, 출발 5분 전, 출발 세 번', () => {
     expect(times(buildPushSchedule(armed, at(6, 0), 5))).toEqual([at(7, 24), at(8, 9), at(8, 14)]);
   });
   it('미루면 다시 울릴 시각으로 바뀐다', () => {
     const s = snooze(tickSession(armed, at(7, 24)), at(7, 25), 5);
     expect(times(buildPushSchedule(s, at(7, 25), 5))[0]).toBe(at(7, 30));
   });
-  it('준비를 시작하면 기상 알림은 빠지고, 출발하면 모두 빠진다', () => {
+  it('준비를 시작하면 시작시간 알림은 빠지고, 출발하면 모두 빠진다', () => {
     const prep = startPrep(tickSession(armed, at(7, 24)), at(7, 30));
     expect(times(buildPushSchedule(prep, at(7, 30), 5))).toEqual([at(8, 9), at(8, 14)]);
     expect(buildPushSchedule(depart(prep, at(8, 14)), at(8, 14), 5)).toEqual([]);
@@ -40,7 +40,7 @@ describe('buildPushSchedule', () => {
 describe('pickEntry', () => {
   const entries = buildPushSchedule(armed, at(6, 0), 5);
   it('지금과 가장 가까운 알림을 고른다(3분 이내)', () => {
-    expect(pickEntry(entries, at(7, 24) + 40_000)?.title).toBe('일어날 시간이에요');
+    expect(pickEntry(entries, at(7, 24) + 40_000)?.title).toBe('시작할 시간이에요');
     expect(pickEntry(entries, at(8, 13))?.title).toBe('출발할 시간이에요');
     expect(pickEntry(entries, at(7, 40))).toBeNull();
     expect(pickEntry(entries, at(8, 9) + MIN)?.title).toBe('출발 5분 전이에요');

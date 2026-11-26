@@ -32,7 +32,7 @@ export function PushToggle() {
         </span>
         <div className="share-info-text">
           <strong>앱을 닫아도 알림 받기</strong>
-          <span>기상 · 출발 5분 전 · 출발 시각</span>
+          <span>시작시간 · 출발 5분 전 · 출발 시각</span>
         </div>
         {pushEndpoint && <Pill tone="accent">켜짐</Pill>}
       </div>

@@ -20,7 +20,7 @@
 | 창 | 맡은 일 | 소유 경로(여기만 수정) |
 |---|---|---|
 | **A** (이 세션) | 설정 파일, 디자인 토큰·아이콘·공용 부품, 순수 계산(`domain`)과 테스트, 앱 상태(store)·저장·시계(시연 60배), 탭 껍데기, PWA, 통합, 배포, 문서 | 루트 설정 파일, `index.html`, `public/`, `src/domain/**`, `src/app/**`, `src/ui/**`, `src/infra/storage/**`, `docs/**`, `README.md` |
-| **B** | 아침 진행 화면: ②기상 ③준비 ④출발 ⑤이동·도착·요약, 붉은 조명, 알람 소리·알림, 도착 위치 읽기 | `src/features/morning/**`, `src/infra/alarm/**`, `src/infra/geo/**` |
+| **B** | 아침 진행 화면: ②시작시간 ③준비 ④출발 ⑤이동·도착·요약, 붉은 조명, 알람 소리·알림, 도착 위치 읽기 | `src/features/morning/**`, `src/infra/alarm/**`, `src/infra/geo/**` |
 | **C** | 계획·기록 화면: ①오늘(일정·장소·단계·시간표 막대·날씨 카드·메모 입력줄), ⑥기록, 설정, ⑧알리기(말투), 날씨 불러오기 | `src/features/today/**`, `src/features/records/**`, `src/features/settings/**`, `src/features/notify/**`, `src/infra/weather/**` |
 
 - 자기 소유 경로만 고친다. `src/domain`, `src/app`, `src/ui`에 필요한 것이 없으면 직접 만들지 말고 사용자에게 "A에게 전달: ○○ 필요"라고 남긴다.

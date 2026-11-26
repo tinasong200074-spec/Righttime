@@ -84,7 +84,7 @@ export function leavePillText(leaveAt: number, now: number, preLeave: number): s
 }
 
 export interface Leg {
-  label: '기상' | '준비' | '이동';
+  label: '시작시간' | '준비' | '이동';
   diff: number; // 예상보다 늦으면 +분
 }
 
@@ -112,7 +112,7 @@ export function verdictOf(s: Session): Verdict {
   const left = s.leftAt ?? s.leaveAt;
   const prep = (left - (s.prepStartAt ?? left)) / MIN;
   const legs: Leg[] = [
-    { label: '기상', diff: round((s.latency ?? 0) - s.wakeMin) },
+    { label: '시작시간', diff: round((s.latency ?? 0) - s.wakeMin) },
     { label: '준비', diff: round(prep - s.userPrep) },
   ];
   if (s.arrivedAt !== undefined) legs.push({ label: '이동', diff: round((s.arrivedAt - left) / MIN - s.travelMin) });

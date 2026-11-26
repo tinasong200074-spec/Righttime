@@ -28,7 +28,7 @@ export function OutlineButton({ className = '', type = 'button', ...rest }: BtnP
 
 export type Stage = 'wake' | 'prep' | 'leave';
 const STAGES: Array<{ id: Stage; name: string }> = [
-  { id: 'wake', name: '기상' },
+  { id: 'wake', name: '시작시간' },
   { id: 'prep', name: '준비' },
   { id: 'leave', name: '출발' },
 ];

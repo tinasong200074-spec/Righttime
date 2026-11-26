@@ -10,7 +10,7 @@ export function useMorningAlerts(s: Session, now: number, settings: Settings, ch
     if (s.state !== 'ringing') return;
     if (settings.sound) startAlarmSound();
     // 알림창은 처음 울릴 때만. 미룬 뒤 다시 울릴 때는 소리와 진동만 쓴다.
-    if (s.snoozeCount === 0) notify('알람', '일어날 시간이에요', { sound: false });
+    if (s.snoozeCount === 0) notify('알람', '시작할 시간이에요', { sound: false });
     return stopAlarmSound;
   }, [s.state, s.snoozeCount, settings.sound]);
 
