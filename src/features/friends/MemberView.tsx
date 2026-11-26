@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, type ReactNode } from 'react';
 import { fmtClock } from '../../domain/format';
 import type { RoomMember } from '../../domain/room';
 import { moodOf, sceneOf, type Mood } from './memberScene';
@@ -13,6 +13,7 @@ interface Props {
   now: number;
   onBack: () => void;
   onCheer: (key: CheerKey) => Promise<boolean | null>;
+  footer?: ReactNode; // 나가기 버튼 위에 둘 것(초대받은 사람의 "나도 공유하기")
   onLeave?: () => void; // 링크로 들어온 사람에게만: 이 화면에서 바로 방을 나간다
 }
 
@@ -92,7 +93,7 @@ function CheerBox({ m, arriveMs, now, onCheer }: Pick<Props, 'm' | 'arriveMs' | 
 }
 
 // 친구 한 명의 상태 화면: 준비 중 / 늦을 것 같을 때 / 확인 안 됨(목업 3·4·5번). 재촉 없이 안심 메시지만 보낸다
-export function MemberView({ m, arriveMs, now, onBack, onCheer, onLeave }: Props) {
+export function MemberView({ m, arriveMs, now, onBack, onCheer, onLeave, footer }: Props) {
   const mood = moodOf(m, now);
   const scene = sceneOf(m);
   const unknown = mood === 'stale' || mood === 'hidden';
@@ -115,6 +116,7 @@ export function MemberView({ m, arriveMs, now, onBack, onCheer, onLeave }: Props
       </p>
       <div className="m-spacer" />
       {!m.result && m.sharing && <CheerBox m={m} arriveMs={arriveMs} now={now} onCheer={onCheer} />}
+      {footer}
       {onLeave && (
         <button type="button" className="fr-exit" style={{ alignSelf: 'center' }} onClick={onLeave}>
           방에서 나가기

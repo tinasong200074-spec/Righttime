@@ -5,6 +5,7 @@ import type { ChecklistItem } from '../domain/types';
 import { buildChecklist } from '../domain/weather';
 import { loadRaw, saveRaw } from '../infra/storage';
 import { makeActions, type Actions, type Clock } from './actions';
+import { useFriendInvite } from './friendInvite';
 import { useNativeAlarmSync } from './nativeAlarmSync';
 import { endDraftState, tickQueueState } from './queueState';
 import { usePushSync } from './pushSync';
@@ -70,6 +71,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   usePushSync(state);
   useNativeAlarmSync(state);
   useRoomSync(state, now, actions);
+  useFriendInvite(state, actions);
 
   const calc = useMemo(() => calcOf(state), [state]);
   const checklist = useMemo(

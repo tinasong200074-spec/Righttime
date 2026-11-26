@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { cleanCode, codeFromHash, memberLine, resultOf, type RoomMember } from './room';
+import { cleanCode, codeFromHash, memberLine, resultOf, stageChanges, stageNews, type RoomMember } from './room';
 
 describe('resultOf', () => {
   it('늦지 않았으면 지킨 것, 도착 기록이 없으면 집계하지 않는다', () => {
@@ -40,5 +40,24 @@ describe('memberLine', () => {
     expect(memberLine({ ...base, stage: 'travel' }, label)).toBe('이동 중');
     expect(memberLine({ ...base, stage: 'arrived', result: 'late' }, label)).toBe('도착 · 늦었어요');
     expect(memberLine({ ...base, sharing: false, stage: 'prep' }, label)).toBe('공유를 껐어요');
+  });
+});
+
+describe('친구 단계 알림', () => {
+  const m = (userId: string, stage: RoomMember['stage'], isMe = false): RoomMember => ({
+    userId, name: userId, isMe, sharing: true, stage, stepIdx: null, stepCount: null,
+    etaMs: null, lateMin: null, message: null, cheer: null, cheerFrom: null, result: null, updatedAtMs: 0,
+  });
+  it('한 줄로 알린다', () => {
+    expect(stageNews('민수', 'prep')).toBe('민수님이 준비를 시작했어요');
+    expect(stageNews('', 'travel')).toBe('친구님이 출발했어요');
+  });
+  it('단계가 바뀐 친구만 고르고, 나와 처음 본 사람은 뺀다', () => {
+    const prev = { a: 'woke', b: 'prep', me: 'woke' };
+    const now = [m('a', 'prep'), m('b', 'prep'), m('c', 'travel'), m('me', 'prep', true)];
+    expect(stageChanges(prev, now)).toEqual([{ name: 'a', stage: 'prep' }]);
+  });
+  it('단계가 없어진 친구(공유를 끔)는 알리지 않는다', () => {
+    expect(stageChanges({ a: 'prep' }, [m('a', null)])).toEqual([]);
   });
 });

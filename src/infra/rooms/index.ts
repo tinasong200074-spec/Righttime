@@ -1,4 +1,4 @@
-import type { Friend, RoomView } from '../../domain/room';
+import type { Friend, Invite, RoomView } from '../../domain/room';
 import type { ShareStatus } from '../../domain/share';
 import { callRpc } from '../account';
 import type { CheerKey } from '../../domain/cheer';
@@ -36,6 +36,12 @@ export const cheerInRoom = (roomId: string, toUserId: string, kind: CheerKey) =>
 export const setRoomSharing = (roomId: string, on: boolean) => callRpc<boolean>('room_sharing', { p_room: roomId, p_on: on });
 
 export const finishRoom = (roomId: string, result: 'kept' | 'late') => callRpc<boolean>('room_finish', { p_room: roomId, p_result: result });
+
+// 친구(예전에 같은 방에 있었던 사람)를 내 방에 넣는다. 친구의 공유는 꺼진 채로 들어온다
+export const inviteToRoom = (roomId: string, friendId: string) => callRpc<boolean>('room_invite', { p_room: roomId, p_friend: friendId });
+
+// 내가 초대받은, 아직 끝나지 않은 방
+export const fetchInvites = async () => (await callRpc<Invite[]>('my_rooms', {})) ?? [];
 
 export const fetchFriends = async () => (await callRpc<Friend[]>('my_friends', {})) ?? [];
 

@@ -6,9 +6,9 @@ import { closeShare, shareAvailable, shareUrl } from '../../infra/share';
 import { Icon, OutlineButton, Pill, PrimaryButton } from '../../ui';
 import './share.css';
 
-const newToken = () => randomToken(crypto.getRandomValues(new Uint8Array(16)));
+export const newToken = () => randomToken(crypto.getRandomValues(new Uint8Array(16)));
 
-async function sendLink(url: string, name: string): Promise<string> {
+export async function sendLink(url: string, name: string): Promise<string> {
   const text = `${name || '저'}의 도착 예정 시각이에요. 앱 없이 볼 수 있어요.`;
   try {
     if (navigator.share) {

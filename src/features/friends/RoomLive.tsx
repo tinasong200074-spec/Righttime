@@ -7,6 +7,7 @@ import { memberLine, type RoomMember, type RoomView } from '../../domain/room';
 import { buildShareStatus, STAGE_ROWS } from '../../domain/share';
 import { roomUrl, sayInRoom, setRoomSharing } from '../../infra/rooms';
 import { ActiveMark } from './ActiveMark';
+import { InviteFriends } from './InviteFriends';
 import { TopBar } from './TopBar';
 
 const stageLabel = (s: string) => STAGE_ROWS.find((r) => r.id === s)?.label ?? s;
@@ -132,6 +133,7 @@ export function RoomLive({ room, view, onBack, onOpen }: Props) {
       <p className="fr-small" role="status">{msg}</p>
       <div className="m-spacer" />
       {/* 초대받아 들어온 사람에게는 나가기만 보여 준다 */}
+      {!room.joined && <InviteFriends roomId={room.roomId} view={view} onDone={() => setMsg('')} />}
       {!room.joined && (
         <>
           <button type="button" className="fr-ghost" onClick={async () => setMsg(await sendInvite(room.code))}>

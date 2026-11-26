@@ -421,3 +421,12 @@
   font-weight: 700;
   cursor: pointer;
 }
+
+.share-two {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.share-two .share-ok {
+  flex: 1;
+}

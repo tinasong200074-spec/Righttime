@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { CheerToast } from '../features/friends/CheerToast';
+import { InviteBanner } from '../features/friends/InviteBanner';
 import { MorningFlow } from '../features/morning';
 import { AlarmHint } from '../features/push/AlarmHint';
 import { PushToggle } from '../features/push/PushToggle';
@@ -45,6 +46,7 @@ function Shell() {
     <div className="app">
       <DemoBadge />
       <CheerToast />
+      {!inMorning && <InviteBanner onOpen={() => setTab('friends')} />}
       <AlarmHint />
       <ShareBar />
       <SharedInbox />

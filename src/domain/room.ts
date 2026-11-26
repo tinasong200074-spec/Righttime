@@ -64,3 +64,31 @@ export function memberLine(m: RoomMember, stageLabel: (s: ShareStage) => string)
   const steps = m.stage === 'prep' && m.stepCount ? ` · ${(m.stepIdx ?? 0) + 1}/${m.stepCount}` : '';
   return stageLabel(m.stage) + steps;
 }
+
+// 내가 초대받은 방(친구가 나를 골라 공유를 시작했다)
+export interface Invite {
+  roomId: string;
+  code: string;
+  title: string;
+  arriveMs: number;
+  from: string | null;
+  sharing: boolean;
+}
+
+const STAGE_NEWS: Record<ShareStage, string> = {
+  woke: '일어났어요',
+  prep: '준비를 시작했어요',
+  depart: '곧 출발해요',
+  travel: '출발했어요',
+  arrived: '도착했어요',
+};
+
+// 친구의 단계가 바뀌었을 때 띄우는 한 줄: "민수님이 준비를 시작했어요"
+export const stageNews = (name: string, stage: ShareStage) => `${name || '친구'}님이 ${STAGE_NEWS[stage]}`;
+
+// 방 사람들의 단계에서 바뀐 것만 고른다. 처음 본 사람(이전 값이 없는 사람)은 알리지 않는다
+export function stageChanges(prev: Record<string, string | null>, members: RoomMember[]): Array<{ name: string; stage: ShareStage }> {
+  return members
+    .filter((m) => !m.isMe && m.stage && m.userId in prev && prev[m.userId] !== m.stage)
+    .map((m) => ({ name: m.name, stage: m.stage as ShareStage }));
+}

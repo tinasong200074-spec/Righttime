@@ -3,6 +3,7 @@ import { useApp } from '../../app/store';
 import { overBy } from '../../domain/schedule';
 import { RecentPlans } from '../recent/RecentPlans';
 import './fields.css';
+import { FriendPick } from './FriendPick';
 import './main.css';
 import { NumberField } from './NumberField';
 import { PlaceField } from './PlaceField';
@@ -106,6 +107,7 @@ export function NewPlanScreen({ onDone }: { onDone: () => void }) {
           <PlaceField />
         </section>
         <PrepField />
+        <FriendPick />
       </fieldset>
       {!locked && <PlanSummary />}
       <button type="button" className="m-cta" disabled={locked || !calc || calc.arriveAt <= now || over > 0} onClick={arm}>

@@ -3,6 +3,7 @@ import { useApp } from '../../app/store';
 import { Depart } from './Depart';
 import { Glow } from './Glow';
 import { LeaveAsk } from './LeaveAsk';
+import { MorningShare } from './MorningShare';
 import './morning.css';
 import { Prep } from './Prep';
 import { Summary } from './Summary';
@@ -42,6 +43,7 @@ function MorningBody({ session, app }: { session: Session; app: ReturnType<typeo
     <div className="morning">
       <Glow on={app.glow} />
       <Screen state={session.state} />
+      <MorningShare />
       <LeaveAsk />
     </div>
   );
