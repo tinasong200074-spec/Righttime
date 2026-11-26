@@ -92,3 +92,19 @@ export function stageChanges(prev: Record<string, string | null>, members: RoomM
     .filter((m) => !m.isMe && m.stage && m.userId in prev && prev[m.userId] !== m.stage)
     .map((m) => ({ name: m.name, stage: m.stage as ShareStage }));
 }
+
+const isActive = (m: RoomMember) => m.sharing && !m.result && (m.stage !== null || m.etaMs !== null);
+
+// 초대받아 들어온 사람에게 보여 줄 "보낸 친구". 방에 여럿이 있으면 지금 준비 중인 사람 가운데 가장 최근에 바뀐 사람을 고른다.
+// (예전에 같이 있던, 지금은 아무것도 올리지 않는 사람을 보여 주면 단계가 영영 안 바뀐다)
+export function hostOf(members: RoomMember[]): RoomMember | null {
+  const others = members.filter((m) => !m.isMe);
+  const active = others.filter(isActive).sort((a, b) => b.updatedAtMs - a.updatedAtMs);
+  return active[0] ?? others[0] ?? null;
+}
+
+// 들어와 있는 방의 약속이 끝났는지: 누군가는 결과를 남겼고, 지금 준비 중인 다른 사람은 없다
+export function roomOver(members: RoomMember[]): boolean {
+  const others = members.filter((m) => !m.isMe);
+  return others.some((m) => m.result !== null) && !others.some(isActive);
+}

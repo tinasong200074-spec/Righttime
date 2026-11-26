@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { cleanCode, codeFromHash, memberLine, resultOf, stageChanges, stageNews, type RoomMember } from './room';
+import { cleanCode, codeFromHash, hostOf, memberLine, resultOf, roomOver, stageChanges, stageNews, type RoomMember } from './room';
 
 describe('resultOf', () => {
   it('늦지 않았으면 지킨 것, 도착 기록이 없으면 집계하지 않는다', () => {
@@ -59,5 +59,26 @@ describe('친구 단계 알림', () => {
   });
   it('단계가 없어진 친구(공유를 끔)는 알리지 않는다', () => {
     expect(stageChanges({ a: 'prep' }, [m('a', null)])).toEqual([]);
+  });
+});
+
+describe('hostOf, roomOver', () => {
+  const m = (userId: string, o: Partial<RoomMember> = {}): RoomMember => ({
+    userId, name: userId, isMe: false, sharing: true, stage: null, stepIdx: null, stepCount: null,
+    etaMs: null, lateMin: null, message: null, cheer: null, cheerFrom: null, result: null, updatedAtMs: 0, ...o,
+  });
+  const me = m('me', { isMe: true });
+  it('여럿이 있으면 지금 준비 중인 사람을 보여 준다', () => {
+    const idle = m('idle'); // 예전에 같이 있던, 아무것도 올리지 않는 사람
+    const host = m('host', { stage: 'prep', updatedAtMs: 10 });
+    expect(hostOf([me, idle, host])?.userId).toBe('host');
+    expect(hostOf([me, idle])?.userId).toBe('idle'); // 준비 중인 사람이 없으면 첫 사람
+    expect(hostOf([me])).toBeNull();
+  });
+  it('끝난 약속의 방인지', () => {
+    const done = m('done', { stage: 'arrived', result: 'kept' });
+    expect(roomOver([me, done, m('idle')])).toBe(true);
+    expect(roomOver([me, done, m('going', { stage: 'travel' })])).toBe(false); // 아직 오는 사람이 있다
+    expect(roomOver([me, m('idle')])).toBe(false); // 아무도 결과를 남기지 않았다
   });
 });

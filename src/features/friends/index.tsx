@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useApp } from '../../app/store';
 import type { RoomState } from '../../app/state';
 import type { CheerKey } from '../../domain/cheer';
-import type { Friend, RoomView } from '../../domain/room';
+import { hostOf, type Friend, type RoomView } from '../../domain/room';
 import { accountAvailable, callRpc, hasAccount } from '../../infra/account';
 import { cheerInRoom, setRoomSharing } from '../../infra/rooms';
 import { useFriends, useRoomView } from '../room/useRoomView';
@@ -55,7 +55,7 @@ function Waiting({ onBack, onLeave }: { onBack: () => void; onLeave: () => void 
 function JoinedRoute({ room, view, now, toList, refresh }: { room: RoomState; view: RoomView | null; now: number; toList: () => void; refresh: () => void }) {
   const { actions } = useApp();
   const leave = () => actions.setRoom(null);
-  const host = view?.members.find((x) => !x.isMe);
+  const host = view ? hostOf(view.members) : null;
   if (!host || !view) return <Waiting onBack={toList} onLeave={leave} />;
   const cheer = (key: CheerKey) => cheerInRoom(room.roomId, host.userId, key).finally(refresh);
   const toggle = () => {

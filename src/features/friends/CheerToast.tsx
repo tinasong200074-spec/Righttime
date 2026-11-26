@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useApp } from '../../app/store';
 import { cheerLine } from '../../domain/cheer';
-import { stageChanges, stageNews } from '../../domain/room';
+import { roomOver, stageChanges, stageNews } from '../../domain/room';
 import { notify } from '../../infra/alarm';
 import { useRoomView } from '../room/useRoomView';
 import './cheer.css';
@@ -12,7 +12,7 @@ const SHOW_MS = 5000;
 // 화면 맨 위에 톡 메시지처럼 5초 동안 띄우고 소리를 낸다.
 // 어느 탭에 있어도 뜬다. 방에 들어가 있을 때만 5초마다 확인한다
 export function CheerToast() {
-  const { room, settings } = useApp();
+  const { room, settings, actions } = useApp();
   const { view } = useRoomView(room?.roomId ?? null);
   const me = view?.members.find((m) => m.isMe);
   const key = me?.cheer ? `${me.cheerFrom}|${me.cheer}|${me.cheerAtMs ?? ''}` : '';
@@ -41,6 +41,12 @@ export function CheerToast() {
     setLine(text);
     notify('친구 소식', text, { sound: settings.sound });
   }, [view, settings.sound]);
+
+  // 초대받아 들어온 방의 약속이 끝났으면 방에서 나온다. 그래야 새로 온 초대가 보인다
+  const over = !!room?.joined && !!view && view.roomId === room.roomId && roomOver(view.members);
+  useEffect(() => {
+    if (over) actions.setRoom(null);
+  }, [over, actions]);
 
   // 띄운 지 5초 뒤에 지운다. 방 상태를 5초마다 다시 불러와도 이 시계는 끊기지 않게 따로 둔다
   useEffect(() => {

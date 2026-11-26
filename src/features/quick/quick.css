@@ -61,3 +61,8 @@
   border-radius: var(--r-input);
   background: var(--ground);
 }
+.fp-count {
+  font-size: 0.75rem;
+  font-weight: 400;
+  color: var(--muted);
+}

@@ -52,7 +52,9 @@ function useInvite(): { invite: Invite | null; skip: (id: string) => void } {
     };
   }, [room]);
 
-  return { invite: room ? null : (list.find((v) => !skipped.includes(v.roomId)) ?? null), skip };
+  // 아직 내가 공유를 켜지 않은 방(방금 초대받은 방)을 먼저 보여 준다. 예전에 코드로 들어갔던 방은 뒤로 미룬다
+  const fresh = list.filter((v) => !skipped.includes(v.roomId)).sort((x, y) => Number(x.sharing) - Number(y.sharing));
+  return { invite: room ? null : (fresh[0] ?? null), skip };
 }
 
 // "민수님이 약속을 공유했어요" 안내. 보기를 누르면 그 친구의 준비 단계 화면으로 간다

@@ -40,7 +40,7 @@ export interface Plan {
   kind: PlanKind;
   repeatDays?: number[]; // 반복할 요일(0=일 … 6=토). 비어 있으면 한 번만
   notes?: string;
-  friend?: { userId: string; name: string }; // 같이 가는 친구. 알람을 켜면 이 친구에게 바로 공유한다
+  friends?: Array<{ userId: string; name: string }>; // 같이 가는 친구들. 알람을 켜면 이 친구들에게 바로 공유한다
 }
 
 export interface SessionStep extends Step {

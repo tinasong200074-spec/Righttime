@@ -8,12 +8,12 @@ import type { AppState } from './state';
 export function useFriendInvite(state: AppState, actions: Actions): void {
   const done = useRef('');
   const { session, plan, room, shareName } = state;
-  const friend = plan.friend;
+  const friends = plan.friends;
 
   useEffect(() => {
-    if (!session || session.demo || !friend) return;
+    if (!session || session.demo || !friends?.length) return;
     if (room?.joined) return; // 남의 방에 들어가 있을 때는 건드리지 않는다
-    const key = `${session.arriveAt}|${friend.userId}`;
+    const key = `${session.arriveAt}|${friends.map((f) => f.userId).join(',')}`;
     if (done.current === key) return;
     done.current = key;
     void (async () => {
@@ -23,7 +23,7 @@ export function useFriendInvite(state: AppState, actions: Actions): void {
         return;
       }
       if (!room) actions.setRoom({ roomId: ref.roomId, code: ref.code, sharing: true, arriveMs: session.arriveAt });
-      await inviteToRoom(ref.roomId, friend.userId);
+      for (const f of friends) await inviteToRoom(ref.roomId, f.userId);
     })();
-  }, [session, friend, room, shareName, actions]);
+  }, [session, friends, room, shareName, actions]);
 }
