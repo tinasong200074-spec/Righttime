@@ -312,3 +312,24 @@ button.m-row {
 .app {
   padding-top: max(calc(env(safe-area-inset-top, 0px) + 12px), 40px);
 }
+.m-wx {
+  width: 100%;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 4px;
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  font-size: 0.8125rem;
+  text-align: left;
+  cursor: pointer;
+}
+.m-wx-text {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

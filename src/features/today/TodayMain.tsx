@@ -10,13 +10,13 @@ import { useWeather } from './useWeather';
 import { WeatherRow } from './WeatherRow';
 import { isNativeApp } from '../../infra/nativeAlarm';
 
-export type View = 'main' | 'plan' | 'place' | 'steps' | 'weather' | 'carry' | 'helper';
+export type View = 'main' | 'weather' | 'carry' | 'helper';
 type Go = (v: View) => void;
 
-function Header({ go }: { go: Go }) {
+function Header({ edit }: { edit: () => void }) {
   const { plan, now } = useApp();
   return (
-    <button type="button" className="m-head" onClick={() => go('plan')} aria-label="일정 제목과 도착 시각 고치기">
+    <button type="button" className="m-head" onClick={edit} aria-label="일정 이름과 도착 시각 고치기(새 약속)">
       <span>
         <span className="m-muted">{dayLabel(plan.arriveAt, now)}</span>
         <h1 className="m-title">{plan.title || '일정 이름'}</h1>
@@ -54,12 +54,12 @@ function TravelBar({ calc }: { calc: PlanCalc }) {
   );
 }
 
-function DestCard({ calc, go }: { calc: PlanCalc | null; go: Go }) {
+function DestCard({ calc, edit }: { calc: PlanCalc | null; edit: () => void }) {
   const { origin, recentPlans, session } = useApp();
   const [open, setOpen] = useState(false);
   const hasRecent = !session && recentPlans.length > 0;
   // 최근 일정이 있으면 도착 장소를 누를 때 그 아래에 펼치고, 없으면 바로 장소 고르기로 간다
-  const press = () => (hasRecent ? setOpen((v) => !v) : go('place'));
+  const press = () => (hasRecent ? setOpen((v) => !v) : edit());
   return (
     <section className="m-card">
       <span className="m-muted">도착 장소</span>
@@ -70,7 +70,7 @@ function DestCard({ calc, go }: { calc: PlanCalc | null; go: Go }) {
       {hasRecent && open && (
         <div onClick={(e) => (e.target as HTMLElement).closest('.recent-pick') && setOpen(false)}>
           <RecentPlans />
-          <button type="button" className="f-btn" style={{ width: '100%', marginTop: 8 }} onClick={() => go('place')}>
+          <button type="button" className="f-btn" style={{ width: '100%', marginTop: 8 }} onClick={edit}>
             다른 장소 고르기
           </button>
         </div>
@@ -115,12 +115,12 @@ function Row({ icon, name, note, time, accent = false, onClick }: RowProps) {
   );
 }
 
-function Rows({ calc, go }: { calc: PlanCalc; go: Go }) {
+function Rows({ calc, edit }: { calc: PlanCalc; edit: () => void }) {
   const travelAll = calc.ride.val + calc.waitMin + calc.buffer;
   return (
     <section className="m-card m-rows">
       <Row icon="wake" name="시작시간" note={`평소 ${calc.wake.val}분`} time={calc.alarmAt} />
-      <Row icon="prep" name="준비" note={`${calc.prep.val}분 · ${calc.steps.length}단계`} time={calc.prepStartAt} accent onClick={() => go('steps')} />
+      <Row icon="prep" name="준비" note={`${calc.prep.val}분 · ${calc.steps.length}단계`} time={calc.prepStartAt} accent onClick={edit} />
       <Row icon="leave" name="출발" note={`이동 + 배차 + 여유 ${travelAll}분 전`} time={calc.leaveAt} />
     </section>
   );
@@ -163,15 +163,15 @@ function ArmButton() {
 }
 
 // ① 오늘: 목업 6번과 같은 한 화면. 고치는 칸은 탭하면 열리는 보조 화면에 있다
-export function TodayMain({ go }: { go: Go }) {
+export function TodayMain({ go, edit }: { go: Go; edit: () => void }) {
   const { calc } = useApp();
   const mode = useWeather();
   return (
     <div className="m-screen">
-      <Header go={go} />
-      <DestCard calc={calc} go={go} />
-      {calc && <Rows calc={calc} go={go} />}
       <WeatherRow mode={mode} go={go} />
+      <Header edit={edit} />
+      <DestCard calc={calc} edit={edit} />
+      {calc && <Rows calc={calc} edit={edit} />}
       <CarryRow go={go} />
       <div className="m-spacer" />
       <ArmButton />

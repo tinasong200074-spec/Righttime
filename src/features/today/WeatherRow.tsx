@@ -1,54 +1,42 @@
 import { useApp } from '../../app/store';
 import { Icon } from '../../ui';
 import type { View } from './TodayMain';
-import { useWeatherBasis, type WeatherMode } from './useWeather';
+import type { WeatherMode } from './useWeather';
 
 const MANUAL_TITLE = { none: '비 없음', maybe: '비 올 수도 있어요', yes: '비가 와요', auto: '날씨' } as const;
 
 const SUB: Partial<Record<WeatherMode, string>> = {
   demo: '시연 모드에서는 불러오지 않아요',
   off: '자동 추천이 꺼져 있어요',
-  'need-location': '눌러서 위치를 정해요',
+  'need-location': '위치를 허용하면 날씨가 보여요',
   'too-far': '15일 이내 일정만 볼 수 있어요',
-  loading: '불러오는 중이에요…',
-  error: '불러오지 못했어요 · 눌러서 직접 고르기',
+  loading: '날씨 불러오는 중…',
+  error: '날씨를 불러오지 못했어요',
 };
 
-function useRowText(mode: WeatherMode): { title: string; sub: string } {
+// 한 줄에 들어갈 글: 날씨가 있으면 "쌀쌀해요 · 체감 3°C · 비 3%" 전체
+function useLineText(mode: WeatherMode): string {
   const { weather, rain } = useApp();
-  const basis = useWeatherBasis();
-  if (mode === 'ok' && weather?.line) {
-    const [title, ...rest] = weather.line.split(' · ');
-    return { title, sub: [...rest, basis.label].filter(Boolean).join(' · ') };
-  }
-  if (mode === 'manual') return { title: MANUAL_TITLE[rain], sub: '직접 골랐어요' };
-  return { title: '날씨', sub: SUB[mode] ?? '' };
+  if (mode === 'ok' && weather?.line) return weather.line;
+  if (mode === 'manual') return `${MANUAL_TITLE[rain]} · 직접 골랐어요`;
+  return SUB[mode] ?? '날씨';
 }
 
-// 날씨 한 줄: 제목, 체감·강수, 우산·겉옷 알약. 눌러서 직접 고르거나 위치를 정한다
+// 맨 위의 얇은 날씨 줄. 내 위치 날씨를 자동으로 보여 주고, 누르면 직접 고르는 화면이 열린다
 export function WeatherRow({ mode, go }: { mode: WeatherMode; go: (v: View) => void }) {
   const { checklist, rain, weather } = useApp();
-  const { title, sub } = useRowText(mode);
+  const text = useLineText(mode);
   const wet = mode === 'ok' ? weather?.rain : rain === 'yes' || rain === 'maybe';
   const pills = checklist.filter((c) => c.src === 'weather');
   return (
-    <>
-      <button type="button" className="m-card m-nav" onClick={() => go('weather')}>
-        <span className="m-tile is-soft">
-          <Icon name={wet ? 'rain' : 'temp'} main="var(--ink)" det="var(--accent-soft)" size={26} />
+    <button type="button" className="m-wx" onClick={() => go('weather')} aria-label={`날씨: ${text}. 누르면 직접 고를 수 있어요`}>
+      <Icon name={wet ? 'rain' : 'temp'} main="var(--ink)" det="var(--accent-soft)" size={22} />
+      <span className="m-wx-text">{text}</span>
+      {pills.map((p) => (
+        <span key={p.key} className="m-pill">
+          {p.text}
         </span>
-        <span className="m-grow">
-          <div className="m-name">{title}</div>
-          <div className="m-sub">{sub}</div>
-        </span>
-        <span className="m-pills">
-          {pills.map((p) => (
-            <span key={p.key} className="m-pill">
-              {p.text}
-            </span>
-          ))}
-        </span>
-      </button>
-    </>
+      ))}
+    </button>
   );
 }

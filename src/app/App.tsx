@@ -7,15 +7,16 @@ import { FriendsScreen } from '../features/room';
 import { SettingsScreen } from '../features/settings';
 import { ShareBar } from '../features/share/ShareBar';
 import { SharedInbox } from '../features/shareTarget/SharedInbox';
-import { TodayScreen } from '../features/today';
+import { NewPlanScreen, TodayScreen } from '../features/today';
 import { Icon, type IconName } from '../ui';
 import { AppProvider, useApp } from './store';
 
-type Tab = 'today' | 'records' | 'friends' | 'settings';
+type Tab = 'today' | 'records' | 'new' | 'friends' | 'settings';
 
 const TABS: Array<{ id: Tab; label: string; icon: IconName }> = [
   { id: 'today', label: '오늘', icon: 'clock' },
   { id: 'records', label: '기록', icon: 'record' },
+  { id: 'new', label: '새 약속', icon: 'plus' },
   { id: 'friends', label: '친구', icon: 'friend' },
   { id: 'settings', label: '설정', icon: 'settings' },
 ];
@@ -57,7 +58,8 @@ function Shell() {
       ) : (
         <>
           <main className="app-main">
-            {tab === 'today' && <TodayScreen />}
+            {tab === 'today' && <TodayScreen onEdit={() => setTab('new')} />}
+            {tab === 'new' && <NewPlanScreen onDone={() => setTab('today')} />}
             {tab === 'records' && <RecordsScreen />}
             {tab === 'friends' && <FriendsScreen />}
             {tab === 'settings' && <PushToggle />}

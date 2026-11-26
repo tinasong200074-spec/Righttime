@@ -103,11 +103,18 @@ const ICONS: Record<string, Draw> = {
     </>
   ),
   check: (m) => <path d="M5 12.5l4.5 4.5L19 7.5" stroke={m} {...STROKE} strokeWidth={3.2} />,
+  // 새 약속 탭용. 속이 찬 원 + 포인트 색 더하기 표시
+  plus: (m, d) => (
+    <>
+      <circle cx="12" cy="12" r="9.5" fill={m} />
+      <path d="M12 7.5v9M7.5 12h9" stroke={d} {...STROKE} />
+    </>
+  ),
 };
 
 export type IconName =
   | 'wake' | 'prep' | 'leave' | 'rain' | 'umbrella' | 'temp' | 'bag' | 'bell'
-  | 'clock' | 'share' | 'friend' | 'place' | 'record' | 'settings' | 'check';
+  | 'clock' | 'share' | 'friend' | 'place' | 'record' | 'settings' | 'check' | 'plus';
 
 interface IconProps {
   name: IconName;

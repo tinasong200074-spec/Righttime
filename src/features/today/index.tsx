@@ -6,8 +6,6 @@ import { HelperForm } from './HelperForm';
 import { HelperResult } from './HelperResult';
 import './main.css';
 import { MemoBar } from './MemoBar';
-import { PlaceField, PlanFields } from './PlanCard';
-import { StepsEditor } from './StepsEditor';
 import { SubScreen } from './SubScreen';
 import { useHistoryState } from './useHistoryState';
 import './today.css';
@@ -31,9 +29,6 @@ function CarryScreen({ go }: { go: (v: View) => void }) {
 // 보조 화면: 오늘 화면에서 탭한 칸을 고치는 곳
 function Sub({ view, go, back }: { view: Exclude<View, 'main'>; go: (v: View) => void; back: () => void }) {
   const body: Record<Exclude<View, 'main'>, { title: string; badge?: string; node: ReactNode }> = {
-    plan: { title: '일정', node: <PlanFields /> },
-    place: { title: '도착 장소', node: <section className="m-card"><PlaceField /></section> },
-    steps: { title: '준비 단계', node: <StepsEditor /> },
     weather: { title: '날씨', node: <WeatherCard /> },
     carry: { title: '출발할 때 알려줘요', node: <CarryScreen go={go} /> },
     helper: { title: '일정 준비 도우미', badge: '초안', node: <><HelperForm /><HelperResult /></> },
@@ -47,18 +42,16 @@ function Sub({ view, go, back }: { view: Exclude<View, 'main'>; go: (v: View) =>
 }
 
 // ① 오늘: 목업 6번과 같은 한 화면과, 칸을 탭하면 열리는 보조 화면들
-export function TodayScreen() {
+export function TodayScreen({ onEdit }: { onEdit?: () => void }) {
   const { session, plan, actions } = useApp();
   const nav = useHistoryState<View>('main'); // 뒤로 버튼이 앱을 닫지 않고 이전 화면으로 돌아오게 한다
   // 배차 대기 입력은 없앴다(카카오가 배차 간격을 주지 않는다). 예전에 저장된 값이 남아 있으면 0으로 맞춘다
   useEffect(() => {
     if (plan.waitMin !== 0 && !session) actions.updatePlan({ waitMin: 0 });
   }, [plan.waitMin, session, actions]);
-  // 알람이 켜져 있는 동안은 일정·장소·단계를 고치는 화면으로 들어가지 않는다
-  const go = (v: View) => {
-    if (session && v !== 'carry' && v !== 'helper' && v !== 'weather') return;
-    nav.push(v);
-  };
+  const go = (v: View) => nav.push(v);
   const back = () => nav.back(nav.view === 'helper' ? 'carry' : 'main');
-  return nav.view === 'main' ? <TodayMain go={go} /> : <Sub view={nav.view} go={go} back={back} />;
+  return nav.view === 'main' ? <TodayMain go={go} edit={onEdit ?? (() => undefined)} /> : <Sub view={nav.view} go={go} back={back} />;
 }
+
+export { NewPlanScreen } from './NewPlanScreen';
