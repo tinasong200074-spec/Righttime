@@ -1,9 +1,9 @@
 import { useApp } from '../../app/store';
 import { fmtClock, fmtMin } from '../../domain/format';
-import { Icon } from '../../ui';
+import { Icon, type IconName } from '../../ui';
 import '../today/fields.css';
 import '../today/main.css';
-import { alarmCompare, averages, insights, lastDays, placeStats } from './model';
+import { alarmCompare, averages, insights, lastDays, placeStats, type Insight } from './model';
 import { RecordCalendar } from './RecordCalendar';
 import './records.css';
 
@@ -44,24 +44,56 @@ function Averages() {
     <section className="m-card r-stats">
       <Stat value={fmtMin(a.wake)} label="시작시간 평균" />
       <Stat value={fmtMin(a.prep)} label="준비 평균" />
-      <Stat value={signed(a.leave)} label="출발 평균(계획 대비)" />
+      <Stat value={signed(a.leave)} label="출발 평균" />
     </section>
   );
 }
 
-// 숫자를 문장으로 풀어 준다
+const TILE_ICON: Record<Insight['key'], IconName> = { arrive: 'check', snooze: 'bell', wake: 'wake', prep: 'prep', leave: 'leave' };
+const TONE_MARK: Record<Insight['tone'], string> = { good: '✓', warn: '!', flat: '' };
+
+function Tile({ t }: { t: Insight }) {
+  return (
+    <li className={`r-tile is-${t.tone}`}>
+      <span className="r-tile-top">
+        <Icon name={TILE_ICON[t.key]} size={22} main="currentColor" det={t.tone === 'warn' ? 'var(--ink)' : 'var(--surface)'} />
+        {TONE_MARK[t.tone] && (
+          <span className="r-tile-mark" aria-hidden="true">
+            {TONE_MARK[t.tone]}
+          </span>
+        )}
+      </span>
+      <span className="r-tile-num">{t.value}</span>
+      <span className="r-tile-label">{t.label}</span>
+    </li>
+  );
+}
+
+// 기록을 한눈에: 큰 숫자 타일, 최근 도착 결과 줄, 가장 효과가 큰 한 가지
 function Insights() {
   const { records } = useApp();
-  const lines = insights(records);
-  if (lines.length === 0) return null;
+  const view = insights(records);
+  if (!view) return null;
   return (
     <section className="m-card">
-      <h2 className="r-h2">내 기록을 보면</h2>
-      <ul className="r-insights">
-        {lines.map((t) => (
-          <li key={t}>{t}</li>
+      <div className="r-chart-head">
+        <h2>내 기록을 보면</h2>
+        {view.trail.length > 0 && (
+          <span className="r-trail" aria-label={`최근 도착 ${view.trail.map((t) => (t === 'kept' ? '제시간' : '지각')).join(', ')}`}>
+            {view.trail.map((t, i) => (
+              <span key={i} aria-hidden="true">
+                {t === 'kept' ? '✅' : '⏰'}
+              </span>
+            ))}
+          </span>
+        )}
+      </div>
+      <ul className="r-tiles">
+        {view.tiles.map((t) => (
+          <Tile key={t.key} t={t} />
         ))}
       </ul>
+      {view.tip && <p className="r-tip">{view.tip}</p>}
     </section>
   );
 }

@@ -122,25 +122,79 @@
   background: var(--chip);
 }
 
-/* 문장 분석 */
-.r-h2 {
-  margin: 0 0 8px;
-  font-size: 1rem;
+/* 한눈에 보는 기록: 큰 숫자 타일 */
+.r-trail {
+  display: inline-flex;
+  gap: 2px;
+  font-size: 0.875rem;
+}
+.r-tiles {
+  list-style: none;
+  margin: 10px 0 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+.r-tile {
+  display: grid;
+  gap: 2px;
+  padding: 12px 14px;
+  border-radius: 16px;
+  background: var(--chip);
+  color: var(--ink);
+}
+.r-tiles > :first-child:nth-last-child(odd) {
+  grid-column: 1 / -1; /* 타일이 홀수면 첫 칸이 한 줄을 다 쓴다 */
+}
+/* 색만으로 알리지 않게 ✓ / ! 기호도 함께 붙인다 */
+.r-tile.is-good {
+  background: var(--accent-soft);
+}
+.r-tile.is-warn {
+  background: var(--ink);
+  color: #fff;
+}
+.r-tile-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.r-tile-mark {
+  width: 22px;
+  height: 22px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--ink);
+  color: #fff;
+  font-size: 0.8125rem;
   font-weight: 800;
 }
-.r-insights {
-  margin: 0;
-  padding: 0;
-  list-style: none;
+.is-warn .r-tile-mark {
+  background: var(--accent);
+  color: var(--ink);
 }
-.r-insights li {
-  padding: 8px 0;
-  border-top: 1px solid var(--line);
+.r-tile-num {
+  font-size: 1.75rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+}
+.is-warn .r-tile-num {
+  color: var(--accent);
+}
+.r-tile-label {
+  font-size: 0.8125rem;
+}
+.r-tip {
+  margin: 10px 0 0;
+  padding: 10px 14px;
+  border-radius: 14px;
+  border: 1.5px solid var(--ink);
+  background: var(--accent);
   font-size: 0.9375rem;
-}
-.r-insights li:first-child {
-  border-top: 0;
-  font-weight: 700;
+  font-weight: 800;
 }
 
 /* 달력 */

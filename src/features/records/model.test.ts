@@ -7,22 +7,28 @@ const row = (o: Partial<RecordRow>): RecordRow => ({
 });
 
 describe('insights', () => {
-  it('기록이 없으면 아무 말도 하지 않는다', () => {
-    expect(insights([])).toEqual([]);
-    expect(insights([row({ demo: true })])).toEqual([]);
+  const tile = (v: ReturnType<typeof insights>, key: string) => v?.tiles.find((t) => t.key === key);
+  it('기록이 없으면 아무것도 보여 주지 않는다', () => {
+    expect(insights([])).toBeNull();
+    expect(insights([row({ demo: true })])).toBeNull();
   });
-  it('미룬 횟수, 준비 초과, 출발 지연을 문장으로 만든다', () => {
-    const out = insights([row({ arrival: 'late' }), row({ arrival: 'ontime' })]);
-    expect(out).toContain('기록한 2번 중 1번 제시간에 도착했어요.');
-    expect(out).toContain('알람을 평균 2번 미뤄요.');
-    expect(out).toContain('준비가 예상보다 평균 8분 더 걸려요. 준비 시간을 8분 늘려 잡으면 맞아요.');
-    expect(out).toContain('출발은 계획보다 평균 4분 늦어요.');
+  it('미룬 횟수, 준비 초과, 출발 지연을 숫자 타일로 만든다', () => {
+    const v = insights([row({ arrival: 'late' }), row({ arrival: 'ontime' })]);
+    expect(tile(v, 'arrive')).toMatchObject({ value: '1/2', tone: 'flat' });
+    expect(tile(v, 'snooze')).toMatchObject({ value: '2번', tone: 'warn' });
+    expect(tile(v, 'wake')).toMatchObject({ value: '12분', tone: 'warn' });
+    expect(tile(v, 'prep')).toMatchObject({ value: '+8분', label: '준비가 예상보다 김', tone: 'warn' });
+    expect(tile(v, 'leave')).toMatchObject({ value: '+4분', tone: 'warn' });
+    expect(v?.trail).toEqual(['late', 'kept']);
+    expect(v?.tip).toBe('준비 시간을 8분 늘려 잡으면 맞아요');
   });
-  it('차이가 작으면 거의 같다고 말한다', () => {
-    const out = insights([row({ snoozeCount: 0, prepActual: 41, leaveDiff: 0, latency: 3 })]);
-    expect(out).toContain('알람을 거의 미루지 않아요.');
-    expect(out).toContain('준비 시간은 예상과 거의 같아요.');
-    expect(out).toContain('출발은 계획한 시각에 맞추는 편이에요.');
+  it('차이가 작으면 좋은 쪽으로 표시하고 조언은 없다', () => {
+    const v = insights([row({ snoozeCount: 0, prepActual: 41, leaveDiff: 0, latency: 3, arrival: 'early' })]);
+    expect(tile(v, 'arrive')).toMatchObject({ value: '1/1', tone: 'good' });
+    expect(tile(v, 'snooze')?.tone).toBe('good');
+    expect(tile(v, 'prep')).toMatchObject({ label: '준비는 예상대로', tone: 'good' });
+    expect(tile(v, 'leave')?.tone).toBe('good');
+    expect(v?.tip).toBeNull();
   });
 });
 
