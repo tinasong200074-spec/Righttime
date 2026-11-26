@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { calcPlan } from './schedule';
-import { addTransitLog, similarPastRide, type TransitLogEntry } from './transitLog';
-import { DEFAULT_SETTINGS, type Place, type Plan } from './types';
+import { addTransitLog, padRide, similarPastRide, type TransitLogEntry } from './transitLog';
+import { DEFAULT_SETTINGS, type Place, type Plan, type RecordRow } from './types';
 
 // 2026-11-26은 목요일, 11-28은 토요일
 const day = (d: number, h: number, m: number) => new Date(2026, 10, d, h, m).getTime();
@@ -49,7 +49,29 @@ describe('calcPlan + 조회 기록', () => {
     expect(c.ride.val).toBe(43);
     expect(c.ride.basis).toBe('지난 평일 8시대 조회 2회 평균');
   });
-  it('없으면 저장된 값을 쓴다', () => {
+  it('조회한 적이 없으면(직접 넣은 값) 저장된 값을 그대로 쓴다', () => {
     expect(calcPlan(plan, DEFAULT_SETTINGS, [], [place], [])!.ride.val).toBe(30);
+  });
+  it('다른 시간대에 조회한 값뿐이면 넉넉하게 잡고 근거를 적는다', () => {
+    const nightOnly = [{ placeId: 'p1', at: day(24, 22, 0), rideMin: 30 }];
+    const c = calcPlan(plan, DEFAULT_SETTINGS, [], [place], nightOnly)!;
+    expect(c.ride.val).toBe(40);
+    expect(c.ride.basis).toBe('조회 30분에 여유를 더한 값');
+  });
+  it('실제로 다녀온 기록이 있으면 여유를 더하지 않고 기록으로 추천한다', () => {
+    const nightOnly = [{ placeId: 'p1', at: day(24, 22, 0), rideMin: 30 }];
+    const rows = [36, 38, 37].map((m, i) => ({ id: `r${i}`, placeId: 'p1', travelActual: m, demo: false, excluded: false }) as RecordRow);
+    const c = calcPlan(plan, DEFAULT_SETTINGS, rows, [place], nightOnly)!;
+    expect(c.ride.basis).toBe('최근 3회 평균 + 변동 반영');
+    expect(c.ride.val).toBe(38);
+  });
+});
+
+describe('padRide', () => {
+  it('4분의 1을 더하고 5분 단위로 올린다', () => {
+    expect(padRide(40)).toBe(50);
+    expect(padRide(30)).toBe(40);
+    expect(padRide(20)).toBe(25);
+    expect(padRide(12)).toBe(15);
   });
 });

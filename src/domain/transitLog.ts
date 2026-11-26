@@ -51,3 +51,12 @@ export function similarPastRide(log: TransitLogEntry[], placeId: string, departA
 
 // 출발 예정 시각을 대략 잡는다(도착 − 이동 − 여유). 비슷한 시간대를 찾는 데만 쓴다
 export const roughDepartAt = (arriveAt: number, travelMin: number, buffer: number) => arriveAt - (travelMin + buffer) * MIN;
+
+const PAD_RATE = 0.25;
+const PAD_STEP = 5;
+
+// 다른 시간대에 조회한 값밖에 없을 때는 넉넉하게 잡는다(40분 → 50분). 늦지 않는 쪽으로 틀리게 하려는 어림값이다
+export const padRide = (rideMin: number) => Math.ceil((rideMin * (1 + PAD_RATE)) / PAD_STEP) * PAD_STEP;
+
+// 이 장소의 대중교통 시간을 조회한 적이 있는지(직접 넣은 이동 시간과 구분한다)
+export const hasTransitLog = (log: TransitLogEntry[], placeId: string) => log.some((e) => e.placeId === placeId);

@@ -1,5 +1,5 @@
 import { rec, recentValues, type Rec } from './recommend';
-import { roughDepartAt, similarPastRide, type TransitLogEntry } from './transitLog';
+import { hasTransitLog, padRide, roughDepartAt, similarPastRide, type TransitLogEntry } from './transitLog';
 import { DAY, MIN, type Place, type Plan, type RecordRow, type SessionStep, type Settings, type Step } from './types';
 
 export interface ScheduleInput {
@@ -57,6 +57,10 @@ function rideFor(place: Place, plan: Plan, settings: Settings, records: RecordRo
   const past = similarPastRide(log, place.id, roughDepartAt(plan.arriveAt, place.travelMin + plan.waitMin, settings.buffer));
   const actual = recentValues(records, 'travelActual', place.id);
   if (past && actual.length === 0) return { val: past.rideMin, n: past.n, basis: past.basis };
+  // 처음 가는 곳: 다른 시간대에 조회한 값뿐이면 넉넉하게 잡는다. 한 번 다녀오면 실제 기록으로 바뀐다
+  if (!past && actual.length === 0 && hasTransitLog(log, place.id)) {
+    return { val: padRide(place.travelMin), n: 0, basis: `조회 ${place.travelMin}분에 여유를 더한 값` };
+  }
   return rec(past?.rideMin ?? place.travelMin, actual);
 }
 

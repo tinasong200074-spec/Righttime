@@ -82,7 +82,9 @@ function DestCard({ calc, edit }: { calc: PlanCalc | null; edit: () => void }) {
         <div>
           <TravelBar calc={calc} />
           <div className="m-muted" style={{ marginTop: 6 }}>
-            이동 시간과 여유를 더해 출발 시각을 잡았어요.
+            {calc.ride.n === 0 && calc.ride.basis !== '내 입력값'
+              ? `처음 가는 시간대라 넉넉하게 잡았어요(${calc.ride.basis}). 알람이 울린 뒤 앱을 열면 다시 조회해요.`
+              : '이동 시간과 여유를 더해 출발 시각을 잡았어요.'}
           </div>
         </div>
       )}
