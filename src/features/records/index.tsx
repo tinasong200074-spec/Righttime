@@ -3,7 +3,7 @@ import { fmtClock, fmtMin } from '../../domain/format';
 import { Icon, type IconName } from '../../ui';
 import '../today/fields.css';
 import '../today/main.css';
-import { alarmCompare, averages, insights, lastDays, placeStats, type Insight } from './model';
+import { alarmCompare, averages, insights, type Insight } from './model';
 import { RecordCalendar } from './RecordCalendar';
 import './records.css';
 
@@ -98,65 +98,6 @@ function Insights() {
   );
 }
 
-const PX_PER_MIN = 2.143; // 목업 비율: 63분 = 135px
-const CHART_PX = 170;
-
-function PrepChart() {
-  const { records } = useApp();
-  const rows = lastDays(records);
-  const plan = rows[rows.length - 1]?.userPrep ?? 0;
-  const maxVal = Math.max(1, plan, ...rows.map((r) => r.prepActual));
-  const px = Math.min(PX_PER_MIN, (CHART_PX - 10) / maxVal);
-  return (
-    <section className="m-card" style={{ paddingBottom: 12 }}>
-      <div className="r-chart-head">
-        <h2>준비 시간</h2>
-        <span className="m-muted">최근 7일 · 점선은 내 예상 {plan}분</span>
-      </div>
-      <ul className="r-chart" aria-label={`최근 준비 시간 막대 그래프. 내 예상은 ${plan}분`}>
-        {rows.map((r, i) => {
-          const d = new Date(r.date);
-          return (
-            <li key={r.id} className="r-col" aria-label={`${d.getMonth() + 1}월 ${d.getDate()}일 준비 ${Math.round(r.prepActual)}분`}>
-              <span className={`r-bar ${i === rows.length - 1 ? 'is-last' : ''}`} style={{ height: r.prepActual * px }} />
-            </li>
-          );
-        })}
-        <span className="r-plan" style={{ bottom: plan * px }} />
-      </ul>
-      <ul className="r-days" aria-hidden="true">
-        {rows.map((r, i) => (
-          <li key={r.id} className={i === rows.length - 1 ? 'is-last' : ''}>
-            {new Date(r.date).getDate()}
-          </li>
-        ))}
-      </ul>
-    </section>
-  );
-}
-
-function PlaceList() {
-  const { records, places } = useApp();
-  return (
-    <>
-      {placeStats(records, places).map((p) => (
-        <section key={p.id} className="m-card r-place">
-          <span className="r-place-icon">
-            <Icon name="place" main="var(--ink)" det="var(--chip)" size={24} />
-          </span>
-          <div>
-            <div className="m-name">{p.name}</div>
-            <div className="m-sub">
-              이동 평균 {fmtMin(p.actual)}
-              {p.input !== undefined && ` · 입력 ${p.input}분`}
-            </div>
-          </div>
-        </section>
-      ))}
-    </>
-  );
-}
-
 export function RecordsScreen() {
   const { records } = useApp();
   const hasData = averages(records).count > 0;
@@ -172,8 +113,6 @@ export function RecordsScreen() {
           <Insights />
           <Averages />
           <RecordCalendar />
-          <PrepChart />
-          <PlaceList />
         </>
       ) : (
         <section className="m-card">

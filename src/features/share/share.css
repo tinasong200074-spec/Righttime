@@ -3,17 +3,35 @@
 /* ── 앱 위쪽의 공유 줄과 카드 ── */
 .share-strip {
   display: flex;
-  align-items: center;
-  gap: 10px;
+  align-items: stretch;
   min-height: 52px;
   margin: var(--pad) var(--pad) 0;
-  padding: 6px 14px;
   border: 1px solid var(--line);
   border-radius: var(--r-card);
   background: var(--surface);
+  overflow: hidden;
+}
+.share-strip-open {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 14px;
+  border: 0;
+  background: none;
   font-size: 0.875rem;
   font-weight: 700;
   text-align: left;
+  cursor: pointer;
+}
+.share-strip-x {
+  width: 48px;
+  border: 0;
+  border-left: 1px solid var(--line);
+  background: none;
+  color: var(--muted);
+  font-size: 1rem;
   cursor: pointer;
 }
 .share-strip-text {

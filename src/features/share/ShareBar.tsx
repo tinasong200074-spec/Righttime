@@ -102,19 +102,48 @@ function ShareActive({ share }: { share: ShareState }) {
   );
 }
 
-// 준비 현황 링크 공유(명세 ⑩⑪). 알람을 켠 뒤부터 쓸 수 있다
+const HIDE_KEY = 'jette:share-hidden';
+const readHidden = () => {
+  try {
+    return localStorage.getItem(HIDE_KEY) === '1';
+  } catch {
+    return false;
+  }
+};
+
+// 준비 현황 링크 공유(명세 ⑩⑪). 알람을 켠 뒤부터 쓸 수 있다.
+// 한 번 닫으면 다시 보이지 않는다(공유 중일 때는 끌 수 있어야 해서 계속 보인다). 친구 탭에서도 공유할 수 있다
 export function ShareBar() {
   const { session, share } = useApp();
   const [open, setOpen] = useState(false);
-  if (!shareAvailable || !session) return null;
+  const [hidden, setHidden] = useState(readHidden);
+  if (!shareAvailable || !session || (hidden && !share)) return null;
+
+  const dismiss = () => {
+    setOpen(false);
+    if (share) return;
+    setHidden(true);
+    try {
+      localStorage.setItem(HIDE_KEY, '1');
+    } catch {
+      // 저장하지 못하면 이번에만 숨겨진다
+    }
+  };
 
   if (!open) {
     return (
-      <button type="button" className="share-strip" onClick={() => setOpen(true)} aria-expanded={false}>
-        <Icon name="share" size={22} main="var(--ink)" det="var(--surface)" />
-        <span className="share-strip-text">{share ? '상대에게 도착 예정이 보여요' : '도착 예정을 링크로 보여 주기'}</span>
-        {share && <Pill tone="accent">공유 중</Pill>}
-      </button>
+      <div className="share-strip">
+        <button type="button" className="share-strip-open" onClick={() => setOpen(true)} aria-expanded={false}>
+          <Icon name="share" size={22} main="var(--ink)" det="var(--surface)" />
+          <span className="share-strip-text">{share ? '상대에게 도착 예정이 보여요' : '도착 예정을 링크로 보여 주기'}</span>
+          {share && <Pill tone="accent">공유 중</Pill>}
+        </button>
+        {!share && (
+          <button type="button" className="share-strip-x" aria-label="링크 공유 안내 닫기" onClick={dismiss}>
+            ✕
+          </button>
+        )}
+      </div>
     );
   }
 
@@ -122,7 +151,7 @@ export function ShareBar() {
     <section className="share-card" aria-label="준비 현황 공유">
       <div className="share-head">
         <h2>{share ? '공유 중' : '링크로 보여 줄까요?'}</h2>
-        <button type="button" className="share-close" onClick={() => setOpen(false)}>
+        <button type="button" className="share-close" onClick={dismiss}>
           닫기
         </button>
       </div>
