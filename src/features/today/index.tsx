@@ -30,7 +30,7 @@ function CarryScreen({ go }: { go: (v: View) => void }) {
 function Sub({ view, go, back }: { view: Exclude<View, 'main'>; go: (v: View) => void; back: () => void }) {
   const body: Record<Exclude<View, 'main'>, { title: string; badge?: string; node: ReactNode }> = {
     weather: { title: '날씨', node: <WeatherCard /> },
-    carry: { title: '출발할 때 알려줘요', node: <CarryScreen go={go} /> },
+    carry: { title: '챙길 것', node: <CarryScreen go={go} /> },
     helper: { title: '일정 준비 도우미', badge: '초안', node: <><HelperForm /><HelperResult /></> },
   };
   const b = body[view];

@@ -7,7 +7,7 @@ import { XIcon } from './XIcon';
 const SRC_TAG: Partial<Record<NonNullable<MemoItem['src']>, string>> = { notice: '안내문', general: 'AI 제안' };
 
 // AI로 나누고, 실패하거나 비어 있으면 쉼표·줄바꿈으로 나눈다
-function useMemoSubmit() {
+export function useMemoSubmit() {
   const { actions } = useApp();
   const [busy, setBusy] = useState(false);
   const [status, setStatus] = useState('');

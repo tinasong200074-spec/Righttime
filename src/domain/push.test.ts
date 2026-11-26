@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { buildPushSchedule, isPushEndpoint, pickEntry } from './push';
+import { buildPushSchedule, isPushEndpoint, leaveAskText, pickEntry } from './push';
 import { calcPlan } from './schedule';
 import { createSession, depart, snooze, startPrep, tickSession } from './session';
 import { DEFAULT_SETTINGS, MIN, type Plan } from './types';
@@ -28,6 +28,12 @@ describe('buildPushSchedule', () => {
     const prep = startPrep(tickSession(armed, at(7, 24)), at(7, 30));
     expect(times(buildPushSchedule(prep, at(7, 30), 5))).toEqual([at(8, 9), at(8, 14)]);
     expect(buildPushSchedule(depart(prep, at(8, 14)), at(8, 14), 5)).toEqual([]);
+  });
+  it('출발 알림에는 지우지 않은 챙길 것을 넣어 한 번 더 묻는다', () => {
+    const last = (carry: string[]) => buildPushSchedule(armed, at(6, 0), 5, carry).at(-1)?.body;
+    expect(last(['우산', '충전기'])).toBe('이거 챙겼어? 우산, 충전기');
+    expect(last([])).toBe('지금 나가면 늦지 않아요.');
+    expect(leaveAskText([])).toBe('');
   });
   it('지난 시각과 시연은 넣지 않는다', () => {
     const prep = startPrep(tickSession(armed, at(7, 24)), at(7, 30));

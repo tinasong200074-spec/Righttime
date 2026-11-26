@@ -1,68 +1,152 @@
-/* 오늘 화면의 약속 목록. 카드 하나가 약속 하나이고, 누르면 시각이 펼쳐진다 */
-.pl-list {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: grid;
-  gap: var(--gap);
+/* 오늘 화면 맨 위의 "곧 있을 일정" 카드. 이름과 두 시각만 크게 */
+.np {
+  padding: 20px;
+  border-radius: var(--r-hero);
+  background: var(--ink);
+  color: #fff;
 }
-.pl-item {
+.np-day {
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--on-dark);
+}
+.np-title {
+  margin: 4px 0 0;
+  font-size: 2rem;
+  line-height: 1.2;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  overflow-wrap: anywhere;
+}
+.np-times {
+  margin: 16px 0 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+.np-times div {
+  display: grid;
+  gap: 2px;
+}
+.np-times dt {
+  font-size: 0.8125rem;
+  color: var(--on-dark);
+}
+.np-times dd {
+  margin: 0;
+  font-size: 2.75rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1.05;
+}
+.np-times .is-wake dd {
+  color: var(--accent);
+}
+.np-foot {
+  margin-top: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 0.8125rem;
+  color: var(--on-dark);
+}
+/* 일정 삭제: 아주 작게, 빨간 글씨. 검은 바탕에서 읽히도록 흰 알약 위에 둔다 */
+.np-del {
+  flex: none;
+  min-height: 24px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: var(--r-pill);
+  background: #fff;
+  color: var(--danger);
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+.np-empty {
+  display: grid;
+  gap: 10px;
+  justify-items: start;
+}
+.np-empty p {
+  margin: 0;
+  color: var(--muted);
+}
+
+/* 챙길 체크리스트 카드 */
+.ck {
   padding: 0;
   overflow: hidden;
 }
-.pl-head {
+.ck-head {
   width: 100%;
-  min-height: 72px;
+  min-height: 64px;
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 14px 18px;
+  gap: 10px;
+  padding: 12px 18px;
   border: 0;
   background: none;
   text-align: left;
   color: inherit;
   cursor: pointer;
 }
-.pl-head .m-grow {
-  display: grid;
-  gap: 2px;
-}
-.pl-title {
-  font-size: 1.25rem;
+.ck-title {
+  flex: 1;
+  font-size: 1.0625rem;
   font-weight: 800;
-  letter-spacing: -0.02em;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
-.pl-arrive {
-  display: grid;
-  justify-items: end;
-  flex: none;
+.ck-tag {
+  border-radius: var(--r-pill);
+  padding: 3px 10px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  background: var(--accent-soft);
 }
-.pl-clock {
-  font-size: 1.5rem;
-  font-weight: 800;
-  letter-spacing: -0.02em;
-}
-.pl-caret {
-  flex: none;
+.ck-count {
+  font-size: 0.875rem;
   color: var(--muted);
 }
-.pl-body {
-  padding: 0 18px 12px;
+.ck-body {
+  padding: 0 18px 14px;
   border-top: 1px solid var(--line);
 }
-.pl-off {
+.ck-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.ck-list li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 48px;
+  border-bottom: 1px solid var(--line);
+}
+.ck-list li > span:first-child {
+  flex: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.ck-src {
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+.ck-x {
+  width: 44px;
+  height: 44px;
+  flex: none;
+  border: 0;
+  background: none;
+  color: var(--muted);
+  font-size: 1rem;
+  cursor: pointer;
+}
+.ck-body .f-row {
+  margin-top: 10px;
+}
+.ck-more {
   width: 100%;
   margin-top: 8px;
-}
-.pl-empty {
-  display: grid;
-  gap: 10px;
-  justify-items: start;
-}
-.pl-empty p {
-  margin: 0;
-  color: var(--muted);
 }

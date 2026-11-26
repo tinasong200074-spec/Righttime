@@ -70,6 +70,13 @@ function dataActions(set: SetState, clock: Clock) {
     setHelper: (helper: HelperResult | null) => set((s) => ({ ...s, helper, helperDone: {} })),
     toggleHelperDone: (key: string) => set((s) => ({ ...s, helperDone: { ...s.helperDone, [key]: !s.helperDone[key] } })),
     removeMemo: (id: string) => set((s) => ({ ...s, memos: s.memos.filter((m) => m.id !== id) })),
+    // 체크리스트에서 지우기: 내가 적은 것은 메모를 지우고, 날씨 항목은 이번 약속에서만 숨긴다
+    removeCheck: (key: string) =>
+      set((s) =>
+        s.memos.some((m) => m.id === key)
+          ? { ...s, memos: s.memos.filter((m) => m.id !== key) }
+          : { ...s, hiddenChecks: [...(s.hiddenChecks ?? []), key] },
+      ),
     toggleMemoPin: (id: string) => set((s) => ({ ...s, memos: s.memos.map((m) => (m.id === id ? { ...m, pin: !m.pin } : m)) })),
     // 대중교통 시간을 조회할 때마다 부른다. 실제 시각으로 남긴다(시연 시계가 아니라)
     logTransit: (placeId: string, rideMin: number) =>

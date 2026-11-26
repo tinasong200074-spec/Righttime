@@ -2,7 +2,6 @@ import { fmtClock, fmtMin } from '../../domain/format';
 import { MIN } from '../../domain/types';
 import { useApp } from '../../app/store';
 import { HeroCard, Icon, Pill, PrimaryButton, StageBar } from '../../ui';
-import { Checklist } from './Checklist';
 import { fmtTimer, leavePillText, prepElapsedMs, weatherParts } from './progress';
 
 // 날씨 카드. 아이콘 타일 + 제목 + 설명(체감·강수·챙길 것)
@@ -50,7 +49,6 @@ export function Depart() {
         </p>
       </HeroCard>
       <WeatherCard />
-      <Checklist />
       <div className="morning-actions">
         <PrimaryButton onClick={actions.depart}>출발했어요</PrimaryButton>
       </div>

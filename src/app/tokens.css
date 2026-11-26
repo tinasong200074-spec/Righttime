@@ -11,6 +11,7 @@
   --accent: #cff244; /* 포인트 색은 이것 하나 */
   --accent-soft: #eef8be;
   --glow-red: rgba(255, 64, 64, 0.3); /* 붉은 조명에만 쓴다 */
+  --danger: #c62828; /* 일정 삭제 글씨에만 쓴다(사용자 요청) */
 
   --r-card: 20px;
   --r-hero: 24px;

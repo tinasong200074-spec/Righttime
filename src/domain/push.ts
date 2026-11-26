@@ -12,7 +12,10 @@ export interface PushEntry {
 // 푸시 서명에 쓰는 공개 키(공개돼도 되는 값). 비밀 키는 서버 환경 변수에만 있다
 export const VAPID_PUBLIC_KEY = 'BCUObL1lAMrP0eJ0U7jPIRjrEw4DJkVR9UnVLAwHDMfF3Rr0IX_hd5rnBLPeU0JReSGEd2v9E9iDcje1STGUTCQ';
 
-export function buildPushSchedule(s: Session | null, now: number, preLeave: number): PushEntry[] {
+// 출발할 때 한 번 더 묻는 문구. 챙길 것이 없으면 빈 글
+export const leaveAskText = (carry: string[]) => (carry.length > 0 ? `이거 챙겼어? ${carry.join(', ')}` : '');
+
+export function buildPushSchedule(s: Session | null, now: number, preLeave: number, carry: string[] = []): PushEntry[] {
   if (!s || s.demo) return [];
   const out: PushEntry[] = [];
   const wakeAt = s.state === 'snoozed' ? s.nextRingAt : s.state === 'armed' ? s.alarmAt : undefined;
@@ -20,7 +23,7 @@ export function buildPushSchedule(s: Session | null, now: number, preLeave: numb
   const beforeLeave = s.state !== 'travel' && s.state !== 'summary';
   if (beforeLeave) {
     out.push({ at: s.leaveAt - preLeave * MIN, title: `출발 ${preLeave}분 전이에요`, body: '챙길 것을 확인해요.' });
-    out.push({ at: s.leaveAt, title: '출발할 시간이에요', body: '지금 나가면 늦지 않아요.' });
+    out.push({ at: s.leaveAt, title: '출발할 시간이에요', body: leaveAskText(carry) || '지금 나가면 늦지 않아요.' });
   }
   return out.filter((e) => e.at > now).sort((a, b) => a.at - b.at);
 }

@@ -37,6 +37,7 @@ export interface AppState {
   helperDone: Record<string, boolean>; // 준비할 것·전날 할 일 체크
   parked: Booked[]; // 알람을 켜 둔 다른 약속(대기 목록). 맨 앞 약속이 끝나면 차례로 올라온다
   drafting: boolean; // 대기 목록을 둔 채 새 약속을 적는 중
+  hiddenChecks: string[]; // 체크리스트에서 지운 날씨 항목(내가 적은 것은 메모 자체를 지운다). 약속이 끝나면 비운다
   spots: Spot[]; // 출발·도착 칸에서 찾아 쓴 장소(검색 기록, 즐겨찾기, 집). 기기에만 둔다
 }
 
@@ -103,6 +104,7 @@ export function defaultState(now: number): AppState {
     parked: [],
     drafting: false,
     spots: [],
+    hiddenChecks: [],
   };
 }
 
@@ -167,7 +169,7 @@ export function saveRecordState(s: AppState, now: number, excluded: boolean): Ap
   const records = [...s.records, record];
   if (s.session.demo) return { ...s, records, session: null, plan: s.planBackup ?? s.plan, planBackup: null };
   const plan = { ...s.plan, arriveAt: rollForward(s.plan.arriveAt, now) };
-  const done = { ...s, records, session: null, plan, memos: s.memos.filter((m) => m.pin) };
+  const done = { ...s, records, session: null, plan, memos: s.memos.filter((m) => m.pin), hiddenChecks: [] };
   if (!s.plan.repeatDays?.length) return done;
   // 요일 반복이면 다음 그 요일로 알람을 바로 다시 켠다. 방금 끝난 약속과 같은 시각은 건너뛴다
   const after = Math.max(now, s.session.arriveAt);

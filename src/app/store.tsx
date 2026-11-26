@@ -73,8 +73,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const calc = useMemo(() => calcOf(state), [state]);
   const checklist = useMemo(
-    () => buildChecklist(state.memos, state.rain, state.weather, state.settings),
-    [state.memos, state.rain, state.weather, state.settings],
+    () => buildChecklist(state.memos, state.rain, state.weather, state.settings).filter((c) => !(state.hiddenChecks ?? []).includes(c.key)),
+    [state.memos, state.rain, state.weather, state.settings, state.hiddenChecks],
   );
   const glow = state.settings.glow && isGlowOn(state.session, now, state.settings.preLeave);
 
