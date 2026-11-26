@@ -102,28 +102,6 @@ function ShareActive({ share }: { share: ShareState }) {
   );
 }
 
-function VisibleList() {
-  return (
-    <dl className="share-vis">
-      <div>
-        <dt>보임</dt>
-        <dd>
-          <span>지금 단계</span>
-          <span>도착 예정</span>
-        </dd>
-      </div>
-      <div className="is-hidden">
-        <dt>안 보임</dt>
-        <dd>
-          <span>위치</span>
-          <span>미루기</span>
-          <span>기록</span>
-        </dd>
-      </div>
-    </dl>
-  );
-}
-
 // 준비 현황 링크 공유(명세 ⑩⑪). 알람을 켠 뒤부터 쓸 수 있다
 export function ShareBar() {
   const { session, share } = useApp();
@@ -148,7 +126,7 @@ export function ShareBar() {
           닫기
         </button>
       </div>
-      {share ? <ShareActive share={share} /> : <VisibleList />}
+      {share && <ShareActive share={share} />}
       {!share && <ShareSetup arriveAt={session.arriveAt} />}
     </section>
   );

@@ -49,6 +49,7 @@ export interface RoomState {
   sharing: boolean;
   arriveMs: number;
   finished?: boolean; // 이 방의 약속을 마치고 결과를 남겼다
+  joined?: boolean; // 초대받아 들어온 방(내가 만든 방이 아니다)
 }
 
 export const uid = () => Math.random().toString(36).slice(2, 9);

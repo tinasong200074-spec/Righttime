@@ -129,12 +129,17 @@ export function RoomLive({ room, view, onBack, onOpen }: Props) {
       <Others others={others} onOpen={onOpen} />
       <p className="fr-small" role="status">{msg}</p>
       <div className="m-spacer" />
-      <button type="button" className="fr-ghost" onClick={async () => setMsg(await sendInvite(room.code))}>
-        초대 링크 보내기 · 코드 {room.code}
-      </button>
-      <button type="button" className="fr-ghost" onClick={toggle}>
-        {room.sharing ? '공유 끄기' : '다시 공유하기'}
-      </button>
+      {/* 초대받아 들어온 사람에게는 나가기만 보여 준다 */}
+      {!room.joined && (
+        <>
+          <button type="button" className="fr-ghost" onClick={async () => setMsg(await sendInvite(room.code))}>
+            초대 링크 보내기 · 코드 {room.code}
+          </button>
+          <button type="button" className="fr-ghost" onClick={toggle}>
+            {room.sharing ? '공유 끄기' : '다시 공유하기'}
+          </button>
+        </>
+      )}
       <button type="button" className="fr-exit" onClick={() => actions.setRoom(null)} style={{ alignSelf: 'center' }}>
         방에서 나가기
       </button>

@@ -40,7 +40,7 @@ function useEnter() {
     setBusy(false);
     if (!ref) return setMsg(clean ? '방을 찾지 못했어요. 코드를 확인하거나, 이미 끝난 약속일 수 있어요.' : '방을 만들지 못했어요. 잠시 뒤 다시 시도해 주세요.');
     if (location.hash.startsWith('#r=')) history.replaceState(null, '', location.pathname);
-    actions.setRoom({ roomId: ref.roomId, code: ref.code, sharing: true, arriveMs: plan.arriveAt });
+    actions.setRoom({ roomId: ref.roomId, code: ref.code, sharing: true, arriveMs: plan.arriveAt, joined: !!clean });
   };
   return { busy, msg, enter };
 }
