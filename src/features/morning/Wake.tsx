@@ -2,9 +2,9 @@ import { fmtClock, fmtMin } from '../../domain/format';
 import { MIN } from '../../domain/types';
 import { useApp } from '../../app/store';
 import { FillBar, HeroCard, Icon, OutlineButton, Pill, PrimaryButton, StageBar } from '../../ui';
-import { fmtTimer, wakeBar, wakeStartAt } from './progress';
+import { fmtTimer, leavePillText, wakeBar, wakeStartAt } from './progress';
 
-// ② 기상(알람). 울린 뒤 지난 시간을 잰다. 미루는 동안에도 계속 잰다.
+// ② 시작시간(알람). 큰 숫자는 출발까지 남은 시간이다. 울린 뒤 지난 시간은 작게 보이고, 미루는 동안에도 계속 잰다.
 export function Wake() {
   const { session: s, now, settings, actions } = useApp();
   if (!s) return null;
@@ -22,17 +22,16 @@ export function Wake() {
         <div className="morning-head">
           <span className="morning-head-label">
             <Icon name="bell" main="var(--on-dark)" det="var(--on-dark)" size={18} />
-            {fmtClock(start)} 알람
+            출발까지
           </span>
-          <Pill tone="dark">
-            <span className="morning-live" aria-hidden="true" />
-            기록 중
-          </Pill>
+          <Pill tone="dark">{leavePillText(s.leaveAt, now, settings.preLeave)}</Pill>
         </div>
-        <p className="ui-hero-num" aria-label="알람이 울린 뒤 지난 시간">
-          {fmtTimer(now - start)}
+        <p className="ui-hero-num" aria-label="출발까지 남은 시간">
+          {fmtTimer(s.leaveAt - now)}
         </p>
-        <p className="ui-hero-label">알람 후 지난 시간</p>
+        <p className="ui-hero-label">
+          {fmtClock(s.leaveAt)} 출발 · 알람 후 {fmtMin((now - start) / MIN)} 지남
+        </p>
         <FillBar segments={bar.segments} progress={bar.progress} label="알람 시각에서 평소 준비 시작 시각까지 진행" />
         <div className="morning-axis">
           <span>{fmtClock(start)} 알람</span>

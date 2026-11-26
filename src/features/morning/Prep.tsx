@@ -1,8 +1,8 @@
-import { fmtClock, fmtHMS, fmtMin } from '../../domain/format';
+import { fmtClock, fmtMin } from '../../domain/format';
 import { MIN, type Session } from '../../domain/types';
 import { useApp } from '../../app/store';
 import { FillBar, HeroCard, Pill, PrimaryButton, StageBar } from '../../ui';
-import { fmtTimer, prepBar, prepElapsedMs, wakeStartAt } from './progress';
+import { fmtTimer, leavePillText, prepBar, prepElapsedMs, wakeStartAt } from './progress';
 
 function Stats({ s, now }: { s: Session; now: number }) {
   return (
@@ -16,8 +16,8 @@ function Stats({ s, now }: { s: Session; now: number }) {
         <dd className="is-accent">{fmtMin(prepElapsedMs(s, now) / MIN)}</dd>
       </div>
       <div>
-        <dt>출발까지</dt>
-        <dd>{fmtHMS(s.leaveAt - now)}</dd>
+        <dt>출발 시각</dt>
+        <dd>{fmtClock(s.leaveAt)}</dd>
       </div>
     </dl>
   );
@@ -35,16 +35,13 @@ export function Prep() {
       <StageBar current="prep" notes={{ wake: fmtMin(s.latency ?? 0), prep: fmtMin(prepMin), leave: fmtClock(s.leaveAt) }} />
       <HeroCard>
         <div className="morning-head">
-          <span className="morning-head-label">준비 중</span>
-          <Pill tone="dark">
-            <span className="morning-live" aria-hidden="true" />
-            기록 중
-          </Pill>
+          <span className="morning-head-label">출발까지</span>
+          <Pill tone="dark">{leavePillText(s.leaveAt, now, settings.preLeave)}</Pill>
         </div>
-        <p className="ui-hero-num" aria-label="준비한 시간">
-          {fmtTimer(prepElapsedMs(s, now))}
+        <p className="ui-hero-num" aria-label="출발까지 남은 시간">
+          {fmtTimer(s.leaveAt - now)}
         </p>
-        <p className="ui-hero-label">준비한 시간</p>
+        <p className="ui-hero-label">준비 중 · 준비한 시간 {fmtTimer(prepElapsedMs(s, now))}</p>
         <FillBar segments={bar.segments} progress={bar.progress} label="시작시간과 준비로 지난 시간" />
         <div className="morning-axis">
           <span>{fmtClock(wakeStartAt(s))}</span>
