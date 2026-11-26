@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useApp } from '../../app/store';
 import { TONES, buildMessage } from '../../domain/message';
 import type { ToneMode } from '../../domain/types';
@@ -109,21 +110,33 @@ function DemoSection() {
 function DataSection() {
   const { records, actions } = useApp();
   const hasSample = records.some((r) => r.sample);
+  const [msg, setMsg] = useState('');
+  const load = () => {
+    actions.loadSampleData();
+    setMsg('샘플 기록 7건을 넣었어요. 기록 탭에서 분석과 달력을 볼 수 있어요.');
+  };
+  const clear = () => {
+    actions.clearSampleData();
+    setMsg('샘플 기록을 지웠어요.');
+  };
   return (
     <Card>
       <h2 className="f-title">데이터</h2>
       <p className="f-sub">기록·설정·장소는 이 기기에만 저장돼요.</p>
       <div className="f-row f-wrap" style={{ marginTop: 12 }}>
-        <button type="button" className="f-btn" onClick={actions.loadSampleData}>
+        <button type="button" className="f-btn" onClick={load}>
           샘플 데이터 넣기
         </button>
         {hasSample && (
-          <button type="button" className="f-btn" onClick={actions.clearSampleData}>
+          <button type="button" className="f-btn" onClick={clear}>
             샘플 데이터 지우기
           </button>
         )}
         <ConfirmButton label="모든 데이터 삭제" confirmLabel="한 번 더 누르면 모두 지워요" onConfirm={actions.clearAllData} />
       </div>
+      <p className="f-status" role="status">
+        {msg || (hasSample ? '샘플 기록이 들어 있어요.' : '')}
+      </p>
     </Card>
   );
 }

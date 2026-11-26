@@ -100,7 +100,7 @@ export function insights(records: RecordRow[]): InsightView | null {
     const tone = kept === arrived.length ? 'good' : kept * 2 < arrived.length ? 'warn' : 'flat';
     tiles.push({ key: 'arrive', value: `${kept}/${arrived.length}`, label: '제시간 도착', tone });
   }
-  tiles.push({ key: 'snooze', value: `${snooze}번`, label: '알람 미룸(평균)', tone: snooze >= 2 ? 'warn' : snooze === 0 ? 'good' : 'flat' });
+  tiles.push({ key: 'snooze', value: `${snooze}번`, label: '알람 미룸', tone: snooze >= 2 ? 'warn' : snooze === 0 ? 'good' : 'flat' });
   tiles.push({ key: 'wake', value: `${wake}분`, label: '울린 뒤 시작까지', tone: wake >= 10 ? 'warn' : 'flat' });
   tiles.push(prepTile(over), leaveTile(round(average(rows.map((r) => r.leaveDiff)))));
   const tip = over >= NOTABLE_MIN ? `준비 시간을 ${over}분 늘려 잡으면 맞아요` : wake >= 10 ? `알람을 ${wake}분 일찍 맞추면 여유가 생겨요` : null;

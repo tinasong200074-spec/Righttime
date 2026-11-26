@@ -1,5 +1,5 @@
 import { useApp } from '../../app/store';
-import { fmtClock, fmtMin } from '../../domain/format';
+import { fmtClock } from '../../domain/format';
 import { Icon, type IconName } from '../../ui';
 import '../today/fields.css';
 import '../today/main.css';
@@ -22,29 +22,6 @@ function AlarmCard() {
         <span className="r-new">{fmtClock(after)}</span>
       </div>
       <div className="r-hero-sub">{change}</div>
-    </section>
-  );
-}
-
-const signed = (n: number | null) => (n === null ? '-' : `${n > 0 ? '+' : ''}${Math.round(n)}분`);
-
-function Stat({ value, label }: { value: string; label: string }) {
-  return (
-    <div>
-      <div className="r-stat-num">{value}</div>
-      <div className="r-stat-label">{label}</div>
-    </div>
-  );
-}
-
-function Averages() {
-  const { records } = useApp();
-  const a = averages(records);
-  return (
-    <section className="m-card r-stats">
-      <Stat value={fmtMin(a.wake)} label="시작시간 평균" />
-      <Stat value={fmtMin(a.prep)} label="준비 평균" />
-      <Stat value={signed(a.leave)} label="출발 평균" />
     </section>
   );
 }
@@ -77,7 +54,7 @@ function Insights() {
   return (
     <section className="m-card">
       <div className="r-chart-head">
-        <h2>내 기록을 보면</h2>
+        <h2>내 기록을 보면 · 평균</h2>
         {view.trail.length > 0 && (
           <span className="r-trail" aria-label={`최근 도착 ${view.trail.map((t) => (t === 'kept' ? '제시간' : '지각')).join(', ')}`}>
             {view.trail.map((t, i) => (
@@ -111,7 +88,6 @@ export function RecordsScreen() {
       {hasData ? (
         <>
           <Insights />
-          <Averages />
           <RecordCalendar />
         </>
       ) : (

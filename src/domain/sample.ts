@@ -8,6 +8,7 @@ const SNOOZE = [2, 1, 3, 1, 2, 3, 1];
 const LEAVE_DIFF = [6, 3, 9, 2, -1, 11, 4];
 const TRAVEL = [34, 38, 31, 41, 33, 45, 36];
 const ARRIVAL = ['late', 'ontime', 'late', 'ontime', 'early', 'late', 'ontime'] as const;
+const ARRIVE_DIFF = [7, 0, 4, -2, -8, 9, -1]; // 약속 시각과의 차이(분). 달력에서 날짜를 누르면 보인다
 const STEPS = [
   { name: '씻기', est: 15, share: 0.38 },
   { name: '옷 입기', est: 10, share: 0.22 },
@@ -32,6 +33,7 @@ export function buildSampleRecords(now: number): RecordRow[] {
     placeId: SAMPLE_PLACE.id,
     placeName: SAMPLE_PLACE.name,
     travelActual: TRAVEL[i],
+    arriveDiff: ARRIVE_DIFF[i],
     arrival: ARRIVAL[i],
     demo: false,
     excluded: false,
