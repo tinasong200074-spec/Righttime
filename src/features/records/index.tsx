@@ -11,7 +11,7 @@ function AlarmCard() {
   const { calc, plan, settings } = useApp();
   if (!calc) return null;
   const { before, after, diffMin } = alarmCompare(calc, plan, settings);
-  const change = diffMin > 0 ? `알람이 ${diffMin}분 빨라요` : diffMin < 0 ? `알람이 ${-diffMin}분 늦어요` : '알람 시각이 그대로예요';
+  const change = diffMin > 0 ? `${diffMin}분 빨리 준비해야 해요` : diffMin < 0 ? `${-diffMin}분 늦게 준비해도 돼요` : '알람 시각이 그대로예요';
   return (
     <section className="r-hero">
       <div className="r-hero-label">기록을 반영하면</div>
