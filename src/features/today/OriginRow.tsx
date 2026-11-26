@@ -24,8 +24,6 @@ export function OriginRow() {
 
   return (
     <div>
-      <h3 className="f-label">출발지</h3>
-      <p>{origin ? origin.name : '아직 정하지 않았어요.'}</p>
       <PlaceShortcuts target="origin" />
       <div className="f-row f-wrap">
         <button type="button" className="f-btn" aria-expanded={searching} onClick={() => setSearching((v) => !v)}>
@@ -34,11 +32,6 @@ export function OriginRow() {
         <button type="button" className="f-btn" onClick={useHere}>
           지금 위치 쓰기
         </button>
-        {origin && (
-          <button type="button" className="f-btn" onClick={() => actions.setOrigin(null)}>
-            지우기
-          </button>
-        )}
       </div>
       <p className="f-status" aria-live="polite">
         {msg || (origin ? '출발지는 이 기기에만 저장돼요.' : '')}

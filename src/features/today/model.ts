@@ -35,9 +35,9 @@ export interface Part {
   tone: FillSegment['tone'];
 }
 
-// 시간표 막대: 기상 지연 / 준비 단계들 / 이동 / 배차 대기 / 여유
+// 시간표 막대: 시작 지연 / 준비 단계들 / 이동 / 배차 대기 / 여유
 export function timetableParts(c: PlanCalc): Part[] {
-  const parts: Part[] = [{ name: '기상 지연', min: c.wake.val, tone: 'light' }];
+  const parts: Part[] = [{ name: '시작 지연', min: c.wake.val, tone: 'light' }];
   c.steps.forEach((s, i) => parts.push({ name: s.name, min: s.est, tone: i % 2 ? 'gray' : 'ink' }));
   parts.push({ name: '이동', min: c.ride.val, tone: 'ink' });
   parts.push({ name: '배차 대기', min: c.waitMin, tone: 'gray' });

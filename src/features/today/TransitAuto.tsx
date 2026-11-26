@@ -4,9 +4,8 @@ import { roundCoord } from '../../domain/geo';
 import type { TransitRoute } from '../../domain/transit';
 import { readPositionOnce } from '../../infra/geo';
 import { fetchTransit, TRANSIT_ERROR_TEXT, TransitError } from '../../infra/transit';
-import { OriginRow } from './OriginRow';
 
-const BASIS_NOTE = '지금 출발 기준 시간이에요. 아침 시간대에는 다를 수 있어요. 카카오가 배차 간격을 알려 주지 않아서 대기 시간은 따로 넣지 않아요.';
+const BASIS_NOTE = '현재 시간 기준입니다';
 const KEY = 'jette:transit-on';
 const HERE = '현재 위치';
 const GEO_DIGITS = 4; // 소수 넷째 자리(약 11m)로 줄여 기기에만 저장한다
@@ -88,14 +87,17 @@ function useAutoTransit(on: boolean) {
   return { place, phase, route, msg, rerun, reset: () => (last.current = '') };
 }
 
-function RouteInfo({ route }: { route: TransitRoute }) {
+// 소요 시간: 조회한 경로가 있으면 그 값과 요약, 없으면 장소에 저장된 평소 이동 시간
+function TimeBlock({ minutes, route }: { minutes: number | null; route: TransitRoute | null }) {
+  if (minutes === null) return null;
   return (
     <div className="t-route">
       <p>
-        <strong>{route.rideMin}분</strong> · 환승 {route.transfers}번
+        소요 시간 <strong>{minutes}분</strong>
+        {route ? ` · 환승 ${route.transfers}번` : ''}
       </p>
-      <p className="f-sub">{route.summary}</p>
-      {route.landingUrl && (
+      {route && <p className="f-sub">{route.summary}</p>}
+      {route?.landingUrl && (
         <a className="f-btn t-link" href={route.landingUrl} target="_blank" rel="noopener noreferrer">
           카카오맵에서 보기
         </a>
@@ -106,10 +108,10 @@ function RouteInfo({ route }: { route: TransitRoute }) {
 
 // "대중교통으로 가요" 체크. 켜 두면 도착 장소를 고를 때마다 자동으로 이동 시간을 가져온다
 export function TransitAuto() {
-  const { origin } = useApp();
   const [on, setOn] = useChecked();
   const t = useAutoTransit(on);
   const busy = t.phase !== 'idle';
+  const minutes = t.route ? t.route.rideMin : (t.place?.travelMin ?? null);
 
   return (
     <div>
@@ -120,19 +122,15 @@ export function TransitAuto() {
       {on && (
         <>
           <p className="f-status" aria-live="polite">
-            {t.msg || (t.place?.geo ? '' : '도착 장소를 고르면 이동 시간을 자동으로 가져와요.')}
+            {t.msg}
           </p>
-          {t.route && <RouteInfo route={t.route} />}
+          <TimeBlock minutes={minutes} route={t.route} />
           {t.place?.geo && (
             <button type="button" className="f-btn" disabled={busy} onClick={t.rerun}>
               {busy ? (t.phase === 'locating' ? '위치 확인 중…' : '조회 중…') : '다시 조회'}
             </button>
           )}
           <p className="f-sub">{BASIS_NOTE}</p>
-          <details>
-            <summary className="t-summary">출발지 직접 정하기 · {origin?.name ?? '정하지 않았어요'}</summary>
-            <OriginRow />
-          </details>
         </>
       )}
     </div>

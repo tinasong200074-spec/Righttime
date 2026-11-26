@@ -119,7 +119,7 @@ function Rows({ calc, go }: { calc: PlanCalc; go: Go }) {
   const travelAll = calc.ride.val + calc.waitMin + calc.buffer;
   return (
     <section className="m-card m-rows">
-      <Row icon="wake" name="기상" note={`평소 ${calc.wake.val}분`} time={calc.alarmAt} />
+      <Row icon="wake" name="시작시간" note={`평소 ${calc.wake.val}분`} time={calc.alarmAt} />
       <Row icon="prep" name="준비" note={`${calc.prep.val}분 · ${calc.steps.length}단계`} time={calc.prepStartAt} accent onClick={() => go('steps')} />
       <Row icon="leave" name="출발" note={`이동 + 배차 + 여유 ${travelAll}분 전`} time={calc.leaveAt} />
     </section>

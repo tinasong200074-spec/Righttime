@@ -41,7 +41,7 @@ function Averages() {
   const a = averages(records);
   return (
     <section className="m-card r-stats">
-      <Stat value={fmtMin(a.wake)} label="기상" />
+      <Stat value={fmtMin(a.wake)} label="시작시간" />
       <Stat value={fmtMin(a.prep)} label="준비" />
       <Stat value={signed(a.leave)} label="출발 시각" />
     </section>

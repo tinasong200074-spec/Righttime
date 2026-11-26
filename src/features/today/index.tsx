@@ -1,4 +1,4 @@
-import { useEffect, useState, type ReactNode } from 'react';
+import { useEffect, type ReactNode } from 'react';
 import { useApp } from '../../app/store';
 import { CarryCard } from './CarryCard';
 import './fields.css';
@@ -9,6 +9,7 @@ import { MemoBar } from './MemoBar';
 import { PlaceField, PlanFields } from './PlanCard';
 import { StepsEditor } from './StepsEditor';
 import { SubScreen } from './SubScreen';
+import { useHistoryState } from './useHistoryState';
 import './today.css';
 import { TodayMain, type View } from './TodayMain';
 import { WeatherCard } from './WeatherCard';
@@ -28,8 +29,7 @@ function CarryScreen({ go }: { go: (v: View) => void }) {
 }
 
 // 보조 화면: 오늘 화면에서 탭한 칸을 고치는 곳
-function Sub({ view, go }: { view: Exclude<View, 'main'>; go: (v: View) => void }) {
-  const back = () => go(view === 'helper' ? 'carry' : 'main');
+function Sub({ view, go, back }: { view: Exclude<View, 'main'>; go: (v: View) => void; back: () => void }) {
   const body: Record<Exclude<View, 'main'>, { title: string; badge?: string; node: ReactNode }> = {
     plan: { title: '일정', node: <PlanFields /> },
     place: { title: '도착 장소', node: <section className="m-card"><PlaceField /></section> },
@@ -49,11 +49,16 @@ function Sub({ view, go }: { view: Exclude<View, 'main'>; go: (v: View) => void 
 // ① 오늘: 목업 6번과 같은 한 화면과, 칸을 탭하면 열리는 보조 화면들
 export function TodayScreen() {
   const { session, plan, actions } = useApp();
-  const [view, setView] = useState<View>('main');
+  const nav = useHistoryState<View>('main'); // 뒤로 버튼이 앱을 닫지 않고 이전 화면으로 돌아오게 한다
   // 배차 대기 입력은 없앴다(카카오가 배차 간격을 주지 않는다). 예전에 저장된 값이 남아 있으면 0으로 맞춘다
   useEffect(() => {
     if (plan.waitMin !== 0 && !session) actions.updatePlan({ waitMin: 0 });
   }, [plan.waitMin, session, actions]);
-  const go = (v: View) => setView(session && v !== 'main' && v !== 'carry' && v !== 'helper' && v !== 'weather' ? 'main' : v);
-  return view === 'main' ? <TodayMain go={go} /> : <Sub view={view} go={go} />;
+  // 알람이 켜져 있는 동안은 일정·장소·단계를 고치는 화면으로 들어가지 않는다
+  const go = (v: View) => {
+    if (session && v !== 'carry' && v !== 'helper' && v !== 'weather') return;
+    nav.push(v);
+  };
+  const back = () => nav.back(nav.view === 'helper' ? 'carry' : 'main');
+  return nav.view === 'main' ? <TodayMain go={go} /> : <Sub view={nav.view} go={go} back={back} />;
 }

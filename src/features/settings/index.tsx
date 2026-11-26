@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { useApp } from '../../app/store';
 import { TONES, buildMessage } from '../../domain/message';
 import type { ToneMode } from '../../domain/types';
@@ -6,6 +5,7 @@ import { Card } from '../../ui';
 import '../today/fields.css';
 import '../today/main.css';
 import { SubScreen } from '../today/SubScreen';
+import { useHistoryState } from '../today/useHistoryState';
 import { NumberField } from '../today/NumberField';
 import { ConfirmButton } from './ConfirmButton';
 import { CustomTone } from './CustomTone';
@@ -20,10 +20,10 @@ function AlarmSection() {
       <div className="f-grid3" style={{ gridTemplateColumns: 'repeat(2, minmax(0, 1fr))' }}>
         <NumberField label="도착 여유" value={s.buffer} min={0} max={60} onChange={(buffer) => set({ buffer })} />
         <NumberField label="미루기 간격" value={s.snooze} min={1} max={30} onChange={(snooze) => set({ snooze })} />
-        <NumberField label="평소 기상 시간" value={s.latency} min={0} max={60} onChange={(latency) => set({ latency })} />
+        <NumberField label="평소 시작시간" value={s.latency} min={0} max={60} onChange={(latency) => set({ latency })} />
         <NumberField label="출발 알림" value={s.preLeave} min={1} max={30} onChange={(preLeave) => set({ preLeave })} />
       </div>
-      <p className="f-sub">기상 시간은 알람이 울린 뒤 준비를 시작하기까지 평소 걸리는 분이에요. 기록이 쌓이면 기록으로 바뀌어요.</p>
+      <p className="f-sub">시작시간은 알람이 울린 뒤 준비를 시작하기까지 평소 걸리는 분이에요. 기록이 쌓이면 기록으로 바뀌어요.</p>
       <Switch label="알람 소리" on={s.sound} onChange={(sound) => set({ sound })} />
       <Switch label="출발 임박 붉은 조명" on={s.glow} onChange={(glow) => set({ glow })} />
     </Card>
@@ -191,10 +191,11 @@ function Body({ page }: { page: Exclude<Page, 'menu'> }) {
 
 // 설정: 목업처럼 한 화면짜리 메뉴와, 항목마다 열리는 화면
 export function SettingsScreen() {
-  const [page, setPage] = useState<Page>('menu');
-  if (page === 'menu') return <Menu go={setPage} />;
+  const nav = useHistoryState<Page>('menu'); // 뒤로 버튼이 앱을 닫지 않고 메뉴로 돌아오게 한다
+  const page = nav.view;
+  if (page === 'menu') return <Menu go={nav.push} />;
   return (
-    <SubScreen title={TITLES[page]} onBack={() => setPage('menu')}>
+    <SubScreen title={TITLES[page]} onBack={() => nav.back('menu')}>
       <Body page={page} />
     </SubScreen>
   );

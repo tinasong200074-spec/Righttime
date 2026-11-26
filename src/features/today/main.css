@@ -307,3 +307,8 @@ button.m-row {
   cursor: pointer;
   color: inherit;
 }
+
+/* 휴대폰 상태 표시줄(시계·배터리)과 겹치지 않게 맨 위에 여백을 둔다. 기기가 알려 주는 값이 없어도 최소 40px */
+.app {
+  padding-top: max(calc(env(safe-area-inset-top, 0px) + 12px), 40px);
+}

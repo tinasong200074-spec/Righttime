@@ -10,6 +10,7 @@ import { RepeatPicker } from '../quick/RepeatPicker';
 import { newId } from './model';
 import { NumberField } from './NumberField';
 import { PlaceSearch } from './PlaceSearch';
+import { OriginRow } from './OriginRow';
 import { TransitAuto } from './TransitAuto';
 
 const DEFAULT_RADIUS_M = 150;
@@ -88,7 +89,8 @@ function useAddFound() {
   };
 }
 
-export function PlaceField() {
+// 도착 장소를 고르는 도구들: 저장한 장소, 자주 가는 곳, 지도 검색, 직접 추가
+function DestTools() {
   const { plan, places, actions } = useApp();
   const [mode, setMode] = useState<PlaceMode>('none');
   const addFound = useAddFound();
@@ -97,7 +99,7 @@ export function PlaceField() {
   return (
     <div>
       <label className="f-label" htmlFor="plan-place">
-        도착 장소
+        도착 장소 고르기
       </label>
       <div className="f-row">
         <Icon name="place" main="var(--ink)" det="var(--surface)" />
@@ -134,7 +136,64 @@ export function PlaceField() {
         />
       )}
       {plan.placeId && mode === 'none' && <SaveHereButton placeId={plan.placeId} />}
+    </div>
+  );
+}
+
+function EndBox({ label, value, active, onClick }: { label: string; value: string; active: boolean; onClick: () => void }) {
+  return (
+    <button type="button" className="t-end" aria-pressed={active} onClick={onClick}>
+      <span className="m-muted">{label}</span>
+      <span className="t-end-name">{value}</span>
+    </button>
+  );
+}
+
+// 출발과 도착을 나란히 보이고, 그 아래에 대중교통 체크(체크하면 소요 시간). 도착은 체크와 상관없이 입력한다
+export function PlaceField() {
+  const { plan, places, origin } = useApp();
+  const [tool, setTool] = useState<'dest' | 'origin'>('dest');
+  const place = places.find((p) => p.id === plan.placeId);
+
+  return (
+    <div>
+      <div className="t-ends">
+        <EndBox label="출발" value={origin?.name ?? '정하지 않았어요'} active={tool === 'origin'} onClick={() => setTool('origin')} />
+        <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+          <path d="M5 12h14M13 6l6 6-6 6" stroke="var(--muted)" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+        </svg>
+        <EndBox label="도착" value={place?.name ?? '장소를 골라 주세요'} active={tool === 'dest'} onClick={() => setTool('dest')} />
+      </div>
       <TransitAuto />
+      {tool === 'dest' ? <DestTools /> : <OriginRow />}
+    </div>
+  );
+}
+
+// 도착 날짜와 도착 시각을 따로 고른다(요일 반복은 아래 "반복"에서)
+function DateTimeFields() {
+  const { plan, actions } = useApp();
+  const value = toInputValue(plan.arriveAt); // YYYY-MM-DDTHH:MM
+  const date = value.slice(0, 10);
+  const time = value.slice(11, 16);
+  const set = (d: string, t: string) => {
+    const ms = fromInputValue(`${d}T${t}`);
+    if (ms !== null) actions.updatePlan({ arriveAt: ms });
+  };
+  return (
+    <div className="f-grid3" style={{ gridTemplateColumns: '3fr 2fr' }}>
+      <div>
+        <label className="f-label" htmlFor="plan-date">
+          도착 날짜
+        </label>
+        <input id="plan-date" className="f-input" type="date" value={date} onChange={(e) => e.target.value && set(e.target.value, time)} />
+      </div>
+      <div>
+        <label className="f-label" htmlFor="plan-time">
+          도착 시각
+        </label>
+        <input id="plan-time" className="f-input" type="time" value={time} onChange={(e) => e.target.value && set(date, e.target.value)} />
+      </div>
     </div>
   );
 }
@@ -155,19 +214,7 @@ export function PlanFields() {
         value={plan.title}
         onChange={(e) => actions.updatePlan({ title: e.target.value })}
       />
-      <label className="f-label" htmlFor="plan-arrive">
-        도착 시각
-      </label>
-      <input
-        id="plan-arrive"
-        className="f-input"
-        type="datetime-local"
-        value={toInputValue(plan.arriveAt)}
-        onChange={(e) => {
-          const ms = fromInputValue(e.target.value);
-          if (ms !== null) actions.updatePlan({ arriveAt: ms });
-        }}
-      />
+      <DateTimeFields />
       <RepeatPicker />
     </Card>
   );
