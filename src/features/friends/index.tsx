@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useApp } from '../../app/store';
-import type { Friend } from '../../domain/room';
+import type { RoomState } from '../../app/state';
+import type { Friend, RoomView } from '../../domain/room';
 import { accountAvailable, callRpc, hasAccount } from '../../infra/account';
 import { cheerInRoom } from '../../infra/rooms';
 import { useFriends, useRoomView } from '../room/useRoomView';
@@ -13,6 +14,7 @@ import { FriendRecord } from './FriendRecord';
 import { MemberView } from './MemberView';
 import { RoomLive } from './RoomLive';
 import { RoomSetup } from './RoomSetup';
+import { TopBar } from './TopBar';
 
 type View = { name: 'list' } | { name: 'setup' } | { name: 'live' } | { name: 'member'; id: string } | { name: 'record'; id: string };
 
@@ -29,6 +31,32 @@ function RecordRoute({ friend, toList, onGone }: { friend: Friend; toList: () =>
     return ok;
   };
   return <FriendRecord friend={friend} onBack={toList} onCut={cut} />;
+}
+
+// 들어온 방의 정보를 아직 못 받았을 때
+function Waiting({ onBack, onLeave }: { onBack: () => void; onLeave: () => void }) {
+  return (
+    <div className="m-screen">
+      <TopBar title="친구와 약속" onBack={onBack} />
+      <section className="m-card">
+        <p className="m-muted" style={{ margin: 0 }}>친구의 준비 현황을 불러오는 중이에요…</p>
+      </section>
+      <div className="m-spacer" />
+      <button type="button" className="fr-exit" style={{ alignSelf: 'center' }} onClick={onLeave}>
+        방에서 나가기
+      </button>
+    </div>
+  );
+}
+
+// 링크나 코드로 들어온 사람은 보낸 친구의 준비 단계 화면만 본다(내 화면과 방 설정은 보여 주지 않는다)
+function JoinedRoute({ room, view, now, toList, refresh }: { room: RoomState; view: RoomView | null; now: number; toList: () => void; refresh: () => void }) {
+  const { actions } = useApp();
+  const leave = () => actions.setRoom(null);
+  const host = view?.members.find((x) => !x.isMe);
+  if (!host || !view) return <Waiting onBack={toList} onLeave={leave} />;
+  const cheer = () => void cheerInRoom(room.roomId, host.userId, host.lateMin ? 'ok' : 'slow').then(refresh);
+  return <MemberView m={host} arriveMs={view.arriveMs} now={now} onBack={toList} onCheer={cheer} onLeave={leave} />;
 }
 
 // 친구 탭: 목록 → 친구 추가(방 만들기·들어가기, 목업 1번) → 내 화면(2번) → 친구 상태(3·4·5번)
@@ -59,6 +87,7 @@ export function FriendsScreen() {
     );
   }
   if (view.name === 'setup') return <RoomSetup onBack={toList} />;
+  if (view.name === 'live' && room?.joined) return <JoinedRoute room={room} view={roomView} now={now} toList={toList} refresh={refresh} />;
   if (view.name === 'live' && room) return <RoomLive room={room} view={roomView} onBack={toList} onOpen={(id) => nav.push({ name: 'member', id })} />;
   if (view.name === 'member' && room && roomView) {
     const m = roomView.members.find((x) => x.userId === view.id);

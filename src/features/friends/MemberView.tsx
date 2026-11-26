@@ -10,6 +10,7 @@ interface Props {
   now: number;
   onBack: () => void;
   onCheer: () => void;
+  onLeave?: () => void; // 링크로 들어온 사람에게만: 이 화면에서 바로 방을 나간다
 }
 
 function Hero({ m, arriveMs, mood }: { m: RoomMember; arriveMs: number; mood: Mood }) {
@@ -58,7 +59,7 @@ const subject = (name: string) => {
 };
 
 // 친구 한 명의 상태 화면: 준비 중 / 늦을 것 같을 때 / 확인 안 됨(목업 3·4·5번). 재촉 없이 안심 메시지만 보낸다
-export function MemberView({ m, arriveMs, now, onBack, onCheer }: Props) {
+export function MemberView({ m, arriveMs, now, onBack, onCheer, onLeave }: Props) {
   const mood = moodOf(m, now);
   const scene = sceneOf(m);
   const unknown = mood === 'stale' || mood === 'hidden';
@@ -83,6 +84,11 @@ export function MemberView({ m, arriveMs, now, onBack, onCheer }: Props) {
       {!m.result && m.sharing && (
         <button type="button" className="fr-ghost" onClick={onCheer}>
           {m.lateMin ? '‘괜찮아요, 천천히 와요’ 보내기' : '‘천천히 와요’ 보내기'}
+        </button>
+      )}
+      {onLeave && (
+        <button type="button" className="fr-exit" style={{ alignSelf: 'center' }} onClick={onLeave}>
+          방에서 나가기
         </button>
       )}
     </div>
