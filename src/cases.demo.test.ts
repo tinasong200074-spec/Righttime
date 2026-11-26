@@ -15,13 +15,13 @@ const plan: Plan = {
 } as Plan;
 const row = (prep: number, latency: number, extra: Partial<RecordRow> = {}) => ({ id: String(Math.random()), prepActual: prep, latency, ...extra }) as RecordRow;
 const show = (label: string, v: unknown) => console.log(`■ ${label}\n   ${typeof v === 'string' ? v : JSON.stringify(v)}`);
-const times = (c: ReturnType<typeof calcPlan>) => (c ? `알람 ${fmtClock(c.alarmAt)} · 준비 시작 ${fmtClock(c.prepStartAt)} · 출발 ${fmtClock(c.leaveAt)} | 준비 ${c.prep.val}분(${c.prep.basis}) · 기상 ${c.wake.val}분(${c.wake.basis})` : '계산하지 않음(null)');
+const times = (c: ReturnType<typeof calcPlan>) => (c ? `알람 ${fmtClock(c.alarmAt)} · 준비 시작 ${fmtClock(c.prepStartAt)} · 출발 ${fmtClock(c.leaveAt)} | 준비 ${c.prep.val}분(${c.prep.basis}) · 시작시간 ${c.wake.val}분(${c.wake.basis})` : '계산하지 않음(null)');
 
 it('사례 실행', () => {
   console.log('\n===== 정상 사례 =====');
-  show('정상1 기록 없음: 09:00 도착, 이동 30, 여유 10, 준비 40, 기상 10', times(calcPlan(plan, DEFAULT_SETTINGS, [], [])));
+  show('정상1 기록 없음: 09:00 도착, 이동 30, 여유 10, 준비 40, 시작시간 10', times(calcPlan(plan, DEFAULT_SETTINGS, [], [])));
   const five = [row(48, 14), row(52, 18), row(45, 12), row(55, 20), row(50, 15)];
-  show('정상2 기록 5회(준비 45~55분, 기상 12~20분)', times(calcPlan(plan, DEFAULT_SETTINGS, five, [])));
+  show('정상2 기록 5회(준비 45~55분, 시작시간 12~20분)', times(calcPlan(plan, DEFAULT_SETTINGS, five, [])));
   show('정상3 도착 판정: -7분 / 0분 / +3분', [judgeArrival(-7), judgeArrival(0), judgeArrival(3)]);
 
   console.log('\n===== 예외 사례 =====');
