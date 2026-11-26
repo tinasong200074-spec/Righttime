@@ -6,6 +6,7 @@ import './main.css';
 import { NumberField } from './NumberField';
 import { PlaceField } from './PlaceField';
 import { PlanFields } from './PlanCard';
+import { PlanSummary } from './PlanSummary';
 import './today.css';
 
 // 알람이 켜진 약속이 있어도 이 탭에 들어오면 바로 새 약속을 적을 수 있게 한다.
@@ -49,13 +50,27 @@ function TopNotice({ locked }: { locked: boolean }) {
   );
 }
 
-// 준비 시간은 한 칸으로 받는다(단계를 세세하게 나누지 않는다)
+// 준비 시간은 한 칸으로 받는다(단계를 세세하게 나누지 않는다).
+// 기록이 있으면 실제로 걸린 시간으로 보정한 값을 아래에 추천하고, 누르면 그 값이 들어간다
 function PrepField() {
-  const { plan, actions } = useApp();
+  const { plan, calc, actions } = useApp();
   const total = Math.max(1, Math.round(plan.steps.reduce((a, s) => a + s.est, 0)));
+  const set = (n: number) => actions.updatePlan({ steps: [{ id: 'prep', name: '준비', est: n }] });
+  const rec = calc && calc.prep.n > 0 ? calc.prep : null;
   return (
     <section className="m-card">
-      <NumberField label="준비 시간" value={total} min={1} max={480} onChange={(n) => actions.updatePlan({ steps: [{ id: 'prep', name: '준비', est: n }] })} />
+      <NumberField label="준비 시간" value={total} min={1} max={480} onChange={set} />
+      {rec && rec.val !== total && (
+        <div className="ps-rec">
+          <span>
+            추천 <strong>{rec.val}분</strong> · {rec.basis}
+          </span>
+          <button type="button" className="f-btn" onClick={() => set(rec.val)}>
+            {rec.val}분으로 넣기
+          </button>
+        </div>
+      )}
+      {rec && <p className="m-sub ps-note">알람은 내 기록으로 보정한 {rec.val}분으로 계산해요.</p>}
     </section>
   );
 }
@@ -90,6 +105,7 @@ export function NewPlanScreen({ onDone }: { onDone: () => void }) {
         </section>
         <PrepField />
       </fieldset>
+      {!locked && <PlanSummary />}
       <button type="button" className="m-cta" disabled={locked || !calc || calc.arriveAt <= now} onClick={arm}>
         {editing ? '고친 대로 알람 켜기' : '알람 켜기'}
       </button>
