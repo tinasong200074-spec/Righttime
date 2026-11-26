@@ -29,10 +29,8 @@ describe('buildPushSchedule', () => {
     expect(times(buildPushSchedule(prep, at(7, 30), 5))).toEqual([at(8, 9), at(8, 14)]);
     expect(buildPushSchedule(depart(prep, at(8, 14)), at(8, 14), 5)).toEqual([]);
   });
-  it('출발 알림에는 지우지 않은 챙길 것을 넣어 한 번 더 묻는다', () => {
-    const last = (carry: string[]) => buildPushSchedule(armed, at(6, 0), 5, carry).at(-1)?.body;
-    expect(last(['우산', '충전기'])).toBe('이거 챙겼어? 우산, 충전기');
-    expect(last([])).toBe('지금 나가면 늦지 않아요.');
+  it('챙길 것을 묻는 문구', () => {
+    expect(leaveAskText(['우산', '충전기'])).toBe('이거 챙겼어? 우산, 충전기');
     expect(leaveAskText([])).toBe('');
   });
   it('지난 시각과 시연은 넣지 않는다', () => {

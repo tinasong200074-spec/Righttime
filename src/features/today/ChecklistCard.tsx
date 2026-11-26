@@ -35,7 +35,7 @@ function Body({ onHelper }: { onHelper: () => void }) {
         </button>
       </form>
       <p className="f-status" aria-live="polite">
-        {status || '지우지 않은 것은 출발 시각에 소리와 함께 한 번 더 물어봐요.'}
+        {status || '지우지 않은 것은 준비를 마치고 출발 단계로 넘어갈 때 소리와 함께 한 번 더 물어봐요.'}
       </p>
       <button type="button" className="f-btn ck-more" onClick={onHelper}>
         안내문 글·사진 넣어서 정리하기

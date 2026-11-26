@@ -37,7 +37,7 @@ export function MorningFlow() {
 
 // 알림 훅은 세션이 있을 때만 돌리려고 따로 나눴다
 function MorningBody({ session, app }: { session: Session; app: ReturnType<typeof useApp> }) {
-  useMorningAlerts(session, app.now, app.settings, app.checklist);
+  useMorningAlerts(session, app.now, app.settings);
   return (
     <div className="morning">
       <Glow on={app.glow} />

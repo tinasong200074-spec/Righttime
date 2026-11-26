@@ -1,9 +1,9 @@
 import { useEffect, useRef } from 'react';
-import { MIN, type ChecklistItem, type Session, type Settings } from '../../domain/types';
+import { MIN, type Session, type Settings } from '../../domain/types';
 import { notify, startAlarmSound, stopAlarmSound } from '../../infra/alarm';
 
 // 알람 소리와 출발 전 알림. 출발 전 알림은 시각마다 한 번만 울린다.
-export function useMorningAlerts(s: Session, now: number, settings: Settings, checklist: ChecklistItem[]): void {
+export function useMorningAlerts(s: Session, now: number, settings: Settings): void {
   const done = useRef(new Set<number>());
 
   useEffect(() => {
@@ -22,7 +22,7 @@ export function useMorningAlerts(s: Session, now: number, settings: Settings, ch
     if (!crossed.length) return;
     crossed.forEach((m) => done.current.add(m));
     const m = Math.min(...crossed);
-    const asks = m === settings.preLeave ? checklist.map((c) => c.ask).join(' ') : '';
-    notify(`출발 ${m}분 전이에요`, asks || '슬슬 준비해 주세요', { sound: settings.sound });
-  }, [s.state, s.leaveAt, now, settings.preLeave, settings.sound, checklist]);
+    // 챙길 것은 여기서 알리지 않는다. 출발 단계로 넘어갈 때 따로 묻는다(LeaveAsk)
+    notify(`출발 ${m}분 전이에요`, '슬슬 준비해 주세요', { sound: settings.sound });
+  }, [s.state, s.leaveAt, now, settings.preLeave, settings.sound]);
 }
