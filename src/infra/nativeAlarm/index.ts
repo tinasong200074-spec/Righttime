@@ -67,3 +67,15 @@ export async function askNativePermissionsOnce(): Promise<void> {
     { timeout: 8000 },
   );
 }
+
+// 설치 앱에서 휴대폰 뒤로 버튼을 첫 화면에서 눌러도 앱이 닫히지 않게 한다.
+// 안드로이드는 "더 돌아갈 화면이 없으면" 앱을 닫으므로, 이동 기록 맨 밑에 받침 한 칸을 깔아 두고
+// 거기까지 내려오면 다시 한 칸을 올린다. 화면 안의 뒤로 가기(useHistoryState)는 그 위에서 그대로 동작한다
+export function keepAppOnBack(): void {
+  if (!isNativeApp()) return;
+  history.replaceState({ jetteBase: true }, '');
+  history.pushState({ jetteTrap: true }, '');
+  window.addEventListener('popstate', (e) => {
+    if ((e.state as { jetteBase?: boolean } | null)?.jetteBase) history.pushState({ jetteTrap: true }, '');
+  });
+}

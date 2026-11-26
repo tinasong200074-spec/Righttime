@@ -67,10 +67,12 @@ export function NotifyCard() {
       {session.state === 'summary' ? (
         <Block title="도착했을 때" text={arriveMessage(tone, session.placeName, session.geo)} button="도착 문구 보내기" onSend={send} />
       ) : (
-        <>
+        // 문구는 하나만 보여 준다. 출발 시각이 지났고 늦을 것 같을 때만 늦는다는 문구로 바꾼다
+        now > session.leaveAt && info.isLate ? (
+          <Block title="늦을 것 같을 때" text={lateMessage(tone, session, now)} button="늦을 것 같아요" strong note={lateNote} onSend={send} />
+        ) : (
           <Block title="도착 시각" text={etaMessage(tone, session, now)} button="도착 시각 보내기" onSend={send} />
-          <Block title="늦을 것 같을 때" text={lateMessage(tone, session, now)} button="늦을 것 같아요" strong={info.isLate} note={lateNote} onSend={send} />
-        </>
+        )
       )}
       <p className="f-status" aria-live="polite" style={{ margin: 0 }}>
         {sent ? RESULT_TEXT[sent.result] : ''}

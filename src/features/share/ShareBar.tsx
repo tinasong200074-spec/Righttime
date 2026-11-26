@@ -42,14 +42,44 @@ function ShareSetup({ arriveAt }: { arriveAt: number }) {
   );
 }
 
+const SENT_KEY = 'jette:share-sent';
+const wasSent = (token: string) => {
+  try {
+    return localStorage.getItem(SENT_KEY) === token;
+  } catch {
+    return false;
+  }
+};
+
 function ShareActive({ share }: { share: ShareState }) {
   const { shareName, actions } = useApp();
   const [msg, setMsg] = useState('');
+  const [sent, setSent] = useState(() => wasSent(share.token));
   const url = shareUrl(share.token);
   const stop = () => {
     void closeShare(share); // 서버에서 바로 지워 상대 화면에서 사라지게 한다
     actions.stopShare();
   };
+  const send = async () => {
+    setMsg(await sendLink(url, shareName));
+    setSent(true);
+    try {
+      localStorage.setItem(SENT_KEY, share.token);
+    } catch {
+      // 저장하지 못해도 이번 화면에서는 숨겨진다
+    }
+  };
+  // 링크를 한 번 보낸 뒤에는 끄기만 남긴다
+  if (sent) {
+    return (
+      <>
+        <OutlineButton onClick={stop}>공유 끄기</OutlineButton>
+        <p className="share-note" role="status">
+          {msg || '끄면 상대 화면에서 바로 사라져요.'}
+        </p>
+      </>
+    );
+  }
   return (
     <>
       <div className="share-switches">
@@ -61,11 +91,9 @@ function ShareActive({ share }: { share: ShareState }) {
           <span>도착 예정 시각</span>
           <input type="checkbox" role="switch" checked={share.showEta} onChange={(e) => actions.updateShare({ showEta: e.target.checked })} />
         </label>
-        <p className="share-switch is-off">미루기·기록 — 항상 숨김</p>
-        <p className="share-switch is-off">위치 — 보내지 않음</p>
       </div>
       <input className="share-url" readOnly value={url} aria-label="공유 링크" onFocus={(e) => e.target.select()} />
-      <PrimaryButton onClick={async () => setMsg(await sendLink(url, shareName))}>링크 보내기</PrimaryButton>
+      <PrimaryButton onClick={send}>링크 보내기</PrimaryButton>
       <OutlineButton onClick={stop}>공유 끄기</OutlineButton>
       <p className="share-note" role="status">
         {msg || '끄면 상대 화면에서 바로 사라져요. 상대가 몇 번 봤는지는 알려 주지 않아요.'}
@@ -115,7 +143,7 @@ export function ShareBar() {
   return (
     <section className="share-card" aria-label="준비 현황 공유">
       <div className="share-head">
-        <h2>{share ? '상대에게 보이는 것' : '링크로 보여 줄까요?'}</h2>
+        <h2>{share ? '공유 중' : '링크로 보여 줄까요?'}</h2>
         <button type="button" className="share-close" onClick={() => setOpen(false)}>
           닫기
         </button>
