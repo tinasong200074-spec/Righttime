@@ -12,6 +12,8 @@ export const CHEER_TEXT = {
   waiting: '기다리고 있어요',
   here: '먼저 도착했어요',
   tardy: '좀 늦네요',
+  ready: '전 준비 끝났어요',
+  arrived: '도착했어요',
 } as const;
 
 export const CHEER_EMOJI = {
@@ -36,9 +38,9 @@ const SOON_MIN = 30;
 // 지금 상황에 맞는 한마디 두 개. 첫 번째가 가장 어울리는 말이다
 export function cheerOptions(i: { arriveMs: number; now: number; lateMin: number | null }): CheerTextKey[] {
   if (i.lateMin && i.lateMin > 0) return ['ok', 'waiting']; // 늦는다고 알려 왔을 때
-  if (i.now >= i.arriveMs) return ['waiting', 'here']; // 약속 시각이 지났을 때
-  if (i.arriveMs - i.now <= SOON_MIN * MIN) return ['safe', 'soon']; // 약속이 가까울 때
-  return ['prep', 'later']; // 아직 여유가 있을 때
+  if (i.now >= i.arriveMs) return ['waiting', 'arrived']; // 약속 시각이 지났을 때
+  if (i.arriveMs - i.now <= SOON_MIN * MIN) return ['arrived', 'ready']; // 약속이 가까울 때는 도착을 먼저 보여 준다
+  return ['ready', 'arrived']; // 아직 여유가 있을 때: 내 쪽 상황을 알려 준다
 }
 
 // 받은 쪽 알림 한 줄: "민수님: 기다리고 있어요"
