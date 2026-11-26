@@ -1,132 +1,13 @@
-import { useState } from 'react';
 import { useApp } from '../../app/store';
-import { fmtClock } from '../../domain/format';
-import type { PlanCalc } from '../../domain/schedule';
+import { isNativeApp } from '../../infra/nativeAlarm';
 import { WEATHER_CREDIT } from '../../infra/weather';
-import { RecentPlans } from '../recent/RecentPlans';
-import { Icon, type IconName } from '../../ui';
-import { dayLabel } from './model';
+import { PlanList } from '../queue/PlanList';
+import { Icon } from '../../ui';
 import { useWeather } from './useWeather';
 import { WeatherRow } from './WeatherRow';
-import { isNativeApp } from '../../infra/nativeAlarm';
 
 export type View = 'main' | 'weather' | 'carry' | 'helper';
 type Go = (v: View) => void;
-
-function Header({ edit }: { edit: () => void }) {
-  const { plan, now } = useApp();
-  return (
-    <button type="button" className="m-head" onClick={edit} aria-label="일정 이름과 도착 시각 고치기(새 약속)">
-      <span>
-        <span className="m-muted">{dayLabel(plan.arriveAt, now)}</span>
-        <h1 className="m-title">{plan.title || '일정 이름'}</h1>
-      </span>
-      <span>
-        <span className="m-muted">도착</span>
-        <span className="m-title" style={{ display: 'block' }}>
-          {fmtClock(plan.arriveAt)}
-        </span>
-      </span>
-    </button>
-  );
-}
-
-function TravelBar({ calc }: { calc: PlanCalc }) {
-  const total = calc.ride.val + calc.waitMin + calc.buffer;
-  const w = (n: number) => `${(n / total) * 100}%`;
-  return (
-    <div role="img" aria-label={`이동 ${calc.ride.val}분, 배차 대기 ${calc.waitMin}분, 여유 ${calc.buffer}분, 합계 ${total}분`}>
-      <div className="m-bar">
-        <span className="m-seg-ride" style={{ width: w(calc.ride.val) }} />
-        {calc.waitMin > 0 && <span className="m-seg-wait" style={{ width: w(calc.waitMin) }} />}
-        <span className="m-seg-buf" style={{ flex: 1 }} />
-      </div>
-      <div className="m-bar-labels">
-        <b style={{ width: w(calc.ride.val) }}>이동 {calc.ride.val}분</b>
-        <span className="m-muted" style={{ width: w(calc.waitMin) }}>
-          {calc.waitMin > 0 ? `대기 ${calc.waitMin}` : ''}
-        </span>
-        <span className="m-muted" style={{ flex: 1, textAlign: 'right' }}>
-          여유 {calc.buffer}
-        </span>
-      </div>
-    </div>
-  );
-}
-
-function DestCard({ calc, edit }: { calc: PlanCalc | null; edit: () => void }) {
-  const { origin, recentPlans, session } = useApp();
-  const [open, setOpen] = useState(false);
-  const hasRecent = !session && recentPlans.length > 0;
-  // 최근 일정이 있으면 도착 장소를 누를 때 그 아래에 펼치고, 없으면 바로 장소 고르기로 간다
-  const press = () => (hasRecent ? setOpen((v) => !v) : edit());
-  return (
-    <section className="m-card">
-      <span className="m-muted">도착 장소</span>
-      <button type="button" className={`m-dest ${calc?.place ? '' : 'is-empty'}`} aria-expanded={hasRecent ? open : undefined} onClick={press}>
-        <Icon name="place" main="var(--ink)" det="var(--surface)" size={22} />
-        {calc?.place?.name ?? '눌러서 도착 장소 정하기'}
-      </button>
-      {hasRecent && open && (
-        <div onClick={(e) => (e.target as HTMLElement).closest('.recent-pick') && setOpen(false)}>
-          <RecentPlans />
-          <button type="button" className="f-btn" style={{ width: '100%', marginTop: 8 }} onClick={edit}>
-            다른 장소 고르기
-          </button>
-        </div>
-      )}
-      <div className="m-muted" style={{ marginTop: 6 }}>
-        출발지 · {origin?.name ?? '정하지 않았어요'}
-      </div>
-      {calc && (
-        <div>
-          <TravelBar calc={calc} />
-          <div className="m-muted" style={{ marginTop: 6 }}>
-            {calc.ride.n === 0 && calc.ride.basis !== '내 입력값'
-              ? `처음 가는 시간대라 넉넉하게 잡았어요(${calc.ride.basis}). 알람이 울린 뒤 앱을 열면 다시 조회해요.`
-              : '이동 시간과 여유를 더해 출발 시각을 잡았어요.'}
-          </div>
-        </div>
-      )}
-    </section>
-  );
-}
-
-interface RowProps {
-  icon: IconName;
-  name: string;
-  note: string;
-  time: number;
-  accent?: boolean;
-  onClick?: () => void;
-}
-
-function Row({ icon, name, note, time, accent = false, onClick }: RowProps) {
-  const Tag = onClick ? 'button' : 'div';
-  return (
-    <Tag className="m-row" {...(onClick ? { type: 'button' as const, onClick } : {})}>
-      <span className={`m-circle ${accent ? 'is-accent' : ''}`}>
-        <Icon name={icon} main="var(--ink)" det={accent ? 'var(--accent)' : 'var(--chip)'} size={24} />
-      </span>
-      <span className="m-grow">
-        <div className="m-name">{name}</div>
-        <div className="m-sub">{note}</div>
-      </span>
-      <span className="m-big">{fmtClock(time)}</span>
-    </Tag>
-  );
-}
-
-function Rows({ calc, edit }: { calc: PlanCalc; edit: () => void }) {
-  const travelAll = calc.ride.val + calc.waitMin + calc.buffer;
-  return (
-    <section className="m-card m-rows">
-      <Row icon="wake" name="시작시간" note={`평소 ${calc.wake.val}분`} time={calc.alarmAt} />
-      <Row icon="prep" name="준비" note={`${calc.prep.val}분 · ${calc.steps.length}단계`} time={calc.prepStartAt} accent onClick={edit} />
-      <Row icon="leave" name="출발" note={`이동 + 배차 + 여유 ${travelAll}분 전`} time={calc.leaveAt} />
-    </section>
-  );
-}
 
 function CarryRow({ go }: { go: Go }) {
   const { checklist } = useApp();
@@ -143,40 +24,25 @@ function CarryRow({ go }: { go: Go }) {
   );
 }
 
-function ArmButton() {
-  const { calc, session, now, actions } = useApp();
-  if (session) {
-    return (
-      <button type="button" className="m-ghost" onClick={actions.cancelSession}>
-        알람 끄기 · {fmtClock(session.alarmAt)}에 울려요
-      </button>
-    );
-  }
-  return (
-    <>
-      <button type="button" className="m-cta" disabled={!calc || calc.arriveAt <= now} onClick={actions.arm}>
-        알람 켜기
-      </button>
-      <p className="m-note">
-        {calc && calc.alarmAt <= now ? '알람 시각이 이미 지났어요. 도착 시각을 확인해 주세요. ' : ''}{isNativeApp() ? '앱을 닫아도 알람이 울려요' : '웹 앱이라 화면이 열려 있을 때만 울려요'} · {WEATHER_CREDIT}
-      </p>
-    </>
-  );
-}
-
-// ① 오늘: 목업 6번과 같은 한 화면. 고치는 칸은 탭하면 열리는 보조 화면에 있다
+// ① 오늘: 잡아 둔 약속을 세로로 나열한다. 약속을 누르면 시작·준비·출발 시각이 펼쳐진다.
+// 약속을 만들고 고치는 일은 "새 약속" 탭에서 한다
 export function TodayMain({ go, edit }: { go: Go; edit: () => void }) {
-  const { calc } = useApp();
   const mode = useWeather();
   return (
     <div className="m-screen">
       <WeatherRow mode={mode} go={go} />
-      <Header edit={edit} />
-      <DestCard calc={calc} edit={edit} />
-      {calc && <Rows calc={calc} edit={edit} />}
+      <div className="m-titlerow">
+        <h1 className="m-h1">오늘</h1>
+      </div>
+      <PlanList onNew={edit} />
       <CarryRow go={go} />
       <div className="m-spacer" />
-      <ArmButton />
+      <button type="button" className="m-cta" onClick={edit}>
+        새 약속 잡기
+      </button>
+      <p className="m-note">
+        {isNativeApp() ? '앱을 닫아도 알람이 울려요' : '웹 앱이라 화면이 열려 있을 때만 울려요'} · {WEATHER_CREDIT}
+      </p>
     </div>
   );
 }
