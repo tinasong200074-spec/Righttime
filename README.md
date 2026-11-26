@@ -107,6 +107,7 @@ demo/          시연용 사례 실행 스크립트
 - [문제 정의서](docs/PROBLEM_DEFINITION.md)
 - [PRD](docs/PRD.md): 요구사항, 범위, 구현 상태
 - [시연 가이드](docs/시연-가이드.md): 발표 순서, 정상·예외 사례 실행 결과, 사람 확인 지점
+- [발표 자료(PPT)](docs/발표/제때_발표.pptx)와 [발표 대본](docs/발표-대본.md): 21장, 슬라이드마다 읽을 말
 - [QA 시트](docs/qa/제출전-QA.md): Claude가 확인한 것과 사람이 직접 볼 목록
 - [역할 분담](docs/ROLES.md): 작업 창 3개의 담당과 공용 계약
 - [원본 명세](docs/reference/jette-spec.md), [프로토타입](docs/reference/jaettae-prototype.html)
