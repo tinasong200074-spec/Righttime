@@ -1,5 +1,6 @@
 import { setPlaceTag } from '../domain/repeat';
 import * as S from '../domain/session';
+import { setHome, toggleFav, touchSpot, type Spot } from '../domain/spots';
 import { addTransitLog } from '../domain/transitLog';
 import type { Arrival, GeoResult, MemoItem, Place, Plan, RainChoice, Settings, Tone, WeatherResult } from '../domain/types';
 import type { AskItem, HelperResult } from '../domain/ai';
@@ -74,6 +75,10 @@ function dataActions(set: SetState, clock: Clock) {
     logTransit: (placeId: string, rideMin: number) =>
       set((s) => ({ ...s, transitLog: addTransitLog(s.transitLog ?? [], { placeId, at: Date.now(), rideMin }) })),
     setOrigin: (origin: AppState['origin']) => set((s) => ({ ...s, origin })),
+    // 검색 기록은 실제 시각으로 남긴다(시연 시계가 아니라)
+    touchSpot: (spot: Omit<Spot, 'usedAt' | 'fav' | 'home'>) => set((s) => ({ ...s, spots: touchSpot(s.spots ?? [], spot, Date.now()) })),
+    toggleSpotFav: (key: string) => set((s) => ({ ...s, spots: toggleFav(s.spots ?? [], key) })),
+    setSpotHome: (key: string) => set((s) => ({ ...s, spots: setHome(s.spots ?? [], key) })),
     setRain: (rain: RainChoice) => set((s) => ({ ...s, rain })),
     setWeather: (weather: WeatherResult | null) => set((s) => ({ ...s, weather })),
     setWeatherCoord: (weatherCoord: AppState['weatherCoord']) => set((s) => ({ ...s, weatherCoord, weather: null })),

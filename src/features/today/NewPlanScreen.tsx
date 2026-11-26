@@ -2,7 +2,8 @@ import { useApp } from '../../app/store';
 import { RecentPlans } from '../recent/RecentPlans';
 import './fields.css';
 import './main.css';
-import { PlaceField, PlanFields } from './PlanCard';
+import { PlaceField } from './PlaceField';
+import { PlanFields } from './PlanCard';
 import { StepsEditor } from './StepsEditor';
 import './today.css';
 

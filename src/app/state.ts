@@ -6,6 +6,7 @@ import type { AskItem, HelperResult } from '../domain/ai';
 import { addRecent, applyRecent, freshPlan, toRecent, type RecentPlan } from '../domain/recent';
 import { minuteOfDay, nextRepeatArrive } from '../domain/repeat';
 import type { Booked } from '../domain/queue';
+import type { Spot } from '../domain/spots';
 import type { TransitLogEntry } from '../domain/transitLog';
 import {
   DEFAULT_SETTINGS, MIN,
@@ -36,6 +37,7 @@ export interface AppState {
   helperDone: Record<string, boolean>; // 준비할 것·전날 할 일 체크
   parked: Booked[]; // 알람을 켜 둔 다른 약속(대기 목록). 맨 앞 약속이 끝나면 차례로 올라온다
   drafting: boolean; // 대기 목록을 둔 채 새 약속을 적는 중
+  spots: Spot[]; // 출발·도착 칸에서 찾아 쓴 장소(검색 기록, 즐겨찾기, 집). 기기에만 둔다
 }
 
 export interface ShareState {
@@ -100,6 +102,7 @@ export function defaultState(now: number): AppState {
     helperDone: {},
     parked: [],
     drafting: false,
+    spots: [],
   };
 }
 

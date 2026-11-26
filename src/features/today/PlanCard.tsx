@@ -1,17 +1,10 @@
 import { useState } from 'react';
 import { useApp } from '../../app/store';
+import { Card } from '../../ui';
 import { fromInputValue, toInputValue } from '../../domain/format';
 import { roundCoord } from '../../domain/geo';
-import type { FoundPlace } from '../../domain/transit';
-import { Card, Icon } from '../../ui';
 import { readPositionOnce } from '../../infra/geo';
-import { PlaceShortcuts } from '../quick/PlaceShortcuts';
 import { RepeatPicker } from '../quick/RepeatPicker';
-import { newId } from './model';
-import { NumberField } from './NumberField';
-import { PlaceSearch } from './PlaceSearch';
-import { OriginRow } from './OriginRow';
-import { TransitAuto } from './TransitAuto';
 
 const DEFAULT_RADIUS_M = 150;
 const GEO_DIGITS = 4; // 소수 넷째 자리(약 11m), 기기에만 저장
@@ -40,132 +33,6 @@ export function SaveHereButton({ placeId }: { placeId: string }) {
       <p className="f-status" aria-live="polite">
         {msg || (place.geo ? '저장된 위치가 있어요.' : '그 장소에 도착했을 때 눌러 주세요.')}
       </p>
-    </div>
-  );
-}
-
-function AddPlaceForm({ onDone }: { onDone: () => void }) {
-  const { actions } = useApp();
-  const [name, setName] = useState('');
-  const [travelMin, setTravelMin] = useState(30);
-
-  const save = () => {
-    if (!name.trim()) return;
-    const id = newId();
-    actions.savePlace({ id, name: name.trim().slice(0, 30), travelMin });
-    actions.updatePlan({ placeId: id });
-    onDone();
-  };
-
-  return (
-    <div>
-      <label className="f-label" htmlFor="new-place">
-        장소 이름
-      </label>
-      <input id="new-place" className="f-input" maxLength={30} value={name} onChange={(e) => setName(e.target.value)} placeholder="예: A사, 학원" />
-      <NumberField label="평소 이동 시간" value={travelMin} min={1} max={300} onChange={setTravelMin} />
-      <div className="f-row" style={{ marginTop: 12 }}>
-        <button type="button" className="f-btn" disabled={!name.trim()} onClick={save}>
-          장소 저장
-        </button>
-        <button type="button" className="f-btn" onClick={onDone}>
-          닫기
-        </button>
-      </div>
-    </div>
-  );
-}
-
-type PlaceMode = 'none' | 'add' | 'search';
-
-// 검색으로 고른 장소를 저장하고 도착 장소로 정한다. 이동 시간은 지금 적힌 값으로 시작한다
-function useAddFound() {
-  const { plan, actions } = useApp();
-  return (p: FoundPlace) => {
-    const id = newId();
-    const geo = { lat: roundCoord(p.lat, GEO_DIGITS), lon: roundCoord(p.lon, GEO_DIGITS), r: DEFAULT_RADIUS_M };
-    actions.savePlace({ id, name: p.name.slice(0, 30), travelMin: plan.rideMin, geo });
-    actions.updatePlan({ placeId: id });
-  };
-}
-
-// 도착 장소를 고르는 도구들: 저장한 장소, 자주 가는 곳, 지도 검색, 직접 추가
-function DestTools() {
-  const { plan, places, actions } = useApp();
-  const [mode, setMode] = useState<PlaceMode>('none');
-  const addFound = useAddFound();
-  const toggle = (m: PlaceMode) => setMode((cur) => (cur === m ? 'none' : m));
-
-  return (
-    <div>
-      <label className="f-label" htmlFor="plan-place">
-        도착 장소 고르기
-      </label>
-      <div className="f-row">
-        <Icon name="place" main="var(--ink)" det="var(--surface)" />
-        <select
-          id="plan-place" className="f-input f-grow"
-          value={plan.placeId ?? ''}
-          onChange={(e) => actions.updatePlan({ placeId: e.target.value || undefined })}
-        >
-          <option value="">장소를 고르지 않았어요</option>
-          {places.map((p) => (
-            <option key={p.id} value={p.id}>
-              {p.name}
-            </option>
-          ))}
-        </select>
-      </div>
-      <PlaceShortcuts target="dest" />
-      <div className="f-row f-wrap" style={{ marginTop: 8 }}>
-        <button type="button" className="f-btn" aria-expanded={mode === 'search'} onClick={() => toggle('search')}>
-          지도에서 찾기
-        </button>
-        <button type="button" className="f-btn" aria-expanded={mode === 'add'} onClick={() => toggle('add')}>
-          직접 추가
-        </button>
-      </div>
-      {mode === 'add' && <AddPlaceForm onDone={() => setMode('none')} />}
-      {mode === 'search' && (
-        <PlaceSearch
-          label="도착 장소 검색"
-          onPick={(p) => {
-            addFound(p);
-            setMode('none');
-          }}
-        />
-      )}
-      {plan.placeId && mode === 'none' && <SaveHereButton placeId={plan.placeId} />}
-    </div>
-  );
-}
-
-function EndBox({ label, value, active, onClick }: { label: string; value: string; active: boolean; onClick: () => void }) {
-  return (
-    <button type="button" className="t-end" aria-pressed={active} onClick={onClick}>
-      <span className="m-muted">{label}</span>
-      <span className="t-end-name">{value}</span>
-    </button>
-  );
-}
-
-// 출발과 도착을 나란히 보이고, 그 아래에 대중교통 체크(체크하면 소요 시간). 도착은 체크와 상관없이 입력한다
-export function PlaceField() {
-  const { plan, places, origin } = useApp();
-  const [tool, setTool] = useState<'dest' | 'origin'>('dest');
-  const place = places.find((p) => p.id === plan.placeId);
-
-  return (
-    <div>
-      <div className="t-ends">
-        <EndBox label="출발" value={origin?.name ?? '정하지 않았어요'} active={tool === 'origin'} onClick={() => setTool('origin')} />
-        <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
-          <path d="M5 12h14M13 6l6 6-6 6" stroke="var(--muted)" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" fill="none" />
-        </svg>
-        <EndBox label="도착" value={place?.name ?? '장소를 골라 주세요'} active={tool === 'dest'} onClick={() => setTool('dest')} />
-      </div>
-      <TransitAuto />
-      {tool === 'dest' ? <DestTools /> : <OriginRow />}
     </div>
   );
 }
