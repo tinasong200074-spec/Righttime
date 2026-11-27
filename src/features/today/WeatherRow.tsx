@@ -1,8 +1,9 @@
 import { useApp } from '../../app/store';
 import { Icon } from '../../ui';
 import type { View } from './TodayMain';
-import type { WeatherMode } from './useWeather';
+import { useWeatherBasis, type WeatherMode } from './useWeather';
 
+const BASIS_SHORT = { mine: '내 위치', place: '도착 장소', origin: '출발지' } as const;
 const MANUAL_TITLE = { none: '비 없음', maybe: '비 올 수도 있어요', yes: '비가 와요', auto: '날씨' } as const;
 
 const SUB: Partial<Record<WeatherMode, string>> = {
@@ -17,7 +18,9 @@ const SUB: Partial<Record<WeatherMode, string>> = {
 // 한 줄에 들어갈 글: 날씨가 있으면 "쌀쌀해요 · 체감 3°C · 비 3%" 전체
 function useLineText(mode: WeatherMode): string {
   const { weather, rain } = useApp();
-  if (mode === 'ok' && weather?.line) return weather.line;
+  const { kind } = useWeatherBasis();
+  // 어느 위치의 날씨인지 눌러 보지 않아도 알 수 있게 앞에 붙인다
+  if (mode === 'ok' && weather?.line) return kind === 'none' ? weather.line : `${BASIS_SHORT[kind]} · ${weather.line}`;
   if (mode === 'manual') return `${MANUAL_TITLE[rain]} · 직접 골랐어요`;
   return SUB[mode] ?? '날씨';
 }
